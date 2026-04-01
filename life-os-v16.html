@@ -137,6 +137,15 @@ body{font-family:'Syne',sans-serif;background:var(--bg0);color:var(--t1);min-hei
 .inv-val{font-size:13px;font-family:'DM Mono',monospace;color:var(--acc);}
 .inv-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
 .inv-fill{height:100%;background:var(--acc2);border-radius:3px;}
+.add-expense-form{background:var(--bg2);border:1px solid var(--bg3);border-radius:var(--r);padding:12px;margin-top:10px;}
+.add-expense-form .form-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.add-expense-inp{background:var(--bg1);border:1px solid var(--bg3);border-radius:8px;color:var(--t0);font-size:13px;padding:8px 10px;flex:1;min-width:80px;font-family:'Syne',sans-serif;}
+.add-expense-inp::placeholder{color:var(--t2);}
+.add-btn{background:var(--acc);border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;color:#000;cursor:pointer;white-space:nowrap;}
+.add-btn:active{transform:scale(.96);}
+.del-btn{background:none;border:none;color:var(--acc3);cursor:pointer;font-size:16px;padding:4px 6px;border-radius:6px;transition:var(--trans);}
+.del-btn:hover{background:rgba(248,113,113,.15);}
+
 /* PROJEKTE */
 .proj-card{background:var(--bg1);border:1px solid var(--bg3);border-radius:var(--r);padding:14px;margin-bottom:10px;}
 .proj-title{font-size:15px;font-weight:800;color:var(--t0);margin-bottom:10px;}
@@ -433,6 +442,14 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
       <div class="card">
         <div class="card-title">📤 Ausgaben</div>
         <div id="fin-expense"></div>
+        <div class="add-expense-form">
+          <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">➕ Neue Ausgabe</div>
+          <div class="form-row">
+            <input class="add-expense-inp" id="new-exp-label" placeholder="Bezeichnung (z.B. Handy)">
+            <input class="add-expense-inp" id="new-exp-amt" type="number" placeholder="Betrag (€)" min="0" step="0.01" style="max-width:120px;">
+          </div>
+          <button class="add-btn" onclick="addExpense()">➕ Hinzufügen</button>
+        </div>
       </div>
       <div class="card">
         <div class="card-title">📈 Investments</div>
@@ -932,7 +949,13 @@ function renderFinRow(item,container,type){
   amt.textContent=(item.amt>=0?'+':'')+item.amt.toFixed(2)+'€';
   const edit=document.createElement('button');edit.className='edit-btn';edit.textContent='✏️';
   edit.onclick=()=>openModal(item,type);
-  row.append(cb,lbl,amt,edit);container.appendChild(row);
+  const del=document.createElement('button');del.className='del-btn';del.textContent='🗑️';
+  del.onclick=()=>{
+    if(type==='expense'){S.finanzen.expense=S.finanzen.expense.filter(x=>x.id!==item.id);}
+    else if(type==='income'){S.finanzen.income=S.finanzen.income.filter(x=>x.id!==item.id);}
+    save();renderFinanzen();
+  };
+  row.append(cb,lbl,amt,del,edit);container.appendChild(row);
 }
 function renderFinanzen(){
   // Konten
@@ -1169,6 +1192,21 @@ function renderPanel(id){
 // ==============================
 // INIT
 // ==============================
+// ==============================
+// AUSGABEN HINZUFÜGEN
+// ==============================
+function addExpense(){
+  const label=document.getElementById('new-exp-label').value.trim();
+  const amt=parseFloat(document.getElementById('new-exp-amt').value);
+  if(!label||isNaN(amt)||amt<=0){showToast('⚠️ Bezeichnung und Betrag eingeben!');return;}
+  const newId='e'+(Date.now());
+  S.finanzen.expense.push({id:newId,label:label,amt:-Math.abs(amt),paid:false});
+  save();renderFinanzen();
+  document.getElementById('new-exp-label').value='';
+  document.getElementById('new-exp-amt').value='';
+  showToast('✅ Ausgabe hinzugefügt!');
+}
+
 // ==============================
 // SAVE / EXPORT / IMPORT / ZOOM
 // ==============================
