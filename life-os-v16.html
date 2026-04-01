@@ -235,6 +235,17 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
 .pc-mode .task-btn{width:40px;height:40px;}
 .pc-mode .task-cb{width:26px;height:26px;}
 .pc-mode #main{padding:8px;}
+
+  .konto-card{cursor:pointer;position:relative;}.konto-card:hover{border-color:var(--acc);}
+  .konto-edit-form{display:none;flex-direction:column;gap:6px;}.konto-card.editing .konto-view{display:none;}.konto-card.editing .konto-edit-form{display:flex;}
+  .konto-edit-inp{background:var(--bg1);border:1px solid var(--acc);border-radius:6px;color:var(--t0);font-size:13px;padding:5px 8px;font-family:'DM Mono',monospace;width:100%;}
+  .konto-edit-btns{display:flex;gap:4px;}.konto-save-btn{flex:1;background:var(--acc);border:none;border-radius:6px;color:#000;font-size:11px;font-weight:700;padding:5px;cursor:pointer;}.konto-cancel-btn{flex:1;background:var(--bg3);border:none;border-radius:6px;color:var(--t1);font-size:11px;padding:5px;cursor:pointer;}
+  .expense-sort-bar{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}.sort-btn{background:var(--bg2);border:1px solid var(--bg3);border-radius:20px;padding:5px 10px;font-size:11px;color:var(--t2);cursor:pointer;transition:var(--trans);font-weight:600;}.sort-btn:hover,.sort-btn.active{background:var(--acc);color:#000;border-color:var(--acc);}
+  .fin-meta{display:flex;flex-direction:column;align-items:flex-end;min-width:90px;}.fin-due{font-size:10px;color:var(--acc4);font-family:'DM Mono',monospace;}.fin-turnus{font-size:9px;color:var(--acc2);background:rgba(96,165,250,.12);border-radius:8px;padding:1px 5px;margin-top:2px;display:inline-block;}
+  .eigenkapital-progress-wrap{margin-top:12px;padding-top:12px;border-top:1px solid var(--bg3);}.ek-goal-bar{height:14px;background:var(--bg3);border-radius:7px;overflow:hidden;margin:8px 0;}.ek-goal-fill{height:100%;background:linear-gradient(90deg,var(--acc2),var(--acc));border-radius:7px;transition:width .5s ease;}
+  .ek-stats{display:flex;justify-content:space-between;font-size:11px;font-family:'DM Mono',monospace;color:var(--t2);}.ek-pct{font-size:24px;font-weight:800;color:var(--t0);text-align:center;font-family:'DM Mono',monospace;}.ek-diff{font-size:12px;color:var(--acc3);text-align:center;margin-top:2px;font-family:'DM Mono',monospace;}
+  .inv-val-edit{cursor:pointer;}.inv-val-edit:hover{color:var(--acc4);}
+
 </style>
 </head>
 <body>
@@ -429,7 +440,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
     <!-- ===== FINANZEN ===== -->
     <div class="panel" id="panel-finanzen">
       <div class="card">
-        <div class="card-title">💳 Konten</div>
+        <div class="card-title">💳 AKTUELL</div>
         <div class="konto-grid" id="konto-grid"></div>
         <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bg3);">
           <div class="progress-label"><span style="font-size:13px;font-weight:700;color:var(--t1);">Gesamt</span><span class="balance-display" id="fin-balance" style="font-size:20px;"></span></div>
@@ -452,7 +463,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
         </div>
       </div>
       <div class="card">
-        <div class="card-title">📈 Investments</div>
+        <div class="card-title">💎 Eigenkapital</div>
         <div id="fin-investments"></div>
       </div>
     </div>
@@ -593,31 +604,31 @@ const DEF = {
       {id:"i4",label:"City Park",amt:1000,paid:false}
     ],
     expense:[
-      {id:"e1",label:"Miete",amt:-650,paid:false},
-      {id:"e2",label:"Strom",amt:-80,paid:false},
-      {id:"e3",label:"Internet",amt:-30,paid:false},
-      {id:"e4",label:"Unterhalt",amt:-300,paid:false},
-      {id:"e5",label:"Sprit",amt:-120,paid:false},
-      {id:"e6",label:"Essen",amt:-200,paid:false},
-      {id:"e7",label:"Bausparvertrag",amt:-50,paid:false},
-      {id:"e8",label:"Schreibe",amt:-15,paid:false},
-      {id:"e9",label:"DB-Ticket",amt:-29,paid:false},
-      {id:"e10",label:"GYM",amt:-35,paid:false},
-      {id:"e11",label:"BMW E46",amt:-80,paid:false},
-      {id:"e12",label:"GP1",amt:-20,paid:false},
-      {id:"e13",label:"Mintos Sparrate",amt:-100,paid:false},
-      {id:"e14",label:"Maria",amt:-50,paid:false},
-      {id:"e15",label:"Netflix",amt:-13,paid:false},
-      {id:"e16",label:"Amazon Prime",amt:-9,paid:false},
-      {id:"e17",label:"Audible",amt:-10,paid:false}
+      {id:"e1",label:"Miete",amt:-650,paid:false,dueDate:"2026-05-01",monthly:true},
+      {id:"e2",label:"Strom",amt:-80,paid:false,dueDate:"2026-05-15",monthly:true},
+      {id:"e3",label:"Internet",amt:-30,paid:false,dueDate:"2026-05-15",monthly:true},
+      {id:"e4",label:"Unterhalt",amt:-300,paid:false,dueDate:"2026-05-01",monthly:true},
+      {id:"e5",label:"Sprit",amt:-120,paid:false,dueDate:"2026-05-20",monthly:false},
+      {id:"e6",label:"Essen",amt:-200,paid:false,dueDate:"2026-05-20",monthly:false},
+      {id:"e7",label:"Bausparvertrag",amt:-50,paid:false,dueDate:"2026-05-01",monthly:true},
+      {id:"e8",label:"Schreibe",amt:-15,paid:false,dueDate:"2026-05-01",monthly:true},
+      {id:"e9",label:"DB-Ticket",amt:-29,paid:false,dueDate:"2026-05-01",monthly:true},
+      {id:"e10",label:"GYM",amt:-35,paid:false,dueDate:"2026-05-01",monthly:true},
+      {id:"e11",label:"BMW E46",amt:-80,paid:false,dueDate:"2026-05-15",monthly:true},
+      {id:"e12",label:"GP1",amt:-20,paid:false,dueDate:"2026-05-01",monthly:true},
+      {id:"e13",label:"Mintos Sparrate",amt:-100,paid:false,dueDate:"2026-05-01",monthly:true},
+      {id:"e14",label:"Maria",amt:-50,paid:false,dueDate:"2026-05-01",monthly:true},
+      {id:"e15",label:"Netflix",amt:-13,paid:false,dueDate:"2026-05-10",monthly:true},
+      {id:"e16",label:"Amazon Prime",amt:-9,paid:false,dueDate:"2026-05-10",monthly:true},
+      {id:"e17",label:"Audible",amt:-10,paid:false,dueDate:"2026-05-10",monthly:true}
     ],
     investments:[
       {name:"🏦 Rücklagen",val:1001.65,goal:25000},
       {name:"🏠 Bausparvertrag",val:538.27,goal:50000},
       {name:"📊 Mintos",val:2312.20,goal:null},
-      {name:"📈 Trade Republic",val:38.35,goal:null},
       {name:"🐦 Robinhood",val:56.54,goal:null},
-      {name:"📱 N26 Invest",val:66.03,goal:null}
+      {name:"🏦 N26",val:66.03,goal:null},
+      {name:"📈 Trade Republic",val:38.35,goal:null}
     ]
   },
   players:[
@@ -642,6 +653,8 @@ function load(){
   // Ensure structure
   ['morgenTasks','fokusTasks','haushalTasks','abendTasks','supps','suppDone','projekte','notes','players'].forEach(k=>{if(!S[k])S[k]=DEF[k];});
   if(!S.finanzen)S.finanzen=DEF.finanzen;
+  if(S.finanzen&&S.finanzen.expense){S.finanzen.expense.forEach((e,i)=>{if(e.dueDate===undefined)e.dueDate=DEF.finanzen.expense[i]?DEF.finanzen.expense[i].dueDate||'':'';if(e.monthly===undefined)e.monthly=DEF.finanzen.expense[i]?DEF.finanzen.expense[i].monthly||false:false;});}
+  if(S.finanzen&&S.finanzen.investments){const _ekn=['mintos','robinhood','n26','trade republic'];if(!_ekn.some(n=>S.finanzen.investments.some(i=>i.name.toLowerCase().includes(n))))S.finanzen.investments=JSON.parse(JSON.stringify(DEF.finanzen.investments));}
   if(!S.kcal)S.kcal=2500;
   if(!S.reps)S.reps={lies:[],unter:[],klim:[]};
   if(!S.calEvents)S.calEvents={};
@@ -957,44 +970,48 @@ function renderFinRow(item,container,type){
   };
   row.append(cb,lbl,amt,del,edit);container.appendChild(row);
 }
+// === FINANZEN HELPERS ===
+let _expSortMode='entry';
+function _fmtDate(ds){if(!ds)return'—';const d=new Date(ds+'T00:00:00');if(isNaN(d))return'—';return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();}
+function _rollMonthly(){const now=new Date();now.setHours(0,0,0,0);S.finanzen.expense.forEach(e=>{if(e.monthly&&e.dueDate){const d=new Date(e.dueDate+'T00:00:00');while(!isNaN(d)&&d<now){d.setMonth(d.getMonth()+1);e.dueDate=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');e.paid=false;}}});save();}
+function _getSortedExp(){const arr=[...S.finanzen.expense];if(_expSortMode==='date')return arr.sort((a,b)=>{const da=a.dueDate?new Date(a.dueDate):new Date('9999-12-31');const db=b.dueDate?new Date(b.dueDate):new Date('9999-12-31');return da-db;});if(_expSortMode==='amount-asc')return arr.sort((a,b)=>Math.abs(a.amt)-Math.abs(b.amt));if(_expSortMode==='amount-desc')return arr.sort((a,b)=>Math.abs(b.amt)-Math.abs(a.amt));return arr;}
+function _renderExpRow(item,container){const row=document.createElement('div');row.className='fin-row';const cb=document.createElement('div');cb.className='fin-cb'+(item.paid?' paid':'');cb.textContent=item.paid?'✓':'';cb.onclick=()=>{item.paid=!item.paid;save();renderFinanzen();};const lbl=document.createElement('div');lbl.className='fin-label'+(item.paid?' paid':'');lbl.textContent=item.label;const meta=document.createElement('div');meta.className='fin-meta';const dueEl=document.createElement('div');dueEl.className='fin-due';dueEl.textContent=item.dueDate?_fmtDate(item.dueDate):'—';meta.appendChild(dueEl);if(item.monthly){const tu=document.createElement('div');tu.className='fin-turnus';tu.textContent='🔄 monatlich';meta.appendChild(tu);}const amt=document.createElement('div');amt.className='fin-amt neg';amt.textContent=item.amt.toFixed(2)+'€';const edit=document.createElement('button');edit.className='edit-btn';edit.textContent='✏️';edit.onclick=()=>_openExpModal(item);const del=document.createElement('button');del.className='del-btn';del.textContent='🗑️';del.onclick=()=>{S.finanzen.expense=S.finanzen.expense.filter(x=>x.id!==item.id);save();renderFinanzen();};row.append(cb,lbl,meta,amt,del,edit);container.appendChild(row);}
+function _openExpModal(item){window._expModalItem=item;document.getElementById('modal-title').textContent='✏️ '+item.label+' bearbeiten';document.getElementById('modal-name').value=item.label;document.getElementById('modal-amt').value=Math.abs(item.amt);document.getElementById('modal-date').value=item.dueDate||'';let mr=document.getElementById('modal-monthly-row');if(!mr){mr=document.createElement('div');mr.id='modal-monthly-row';mr.style.cssText='display:flex;align-items:center;gap:10px;margin-bottom:10px;';mr.innerHTML='<label style="font-size:13px;color:var(--t1);flex:1;">🔄 Monatlich<\/label><input type="checkbox" id="modal-monthly" style="width:20px;height:20px;cursor:pointer;accent-color:var(--acc2);">';document.getElementById('modal-date').after(mr);}mr.style.display='flex';document.getElementById('modal-monthly').checked=!!item.monthly;document.getElementById('modal').classList.add('open');}
 function renderFinanzen(){
-  // Konten
-  const kg=document.getElementById('konto-grid');kg.innerHTML='';
-  let total=0;
-  S.finanzen.konten.forEach(k=>{
+  const kg=document.getElementById('konto-grid');kg.innerHTML='';let total=0;
+  S.finanzen.konten.forEach((k,idx)=>{
     const card=document.createElement('div');card.className='konto-card';
-    card.innerHTML=`<div class="konto-name">${k.name}</div><div class="konto-val ${k.val>=0?'pos':'neg'}">${k.val>=0?'+':''}${k.val.toFixed(2)}€</div>`;
-    kg.appendChild(card);total+=k.val;
+    const view=document.createElement('div');view.className='konto-view';
+    view.innerHTML='<div class="konto-name">'+k.name+'<\/div><div class="konto-val '+(k.val>=0?'pos':'neg')+'">'+(k.val>=0?'+':'')+k.val.toFixed(2)+'€<\/div>';
+    const ef=document.createElement('div');ef.className='konto-edit-form';
+    ef.innerHTML='<input class="konto-edit-inp" type="text" value="'+k.name+'" id="ke-n-'+idx+'"><input class="konto-edit-inp" type="number" value="'+k.val+'" step="0.01" id="ke-v-'+idx+'"><div class="konto-edit-btns"><button class="konto-cancel-btn" onclick="this.closest(\'.konto-card\').classList.remove(\'editing\')">✕<\/button><button class="konto-save-btn" onclick="S.finanzen.konten['+idx+'].name=document.getElementById(\'ke-n-'+idx+'\').value;S.finanzen.konten['+idx+'].val=parseFloat(document.getElementById(\'ke-v-'+idx+'\').value)||0;save();renderFinanzen();">✓<\/button><\/div>';
+    view.onclick=()=>card.classList.add('editing');
+    card.append(view,ef);kg.appendChild(card);total+=k.val;
   });
-  const bal=document.getElementById('fin-balance');
-  bal.textContent=(total>=0?'+':'')+total.toFixed(2)+'€';
-  bal.style.color=total>=0?'var(--acc)':'var(--acc3)';
-  // Income
-  const inc=document.getElementById('fin-income');inc.innerHTML='';
-  S.finanzen.income.forEach(item=>renderFinRow(item,inc,'income'));
-  // Expense
+  const addCard=document.createElement('div');addCard.className='konto-card';addCard.style.cssText='display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px dashed var(--bg3);min-height:60px;';addCard.innerHTML='<span style="font-size:22px;color:var(--t2);">+<\/span>';addCard.onclick=()=>{const n=prompt('Kontoname:');if(!n)return;const v=parseFloat(prompt('Betrag (€):')||'0')||0;S.finanzen.konten.push({name:n,val:v});save();renderFinanzen();};kg.appendChild(addCard);
+  const bal=document.getElementById('fin-balance');bal.textContent=(total>=0?'+':'')+total.toFixed(2)+'€';bal.style.color=total>=0?'var(--acc)':'var(--acc3)';
+  const inc=document.getElementById('fin-income');inc.innerHTML='';S.finanzen.income.forEach(item=>renderFinRow(item,inc,'income'));
+  _rollMonthly();
   const exp=document.getElementById('fin-expense');exp.innerHTML='';
-  S.finanzen.expense.forEach(item=>renderFinRow(item,exp,'expense'));
-  // Investments
+  const sb=document.createElement('div');sb.className='expense-sort-bar';
+  [{id:'entry',label:'📋 Eintragung'},{id:'date',label:'📅 Fälligkeit'},{id:'amount-asc',label:'💰 Betrag ↑'},{id:'amount-desc',label:'💰 Betrag ↓'}].forEach(s=>{const b=document.createElement('button');b.className='sort-btn'+(_expSortMode===s.id?' active':'');b.textContent=s.label;b.onclick=()=>{_expSortMode=s.id;renderFinanzen();};sb.appendChild(b);});
+  exp.appendChild(sb);
+  _getSortedExp().forEach(item=>_renderExpRow(item,exp));
+  const af=document.createElement('div');af.className='add-expense-form';af.innerHTML='<div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">➕ Neue Ausgabe<\/div><div class="form-row"><input class="add-expense-inp" id="new-exp-label" placeholder="Bezeichnung (z.B. Handy)"><input class="add-expense-inp" id="new-exp-amt" type="number" placeholder="Betrag (€)" min="0" step="0.01" style="max-width:100px;"><\/div><div class="form-row" style="gap:8px;align-items:center;flex-wrap:wrap;"><input class="add-expense-inp" id="new-exp-date" type="date" style="flex:1;min-width:120px;"><label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);"><input type="checkbox" id="new-exp-monthly" style="width:16px;height:16px;accent-color:var(--acc2);">🔄 monatlich<\/label><\/div><button class="add-btn" onclick="addExpense()">➕ Hinzufügen<\/button>';exp.appendChild(af);
   const inv=document.getElementById('fin-investments');inv.innerHTML='';
-  S.finanzen.investments.forEach(item=>{
-    const row=document.createElement('div');row.className='inv-row';
-    const top=document.createElement('div');top.className='inv-top';
-    const name=document.createElement('div');name.className='inv-name';name.textContent=item.name;
-    const val=document.createElement('div');val.className='inv-val';val.textContent=item.val.toLocaleString('de-DE',{minimumFractionDigits:2})+'€';
-    top.append(name,val);
-    const bar=document.createElement('div');bar.className='inv-bar';
-    if(item.goal){
-      const fill=document.createElement('div');fill.className='inv-fill';
-      fill.style.width=Math.min(item.val/item.goal*100,100)+'%';
-      bar.appendChild(fill);
-      const goalLbl=document.createElement('div');
-      goalLbl.style.cssText='font-size:10px;color:var(--t2);margin-top:2px;font-family:"DM Mono",monospace;';
-      goalLbl.textContent=`Ziel: ${item.goal.toLocaleString('de-DE')}€ · ${(item.val/item.goal*100).toFixed(1)}%`;
-      row.append(top,bar,goalLbl);
-    }else{row.append(top);}
+  S.finanzen.investments.forEach((item,idx)=>{
+    const row=document.createElement('div');row.className='inv-row';const top=document.createElement('div');top.className='inv-top';
+    const nameEl=document.createElement('div');nameEl.className='inv-name';nameEl.textContent=item.name;nameEl.style.cursor='pointer';nameEl.onclick=()=>{const n=prompt('Neuer Name:',item.name);if(n){item.name=n;save();renderFinanzen();}};
+    const valEl=document.createElement('div');valEl.className='inv-val inv-val-edit';valEl.textContent=item.val.toLocaleString('de-DE',{minimumFractionDigits:2})+'€';valEl.onclick=()=>{const v=parseFloat(prompt('Neuer Wert (€):',item.val));if(!isNaN(v)){item.val=v;save();renderFinanzen();}};
+    top.append(nameEl,valEl);
+    if(item.goal){const bar=document.createElement('div');bar.className='inv-bar';const fill=document.createElement('div');fill.className='inv-fill';fill.style.width=Math.min(item.val/item.goal*100,100)+'%';bar.appendChild(fill);const gl=document.createElement('div');gl.style.cssText='font-size:10px;color:var(--t2);margin-top:2px;font-family:"DM Mono",monospace;';gl.textContent='Ziel: '+item.goal.toLocaleString('de-DE')+'€ · '+(item.val/item.goal*100).toFixed(1)+'%';row.append(top,bar,gl);}else{row.appendChild(top);}
     inv.appendChild(row);
   });
+  const ekItems=S.finanzen.investments.filter(i=>['mintos','robinhood','n26','trade republic'].some(n=>i.name.toLowerCase().includes(n)));
+  const ekTotal=ekItems.reduce((a,i)=>a+i.val,0);const EKGOAL=100000;const ekPct=Math.min(ekTotal/EKGOAL*100,100);const ekDiff=EKGOAL-ekTotal;
+  const ekWrap=document.createElement('div');ekWrap.className='eigenkapital-progress-wrap';
+  ekWrap.innerHTML='<div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">📊 Investiertes Kapital · Ziel: 100.000€<\/div><div class="ek-pct">'+ekPct.toFixed(2)+'%<\/div><div class="ek-goal-bar"><div class="ek-goal-fill" style="width:'+ekPct+'%"><\/div><\/div><div class="ek-stats"><span>'+ekTotal.toLocaleString('de-DE',{minimumFractionDigits:2})+'€ investiert<\/span><span style="color:var(--acc);">Ziel: 100.000€<\/span><\/div><div class="ek-diff">−'+ekDiff.toLocaleString('de-DE',{minimumFractionDigits:2})+'€ bis zum Ziel<\/div>';
+  inv.appendChild(ekWrap);
 }
 // EDIT MODAL
 let modalTarget=null,modalType=null;
