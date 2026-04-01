@@ -1145,6 +1145,8 @@ function renderFinanzen(){
   const sb=document.createElement('div');sb.className='expense-sort-bar';
   [{id:'entry',label:'📋 Eintragung'},{id:'date',label:'📅 Fälligkeit'},{id:'amount-asc',label:'💰 Betrag ↑'},{id:'amount-desc',label:'💰 Betrag ↓'}].forEach(s=>{const b=document.createElement('button');b.className='sort-btn'+(_expSortMode===s.id?' active':'');b.textContent=s.label;b.onclick=()=>{_expSortMode=s.id;renderFinanzen();};sb.appendChild(b);});
   exp.appendChild(sb);
+  // Show monthly expense summary banner
+  renderExpenseSummary(exp);
   _getSortedExp().forEach(item=>_renderExpRow(item,exp));
   
   const inv=document.getElementById('fin-investments');inv.innerHTML='';
