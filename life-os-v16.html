@@ -737,6 +737,8 @@ function load(){
   if(S.nextEvent===undefined)S.nextEvent=DEF.nextEvent||'';
   if(!S.playerSortMode)S.playerSortMode=DEF.playerSortMode||'level';
   if(!S.tageslog)S.tageslog=DEF.tageslog;
+  if(!S.archiveDays)S.archiveDays={};
+  if(!S.archive)S.archive=[];
   if(!S.ern)S.ern=DEF.ern;
 }
 function save(){localStorage.setItem('lifeosv16',JSON.stringify(S));}
