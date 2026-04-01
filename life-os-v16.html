@@ -201,7 +201,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
 .rank-meister{background:#4ade8020;color:#4ade80;}
 .player-xp{font-size:11px;color:var(--t2);font-family:'DM Mono',monospace;margin-bottom:4px;}
 /* EDIT MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;display:none;align-items:center;justify-content:center;}
 .modal-overlay.open{display:flex;}
 .modal{background:var(--bg1);border-radius:16px;padding:20px;width:90%;max-width:480px;max-height:90vh;overflow-y:auto;}
 .modal-title{font-size:16px;font-weight:800;color:var(--t0);margin-bottom:16px;}
@@ -291,6 +291,16 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
   /* === MT-AI === */
   .mt-ai-badge{display:inline-block;background:linear-gradient(135deg,var(--acc2),var(--acc));color:#000;font-size:9px;font-weight:800;padding:1px 6px;border-radius:8px;margin-left:4px;vertical-align:middle;letter-spacing:.5px;}
 
+
+/* === ARCHIV MODAL === */
+#archive-modal { z-index:2000 !important; }
+.arch-detail { animation: fadeIn .2s ease; }
+/* === MOBILE IMPROVEMENTS === */
+@media (max-width:480px) {
+  .ern-textarea { min-height:80px; font-size:14px; }
+  .task-text, .task-btn { font-size:14px; }
+  .task-btn { width:38px; height:38px; }
+}
 </style>
 </head>
 <body>
@@ -344,6 +354,10 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
         <div class="progress-label"><span id="prog-text">0 von 7 erledigt</span><span id="prog-pct">0%</span></div>
         <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
       </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <button onclick="archiveToday()" style="flex:1;padding:8px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;font-size:12px;cursor:pointer;color:var(--t2);">📦 Tag archivieren</button>
+        <button onclick="showArchive()" style="flex:1;padding:8px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;font-size:12px;cursor:pointer;color:var(--acc2);">📋 Archiv ansehen</button>
+      </div>
       <div class="card">
         <div class="card-title">☀️ Morgenroutine</div>
         <div id="morgen-list"></div>
@@ -396,6 +410,11 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
         <div class="tp-section-title">🌙 Abendroutine</div>
         <div id="tp-abend"></div>
       </div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button onclick="archiveToday()" style="flex:1;padding:8px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;font-size:12px;cursor:pointer;color:var(--t2);">📦 Tag archivieren</button>
+        <button onclick="showArchive()" style="flex:1;padding:8px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;font-size:12px;cursor:pointer;color:var(--acc2);">📋 Archiv</button>
+        <button onclick="saveData()" style="flex:1;padding:8px;background:var(--acc);border:none;border-radius:8px;font-size:12px;cursor:pointer;color:#000;font-weight:700;">💾 Speichern</button>
+      </div>
       <div class="mini-tiles">
         <div class="mini-tile" onclick="goPanel('fitness')"><div class="mini-tile-icon">💪</div><div class="mini-tile-label">Sport</div></div>
         <div class="mini-tile" onclick="goPanel('finanzen')"><div class="mini-tile-icon">💰</div><div class="mini-tile-label">Finanzen</div></div>
@@ -445,6 +464,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
         <div class="ern-row-big"><div class="ern-label-big">☀️ Mittags</div><textarea class="ern-textarea" id="ern-mittags" placeholder="z.B. Hähnchen mit Reis, Salat..."></textarea></div>
         <div class="ern-row-big"><div class="ern-label-big">🌙 Abends</div><textarea class="ern-textarea" id="ern-abends" placeholder="z.B. Quark, Gemüse, Proteinriegel..."></textarea></div>
         <div class="log-row"><div class="log-label">🚬 Letzte Zigarette</div><input class="log-inp" type="time" id="ern-ziggi"></div>
+        <button onclick="saveErnährung()" style="margin-top:10px;width:100%;padding:12px;background:var(--acc2);border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;color:#fff;">💾 Ernährung speichern</button>
       </div>
     </div>
 
@@ -514,6 +534,12 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
         </div>
         
 
+        </div><!-- /card Ausgaben -->
+    <div class="card">
+      <div class="card-title">📈 Investitionen</div>
+      <div id="fin-investments"></div>
+    </div>
+    </div><!-- /panel-finanzen -->
     <!-- ===== MITSPIELER ===== -->
     <div class="panel" id="panel-mitspieler">
       <div class="stat-grid" id="player-stats"></div>
@@ -578,13 +604,13 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
 // ==============================
 const DEF = {
   morgenTasks:[
-    {id:1,text:"6 Uhr aufstehen",status:"open"},
-    {id:2,text:"Bett machen",status:"open"},
-    {id:3,text:"Bereich aufräumen",status:"open"},
-    {id:4,text:"Lüften",status:"open"},
-    {id:5,text:"Zähne putzen",status:"open"},
-    {id:6,text:"Frühstück",status:"open"},
-    {id:7,text:"Schreibtisch",status:"open"}
+    {id:1,text:"6:00 Uhr aufstehen",status:"open"},
+    {id:2,text:"Klamotten (Wetter App checken)",status:"open"},
+    {id:3,text:"Schulsachen (Kalender checken)",status:"open"},
+    {id:4,text:"Zähne putzen",status:"open"},
+    {id:5,text:"Frühstück",status:"open"},
+    {id:6,text:"15 MIN: Morning Meeting",status:"open"},
+    {id:7,text:"Pünktlich los? ✈️",status:"open"}
   ],
   fokusTasks:[
     {id:101,text:"Tagesplan erstellen",status:"open"},
@@ -685,6 +711,8 @@ const DEF = {
     {name:"Sara",game:"League",level:67,xp:18000,xpGoal:20000,rank:"Diamant"}
   ],
   notes:[],
+  archive:[],
+  archiveDays:{},
   calEvents:{},
   calNotes:{},
   reflex:{gut:"",verb:"",ziel1:"",ziel2:"",ziel3:""},
@@ -835,14 +863,53 @@ function renderHeute(){
 // TAGESPLAN
 // ==============================
 function renderTagesplan(){
-  renderTaskList(S.morgenTasks,document.getElementById('tp-morgen'),renderTagesplan,true);
-  renderTaskList(S.fokusTasks,document.getElementById('tp-fokus'),renderTagesplan,true);
-  renderTaskList(S.haushalTasks,document.getElementById('tp-haushalt'),renderTagesplan,true);
-  renderTaskList(S.abendTasks,document.getElementById('tp-abend'),renderTagesplan,true);
+  // Render each section with edit/delete/add capabilities
+  renderEditableTaskList(S.morgenTasks,'morgenTasks',document.getElementById('tp-morgen'),renderTagesplan,true);
+  renderEditableTaskList(S.fokusTasks,'fokusTasks',document.getElementById('tp-fokus'),renderTagesplan,true);
+  renderEditableTaskList(S.haushalTasks,'haushalTasks',document.getElementById('tp-haushalt'),renderTagesplan,true);
+  renderEditableTaskList(S.abendTasks,'abendTasks',document.getElementById('tp-abend'),renderTagesplan,true);
   document.getElementById('log-aufgestanden').value=S.tageslog.aufgestanden||'';
   document.getElementById('log-schlaf').value=S.tageslog.schlaf||'';
   document.getElementById('log-aufgestanden').oninput=e=>{S.tageslog.aufgestanden=e.target.value;save();};
   document.getElementById('log-schlaf').oninput=e=>{S.tageslog.schlaf=e.target.value;save();};
+}
+
+function renderEditableTaskList(tasks, key, container, renderFn, numbered) {
+  if (!container) return;
+  container.innerHTML = '';
+  tasks.forEach((t, i) => {
+    const row = document.createElement('div');
+    row.className = 'task-row';
+    const num = document.createElement('div'); num.className = 'task-num'; num.textContent = numbered ? (i+1) : ' ';
+    const cb = document.createElement('div');
+    cb.className = 'task-cb' + (t.status==='done'?' done':t.status==='late'?' late':'');
+    cb.textContent = t.status==='done'?'✓':t.status==='late'?'✗':'';
+    cb.onclick = () => cycleTask(t.id, tasks, () => renderEditableTaskList(tasks, key, container, renderFn, numbered));
+    const txt = document.createElement('input');
+    txt.style.cssText = 'flex:1;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--t1);font-size:15px;font-family:"Syne",sans-serif;outline:none;padding:2px 4px;' + (t.status==='done'?'text-decoration:line-through;color:var(--t2);':'') + (t.status==='late'?'text-decoration:line-through;color:var(--acc3);':'');
+    txt.value = t.text;
+    txt.onfocus = e => e.target.style.borderBottomColor = 'var(--acc2)';
+    txt.onblur = e => { e.target.style.borderBottomColor = 'transparent'; t.text = e.target.value; save(); };
+    const acts = document.createElement('div'); acts.className = 'task-actions';
+    const bdone = document.createElement('button'); bdone.className = 'task-btn'; bdone.textContent = '✅';
+    bdone.onclick = () => setTask(t.id, tasks, 'done', () => renderEditableTaskList(tasks, key, container, renderFn, numbered));
+    const blate = document.createElement('button'); blate.className = 'task-btn'; blate.textContent = '❌';
+    blate.onclick = () => setTask(t.id, tasks, 'late', () => renderEditableTaskList(tasks, key, container, renderFn, numbered));
+    const bdel = document.createElement('button'); bdel.className = 'task-btn'; bdel.textContent = '🗑️'; bdel.title = 'Löschen';
+    bdel.onclick = () => { S[key] = S[key].filter(x => x.id !== t.id); save(); renderEditableTaskList(tasks, key, container, renderFn, numbered); };
+    acts.append(bdone, blate, bdel);
+    row.append(num, cb, txt, acts);
+    container.appendChild(row);
+  });
+  // Add task button
+  const addBtn = document.createElement('button');
+  addBtn.style.cssText = 'width:100%;padding:7px;background:rgba(74,222,128,.08);border:1px dashed rgba(74,222,128,.3);border-radius:8px;color:var(--acc);font-size:12px;cursor:pointer;margin-top:6px;font-family:"Syne",sans-serif;';
+  addBtn.textContent = '＋ Aufgabe hinzufügen';
+  addBtn.onclick = () => {
+    const text = prompt('Neue Aufgabe:');
+    if (text && text.trim()) { S[key].push({id:Date.now(), text:text.trim(), status:'open'}); save(); renderEditableTaskList(tasks, key, container, renderFn, numbered); }
+  };
+  container.appendChild(addBtn);
 }
 
 // ==============================
@@ -1475,6 +1542,153 @@ if(savedZoom){
 
 load();
 renderHeute();
+
+// === MOBILE STORAGE HINT ===
+(function() {
+  const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+  if (isMobile && !localStorage.getItem('mobile-hint-shown')) {
+    localStorage.setItem('mobile-hint-shown', '1');
+    setTimeout(() => {
+      const hint = document.createElement('div');
+      hint.style.cssText = 'position:fixed;bottom:70px;left:10px;right:10px;background:var(--bg2);border:1px solid var(--acc2);border-radius:12px;padding:12px;z-index:500;font-size:12px;color:var(--t1);line-height:1.5;';
+      hint.innerHTML = '📱 <strong>Handy-Tipp:</strong> Nutze den 📤 Export-Button, um deine Daten regelmäßig zu sichern. Beim iPhone Safari: <em>Teilen → Zum Home-Bildschirm</em> für bessere App-Nutzung.<button onclick="this.parentElement.remove()" style="display:block;margin-top:8px;width:100%;padding:7px;background:var(--acc2);border:none;border-radius:8px;color:#fff;font-size:12px;cursor:pointer;font-weight:700;">✓ Verstanden</button>';
+      document.body.appendChild(hint);
+    }, 2000);
+  }
+})();
+
+
+
+// ============================== 
+// MONATLICHE AUSGABEN SUMME
+// ==============================
+function renderExpenseSummary(container) {
+  const monthlySum = S.finanzen.expense.reduce((a,e) => a + Math.abs(e.amt), 0);
+  const unpaid = S.finanzen.expense.filter(e => !e.paid).reduce((a,e) => a + Math.abs(e.amt), 0);
+  const paid = monthlySum - unpaid;
+  let banner = document.getElementById('expense-monthly-sum');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'expense-monthly-sum';
+    banner.style.cssText = 'background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;';
+    container.parentElement.insertBefore(banner, container);
+  }
+  banner.innerHTML = '<div><div style="font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;font-weight:700;">📤 Offene Ausgaben diesen Monat</div><div style="font-size:24px;font-weight:800;color:var(--acc3);font-family:'DM Mono',monospace;">' + unpaid.toFixed(2) + '€</div><div style="font-size:11px;color:var(--t2);margin-top:2px;">Gesamt: ' + monthlySum.toFixed(2) + '€</div></div><div style="text-align:right;"><div style="font-size:10px;color:var(--t2);">✅ Bezahlt</div><div style="font-size:18px;font-weight:700;color:var(--acc);">' + paid.toFixed(2) + '€</div><div style="font-size:10px;color:var(--t2);margin-top:2px;">' + Math.round(paid/monthlySum*100) + '%</div></div>';
+}
+
+// ==============================
+// ARCHIV SYSTEM
+// ==============================
+function archiveToday() {
+  const today = new Date().toISOString().slice(0, 10);
+  if (!S.archiveDays) S.archiveDays = {};
+  S.archiveDays[today] = {
+    date: today,
+    morgenTasks: JSON.parse(JSON.stringify(S.morgenTasks)),
+    fokusTasks: JSON.parse(JSON.stringify(S.fokusTasks)),
+    haushalTasks: JSON.parse(JSON.stringify(S.haushalTasks)),
+    abendTasks: JSON.parse(JSON.stringify(S.abendTasks)),
+    kcal: S.kcal,
+    ern: JSON.parse(JSON.stringify(S.ern)),
+    reps: JSON.parse(JSON.stringify(S.reps)),
+    tageslog: JSON.parse(JSON.stringify(S.tageslog)),
+    savedAt: new Date().toLocaleString('de-DE')
+  };
+  save();
+  showToast('📦 Tag archiviert: ' + today);
+}
+
+function showArchive() {
+  if (!S.archiveDays) { showToast('📭 Noch kein Archiv vorhanden'); return; }
+  const days = Object.keys(S.archiveDays).sort().reverse();
+  if (!days.length) { showToast('📭 Noch kein Archiv vorhanden'); return; }
+  
+  // Build archive modal
+  let archModal = document.getElementById('archive-modal');
+  if (!archModal) {
+    archModal = document.createElement('div');
+    archModal.id = 'archive-modal';
+    archModal.className = 'modal-overlay';
+    archModal.style.cssText = 'z-index:2000;';
+    archModal.innerHTML = '<div class="modal" style="max-width:600px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><div class="modal-title" style="margin:0;">📦 Tages-Archiv</div><button onclick="document.getElementById('archive-modal').classList.remove('open')" style="background:none;border:none;color:var(--t2);font-size:20px;cursor:pointer;">✕</button></div><div id="archive-content"></div></div>';
+    document.body.appendChild(archModal);
+    archModal.onclick = e => { if(e.target === archModal) archModal.classList.remove('open'); };
+  }
+  
+  const content = document.getElementById('archive-content');
+  content.innerHTML = '';
+  days.forEach(day => {
+    const d = S.archiveDays[day];
+    const morgenDone = d.morgenTasks.filter(t => t.status==='done').length;
+    const fokusDone = d.fokusTasks.filter(t => t.status==='done').length;
+    const repsTotal = ((d.reps?.lies?.length||0)+(d.reps?.unter?.length||0)+(d.reps?.klim?.length||0))*10;
+    const card = document.createElement('div');
+    card.style.cssText = 'background:var(--bg2);border:1px solid var(--bg3);border-radius:10px;padding:12px;margin-bottom:8px;cursor:pointer;';
+    card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-size:14px;font-weight:700;color:var(--t0);">📅 ' + day + '</div><div style="font-size:10px;color:var(--t2);">' + (d.savedAt||'') + '</div></div><div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;"><span style="font-size:12px;color:var(--acc);">☀️ Morgen: ' + morgenDone + '/7</span><span style="font-size:12px;color:var(--acc2);">⚡ Fokus: ' + fokusDone + '/7</span><span style="font-size:12px;color:var(--acc4);">🔥 ' + d.kcal + ' kcal</span><span style="font-size:12px;color:var(--t2);">💪 ' + repsTotal + ' Reps</span></div>';
+    
+    // Expand on click
+    let expanded = false;
+    card.onclick = () => {
+      expanded = !expanded;
+      const detail = card.querySelector('.arch-detail');
+      if (detail) { detail.remove(); return; }
+      const det = document.createElement('div');
+      det.className = 'arch-detail';
+      det.style.cssText = 'margin-top:10px;padding-top:10px;border-top:1px solid var(--bg3);font-size:12px;color:var(--t2);';
+      // Show tasks
+      const allTasks = [...(d.morgenTasks||[]),...(d.fokusTasks||[])];
+      const doneList = allTasks.filter(t => t.status==='done').map(t => t.text).join(', ');
+      const lateList = allTasks.filter(t => t.status==='late').map(t => t.text).join(', ');
+      det.innerHTML = (doneList ? '<div style="color:var(--acc);">✅ ' + doneList + '</div>' : '') + 
+                      (lateList ? '<div style="color:var(--acc3);">❌ ' + lateList + '</div>' : '') +
+                      (d.ern?.morgens ? '<div>🌅 Morgens: ' + d.ern.morgens + '</div>' : '') +
+                      (d.ern?.mittags ? '<div>☀️ Mittags: ' + d.ern.mittags + '</div>' : '') +
+                      (d.ern?.abends ? '<div>🌙 Abends: ' + d.ern.abends + '</div>' : '');
+      card.appendChild(det);
+    };
+    content.appendChild(card);
+  });
+  
+  archModal.classList.add('open');
+}
+
+// ==============================
+// TAGESPLAN: ADD TASK TO SECTION  
+// ==============================
+function addTaskToSection(key, containerEl, renderFn) {
+  const text = prompt('Neue Aufgabe:');
+  if (!text) return;
+  const newId = Date.now();
+  S[key].push({id: newId, text, status:'open'});
+  save();
+  renderFn();
+}
+
+function deleteTaskFromSection(id, key, renderFn) {
+  S[key] = S[key].filter(t => t.id !== id);
+  save();
+  renderFn();
+}
+
+function editTaskInSection(id, key, renderFn) {
+  const task = S[key].find(t => t.id === id);
+  if (!task) return;
+  const newText = prompt('Aufgabe bearbeiten:', task.text);
+  if (newText !== null && newText.trim()) { task.text = newText.trim(); save(); renderFn(); }
+}
+
+
+// ==============================
+// ERNÄHRUNG SPEICHERN
+// ==============================
+function saveErnährung() {
+  ['morgens','mittags','abends','ziggi'].forEach(k => {
+    const el = document.getElementById('ern-' + k);
+    if (el) S.ern[k] = el.value;
+  });
+  save();
+  showToast('🍽️ Ernährung gespeichert!');
+}
 </script>
 <div class="toast" id="toast"></div>
 </body>
