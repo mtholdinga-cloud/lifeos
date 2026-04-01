@@ -19,7 +19,7 @@
   --acc:#16a34a;--acc2:#2563eb;--acc3:#dc2626;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-body{font-family:'Syne',sans-serif;background:var(--bg0);color:var(--t1);min-height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+body{font-family:'Syne',sans-serif;background:var(--bg0);color:var(--t1);min-height:100vh;overflow:auto;display:flex;flex-direction:column;}
 /* TOPBAR */
 #topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg1);border-bottom:1px solid var(--bg3);flex-shrink:0;height:52px;z-index:100;}
 #topbar .logo{font-size:15px;font-weight:800;color:var(--t0);letter-spacing:-.5px;}
@@ -28,6 +28,16 @@ body{font-family:'Syne',sans-serif;background:var(--bg0);color:var(--t1);min-hei
 .topbar-right{display:flex;align-items:center;gap:8px;}
 .mode-btn{background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;padding:5px 9px;font-size:12px;cursor:pointer;color:var(--t2);transition:var(--trans);}
 .mode-btn:active,.mode-btn:hover{background:var(--bg3);color:var(--t0);}
+
+.zoom-ctrl{display:flex;align-items:center;gap:6px;}
+.zoom-slider{width:70px;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--bg3);outline:none;cursor:pointer;}
+.zoom-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--acc);cursor:pointer;}
+.save-btn{background:var(--acc);border:none;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;color:#000;font-weight:700;transition:var(--trans);}
+.save-btn:active{transform:scale(.95);}
+.export-btn{background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;padding:5px 9px;font-size:12px;cursor:pointer;color:var(--t2);transition:var(--trans);}
+.export-btn:active,.export-btn:hover{background:var(--bg3);color:var(--t0);}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--acc);color:#000;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;z-index:999;opacity:0;transition:opacity .3s ease;pointer-events:none;}
+.toast.show{opacity:1;}
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--acc);animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 /* LAYOUT */
@@ -227,6 +237,15 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
     <div class="live-dot"></div>
   </div>
   <div class="topbar-right">
+    <div class="zoom-ctrl">
+      <span style="font-size:10px;color:var(--t2);">🔍</span>
+      <input type="range" class="zoom-slider" id="zoom-slider" min="70" max="130" value="100" title="Zoom">
+      <span style="font-size:10px;color:var(--t2);font-family:'DM Mono',monospace;" id="zoom-label">100%</span>
+    </div>
+    <button class="save-btn" id="savebtn" onclick="saveData()">💾 Speichern</button>
+    <button class="export-btn" id="exportbtn" onclick="exportData()">📤</button>
+    <button class="export-btn" id="importbtn" onclick="document.getElementById('import-file').click()">📥</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
     <button class="mode-btn" id="modebtn">🖥️ PC</button>
   </div>
 </div>
@@ -1150,8 +1169,61 @@ function renderPanel(id){
 // ==============================
 // INIT
 // ==============================
+// ==============================
+// SAVE / EXPORT / IMPORT / ZOOM
+// ==============================
+function saveData(){
+  save();
+  showToast('✅ Gespeichert!');
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+function exportData(){
+  const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='lifeos-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  showToast('📤 Export gestartet!');
+}
+
+function importData(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      S=JSON.parse(ev.target.result);
+      save();
+      renderPanel(document.querySelector('.nav-item.active')?.dataset.panel||'heute');
+      showToast('📥 Daten importiert!');
+    }catch(err){showToast('❌ Fehler beim Import!');}
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+// ZOOM
+document.getElementById('zoom-slider').addEventListener('input',function(){
+  const v=this.value;
+  document.body.style.zoom=v+'%';
+  document.getElementById('zoom-label').textContent=v+'%';
+  localStorage.setItem('lifeos-zoom',v);
+});
+const savedZoom=localStorage.getItem('lifeos-zoom');
+if(savedZoom){
+  document.getElementById('zoom-slider').value=savedZoom;
+  document.getElementById('zoom-label').textContent=savedZoom+'%';
+  document.body.style.zoom=savedZoom+'%';
+}
+
 load();
 renderHeute();
 </script>
+<div class="toast" id="toast"></div>
 </body>
 </html>
