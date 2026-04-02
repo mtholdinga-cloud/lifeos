@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Life OS v16</title>
+<meta name="theme-color" content="#0f0f0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Life OS">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -301,6 +307,38 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
   .task-text, .task-btn { font-size:14px; }
   .task-btn { width:38px; height:38px; }
 }
+
+/* NOT-RELEVANT */
+.tp-section.not-relevant{opacity:.45;filter:grayscale(.8);transition:opacity .3s,filter .3s;}
+.tp-section.not-relevant:hover{opacity:.75;filter:grayscale(.3);}
+.tp-section-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.tp-section-header-row .tp-section-title{margin-bottom:0;}
+.relevance-toggle{background:none;border:1px solid var(--bg3);border-radius:6px;color:var(--t2);font-size:11px;padding:3px 8px;cursor:pointer;transition:var(--trans);white-space:nowrap;}
+.relevance-toggle:hover{background:var(--bg3);color:var(--t0);}
+.tp-section.not-relevant .relevance-toggle{border-color:var(--acc3);color:var(--acc3);}
+.task-row.dragging{opacity:.4;background:var(--bg3);border-radius:8px;}
+.task-row.drag-over{border-top:2px solid var(--acc);}
+.section-add-main-btn{width:100%;padding:8px;background:rgba(74,222,128,.08);border:1px dashed rgba(74,222,128,.3);border-radius:8px;color:var(--acc);font-size:12px;cursor:pointer;margin-top:8px;font-family:'Syne',sans-serif;transition:var(--trans);}
+.section-add-main-btn:hover{background:var(--acc);color:#000;}
+/* MT HOLDING */
+.mt-org-wrap{padding:8px;}
+.mt-org-head{display:flex;flex-direction:column;align-items:center;margin-bottom:24px;}
+.mt-org-box{background:var(--bg2);border:2px solid var(--acc);border-radius:14px;padding:14px 24px;text-align:center;min-width:160px;}
+.mt-org-box .org-name{font-size:17px;font-weight:800;color:var(--t0);}
+.mt-org-box .org-subtitle{font-size:10px;color:var(--acc);text-transform:uppercase;letter-spacing:.8px;margin-top:2px;}
+.mt-org-line-v{width:2px;height:28px;background:var(--acc);margin:0 auto;}
+.mt-org-companies{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;position:relative;padding-top:28px;}
+.mt-org-companies::before{content:'';display:block;height:2px;background:var(--bg3);position:absolute;top:0;left:calc(100%/(var(--n,5)*2));right:calc(100%/(var(--n,5)*2));}
+.mt-org-company-wrap{display:flex;flex-direction:column;align-items:center;position:relative;}
+.mt-org-company-wrap::before{content:'';width:2px;height:28px;background:var(--bg3);position:absolute;top:-28px;left:50%;transform:translateX(-50%);}
+.mt-org-company{background:var(--bg2);border:1px solid var(--bg3);border-radius:12px;padding:12px;width:100%;transition:var(--trans);}
+.mt-org-company:hover{border-color:var(--acc2);}
+.co-name-inp{background:transparent;border:none;border-bottom:1px solid transparent;color:var(--t0);font-size:13px;font-weight:800;font-family:'Syne',sans-serif;outline:none;width:100%;margin-bottom:8px;padding:0 0 2px;}
+.co-name-inp:focus{border-bottom-color:var(--acc2);}
+.co-goal-label{font-size:9px;color:var(--acc2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;font-weight:700;}
+.co-goal-inp{background:var(--bg1);border:1px solid var(--bg3);border-radius:8px;padding:6px 8px;font-size:11px;color:var(--t2);font-family:'DM Mono',monospace;outline:none;width:100%;transition:var(--trans);}
+.co-goal-inp:focus{border-color:var(--acc2);color:var(--t0);}
+.co-del-btn{background:none;border:none;color:var(--acc3);cursor:pointer;font-size:12px;padding:2px 4px;float:right;margin-top:-4px;}
 </style>
 </head>
 <body>
@@ -340,6 +378,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
       <div class="nav-item" data-panel="mitspieler"><span class="nav-icon">🎮</span><span class="nav-label">Mitspieler</span></div>
       <div class="nav-item" data-panel="notizen"><span class="nav-icon">📝</span><span class="nav-label">Notizen</span></div>
       <div class="nav-item" data-panel="ki"><span class="nav-icon">🤖</span><span class="nav-label">MT-AI</span></div>
+    <div class="nav-item" data-panel="mtholding"><span class="nav-icon">🏢</span><span class="nav-label">MT Holding</span></div>
     </nav>
   </div>
 
@@ -581,6 +620,25 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
       <div style="font-size:10px;color:var(--t2);text-align:center;margin-top:8px;">MT-AI · Persönlicher Mentor & Strategischer Berater · claude-sonnet-4-20250514</div>
     </div>
 
+
+    <!-- ===== MT HOLDING ===== -->
+    <div class="panel" id="panel-mtholding">
+      <div class="mt-org-wrap">
+        <div class="mt-org-head">
+          <div class="mt-org-box">
+            <div class="org-name">🏢 MT Holding</div>
+            <div class="org-subtitle">Muttergesellschaft</div>
+          </div>
+          <div class="mt-org-line-v"></div>
+        </div>
+        <div class="mt-org-companies" id="mt-org-companies"></div>
+        <div style="margin-top:20px;display:flex;gap:8px;">
+          <button onclick="addMTCompany()" style="flex:1;padding:10px;background:rgba(74,222,128,.1);border:1px dashed rgba(74,222,128,.3);border-radius:10px;color:var(--acc);font-size:12px;cursor:pointer;font-weight:700;">&#43; Firma hinzufügen</button>
+          <button onclick="saveMTHolding()" style="flex:1;padding:10px;background:var(--acc);border:none;border-radius:10px;color:#000;font-size:12px;cursor:pointer;font-weight:700;">&#128190; Speichern</button>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /main -->
 </div><!-- /app -->
 
@@ -740,6 +798,8 @@ function load(){
   if(!S.archiveDays)S.archiveDays={};
   if(!S.archive)S.archive=[];
   if(!S.ern)S.ern=DEF.ern;
+    if(!S.tpRelevance)S.tpRelevance={morgenTasks:true,fokusTasks:true,haushalTasks:true,abendTasks:true};
+    if(!S.mtCompanies)S.mtCompanies=null;
 }
 function save(){localStorage.setItem('lifeosv16',JSON.stringify(S));}
 
@@ -865,53 +925,91 @@ function renderHeute(){
 // TAGESPLAN
 // ==============================
 function renderTagesplan(){
-  // Render each section with edit/delete/add capabilities
-  renderEditableTaskList(S.morgenTasks,'morgenTasks',document.getElementById('tp-morgen'),renderTagesplan,true);
-  renderEditableTaskList(S.fokusTasks,'fokusTasks',document.getElementById('tp-fokus'),renderTagesplan,true);
-  renderEditableTaskList(S.haushalTasks,'haushalTasks',document.getElementById('tp-haushalt'),renderTagesplan,true);
-  renderEditableTaskList(S.abendTasks,'abendTasks',document.getElementById('tp-abend'),renderTagesplan,true);
-  document.getElementById('log-aufgestanden').value=S.tageslog.aufgestanden||'';
-  document.getElementById('log-schlaf').value=S.tageslog.schlaf||'';
-  document.getElementById('log-aufgestanden').oninput=e=>{S.tageslog.aufgestanden=e.target.value;save();};
-  document.getElementById('log-schlaf').oninput=e=>{S.tageslog.schlaf=e.target.value;save();};
+    if(!S.tpRelevance)S.tpRelevance={morgenTasks:true,fokusTasks:true,haushalTasks:true,abendTasks:true};
+    const sections=[
+        {key:'morgenTasks',id:'tp-morgen',label:'\u2600\ufe0f Morgenroutine'},
+        {key:'fokusTasks',id:'tp-fokus',label:'\u26a1 Fokus-Tasks'},
+        {key:'haushalTasks',id:'tp-haushalt',label:'\ud83c\udfe0 Haushalt'},
+        {key:'abendTasks',id:'tp-abend',label:'\ud83c\udf19 Abendroutine'}
+    ];
+    sections.forEach(sec=>{
+        const cont=document.getElementById(sec.id);
+        if(!cont)return;
+        const parentSec=cont.closest('.tp-section');
+        if(parentSec){
+            // Update header row
+            let hdr=parentSec.querySelector('.tp-section-header-row');
+            if(!hdr){
+                hdr=document.createElement('div');hdr.className='tp-section-header-row';
+                const oldTitle=parentSec.querySelector('.tp-section-title');
+                if(oldTitle){parentSec.insertBefore(hdr,oldTitle);hdr.appendChild(oldTitle);}
+            }
+            // Toggle button
+            let togBtn=hdr.querySelector('.relevance-toggle');
+            if(!togBtn){togBtn=document.createElement('button');togBtn.className='relevance-toggle';hdr.appendChild(togBtn);}
+            const isRel=S.tpRelevance[sec.key]!==false;
+            togBtn.textContent=isRel?'\u2022 Relevant':'\u2022 Nicht relevant';
+            togBtn.onclick=()=>{S.tpRelevance[sec.key]=!isRel;save();renderTagesplan();};
+            parentSec.classList.toggle('not-relevant',!isRel);
+        }
+        renderEditableTaskList(S[sec.key],sec.key,cont,renderTagesplan,true);
+    });
+    document.getElementById('log-aufgestanden').value=S.tageslog.aufgestanden||'';
+    document.getElementById('log-schlaf').value=S.tageslog.schlaf||'';
+    document.getElementById('log-aufgestanden').oninput=e=>{S.tageslog.aufgestanden=e.target.value;save();};
+    document.getElementById('log-schlaf').oninput=e=>{S.tageslog.schlaf=e.target.value;save();};
 }
 
 function renderEditableTaskList(tasks, key, container, renderFn, numbered) {
-  if (!container) return;
-  container.innerHTML = '';
-  tasks.forEach((t, i) => {
-    const row = document.createElement('div');
-    row.className = 'task-row';
-    const num = document.createElement('div'); num.className = 'task-num'; num.textContent = numbered ? (i+1) : ' ';
-    const cb = document.createElement('div');
-    cb.className = 'task-cb' + (t.status==='done'?' done':t.status==='late'?' late':'');
-    cb.textContent = t.status==='done'?'✓':t.status==='late'?'✗':'';
-    cb.onclick = () => cycleTask(t.id, tasks, () => renderEditableTaskList(tasks, key, container, renderFn, numbered));
-    const txt = document.createElement('input');
-    txt.style.cssText = 'flex:1;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--t1);font-size:15px;font-family:"Syne",sans-serif;outline:none;padding:2px 4px;' + (t.status==='done'?'text-decoration:line-through;color:var(--t2);':'') + (t.status==='late'?'text-decoration:line-through;color:var(--acc3);':'');
-    txt.value = t.text;
-    txt.onfocus = e => e.target.style.borderBottomColor = 'var(--acc2)';
-    txt.onblur = e => { e.target.style.borderBottomColor = 'transparent'; t.text = e.target.value; save(); };
-    const acts = document.createElement('div'); acts.className = 'task-actions';
-    const bdone = document.createElement('button'); bdone.className = 'task-btn'; bdone.textContent = '✅';
-    bdone.onclick = () => setTask(t.id, tasks, 'done', () => renderEditableTaskList(tasks, key, container, renderFn, numbered));
-    const blate = document.createElement('button'); blate.className = 'task-btn'; blate.textContent = '❌';
-    blate.onclick = () => setTask(t.id, tasks, 'late', () => renderEditableTaskList(tasks, key, container, renderFn, numbered));
-    const bdel = document.createElement('button'); bdel.className = 'task-btn'; bdel.textContent = '🗑️'; bdel.title = 'Löschen';
-    bdel.onclick = () => { S[key] = S[key].filter(x => x.id !== t.id); save(); renderEditableTaskList(tasks, key, container, renderFn, numbered); };
-    acts.append(bdone, blate, bdel);
-    row.append(num, cb, txt, acts);
-    container.appendChild(row);
-  });
-  // Add task button
-  const addBtn = document.createElement('button');
-  addBtn.style.cssText = 'width:100%;padding:7px;background:rgba(74,222,128,.08);border:1px dashed rgba(74,222,128,.3);border-radius:8px;color:var(--acc);font-size:12px;cursor:pointer;margin-top:6px;font-family:"Syne",sans-serif;';
-  addBtn.textContent = '＋ Aufgabe hinzufügen';
-  addBtn.onclick = () => {
-    const text = prompt('Neue Aufgabe:');
-    if (text && text.trim()) { S[key].push({id:Date.now(), text:text.trim(), status:'open'}); save(); renderEditableTaskList(tasks, key, container, renderFn, numbered); }
-  };
-  container.appendChild(addBtn);
+    if (!container) return;
+    container.innerHTML = '';
+    let dragSrc = null;
+    tasks.forEach((t, i) => {
+        const row = document.createElement('div');
+        row.className = 'task-row';
+        row.draggable = true;
+        row.dataset.idx = i;
+        row.addEventListener('dragstart', e => { dragSrc = i; row.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+        row.addEventListener('dragend', () => { row.classList.remove('dragging'); container.querySelectorAll('.task-row').forEach(r => r.classList.remove('drag-over')); });
+        row.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; row.classList.add('drag-over'); });
+        row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
+        row.addEventListener('drop', e => {
+            e.preventDefault(); row.classList.remove('drag-over');
+            if (dragSrc === null || dragSrc === i) return;
+            const moved = tasks.splice(dragSrc, 1)[0]; tasks.splice(i, 0, moved);
+            S[key] = tasks; save();
+            renderEditableTaskList(tasks, key, container, renderFn, numbered);
+        });
+        const num = document.createElement('div'); num.className = 'task-num'; num.textContent = numbered ? (i+1) : ' ';
+        const cb = document.createElement('div');
+        cb.className = 'task-cb' + (t.status==='done'?' done':t.status==='late'?' late':'');
+        cb.textContent = t.status==='done'?'\u2713':t.status==='late'?'\u2717':'';
+        cb.onclick = () => { cycleTask(t.id, tasks, () => renderEditableTaskList(tasks, key, container, renderFn, numbered)); };
+        const txt = document.createElement('input');
+        txt.style.cssText = 'flex:1;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--t1);font-size:15px;font-family:"Syne",sans-serif;outline:none;padding:2px 4px;' + (t.status==='done'?'text-decoration:line-through;color:var(--t2);':'') + (t.status==='late'?'text-decoration:line-through;color:var(--acc3);':'');
+        txt.value = t.text;
+        txt.onfocus = e => e.target.style.borderBottomColor = 'var(--acc2)';
+        txt.onblur = e => { e.target.style.borderBottomColor = 'transparent'; t.text = e.target.value; save(); };
+        const acts = document.createElement('div'); acts.className = 'task-actions';
+        const bdone = document.createElement('button'); bdone.className = 'task-btn'; bdone.textContent = '\u2705';
+        bdone.onclick = e => { e.stopPropagation(); setTask(t.id, tasks, 'done', () => renderEditableTaskList(tasks, key, container, renderFn, numbered)); };
+        const blate = document.createElement('button'); blate.className = 'task-btn'; blate.textContent = '\u274c';
+        blate.onclick = e => { e.stopPropagation(); setTask(t.id, tasks, 'late', () => renderEditableTaskList(tasks, key, container, renderFn, numbered)); };
+        const bdel = document.createElement('button'); bdel.className = 'task-btn'; bdel.title = 'L\u00f6schen';
+        bdel.innerHTML = '\u{1F5D1}\uFE0F';
+        bdel.onclick = e => { e.stopPropagation(); const idx2 = S[key].findIndex(x => x.id === t.id); if(idx2 > -1){ S[key].splice(idx2,1); save(); renderEditableTaskList(S[key], key, container, renderFn, numbered); } };
+        acts.append(bdone, blate, bdel);
+        row.append(num, cb, txt, acts);
+        container.appendChild(row);
+    });
+    const addBtn = document.createElement('button');
+    addBtn.className = 'section-add-main-btn';
+    addBtn.textContent = '\uff0b Aufgabe hinzuf\u00fcgen';
+    addBtn.onclick = () => {
+        const text = prompt('Neue Aufgabe:');
+        if (text && text.trim()) { S[key].push({id:Date.now(), text:text.trim(), status:'open'}); save(); renderEditableTaskList(S[key], key, container, renderFn, numbered); }
+    };
+    container.appendChild(addBtn);
 }
 
 // ==============================
@@ -1472,6 +1570,7 @@ function renderPanel(id){
   else if(id==='finanzen')renderFinanzen();
   else if(id==='mitspieler')renderPlayers();
   else if(id==='notizen')renderNotizen();
+    else if(id==='mtholding')renderMTHolding();
 }
 
 // ==============================
@@ -1729,6 +1828,55 @@ function saveErnährung() {
   save();
   showToast('🍽️ Ernährung gespeichert!');
 }
+
+// ==============================
+// MT HOLDING ORGANIGRAMM
+// ==============================
+const MT_DEF_COMPANIES = [
+    {name:'Life OS GmbH', goal:'2026 Q3: 1000 Views/Monat'},
+    {name:'MT Media', goal:'2026 Q4: 50k Follower'},
+    {name:'MT Invest', goal:'2027 Q1: 100k€ AUM'},
+    {name:'MT Academy', goal:'2026 Q3: 500 Schüler'},
+    {name:'MT Properties', goal:'2027 Q2: 3 Objekte'}
+];
+
+function renderMTHolding(){
+    if(!S.mtCompanies)S.mtCompanies=JSON.parse(JSON.stringify(MT_DEF_COMPANIES));
+    const cont=document.getElementById('mt-org-companies');
+    if(!cont)return;
+    cont.innerHTML='';
+    cont.style.setProperty('--n', S.mtCompanies.length);
+    S.mtCompanies.forEach((co,idx)=>{
+        const wrap=document.createElement('div');wrap.className='mt-org-company-wrap';
+        const box=document.createElement('div');box.className='mt-org-company';
+        const delBtn=document.createElement('button');delBtn.className='co-del-btn';delBtn.textContent='\u00d7';delBtn.title='Firma l\u00f6schen';
+        delBtn.onclick=()=>{if(confirm('Firma "'+co.name+'" l\u00f6schen?')){S.mtCompanies.splice(idx,1);save();renderMTHolding();}};
+        const nameInp=document.createElement('input');nameInp.className='co-name-inp';nameInp.value=co.name;nameInp.placeholder='Firmenname';
+        nameInp.onblur=e=>{co.name=e.target.value;save();};
+        const goalLbl=document.createElement('div');goalLbl.className='co-goal-label';goalLbl.textContent='\ud83c\udfaf Ziel';
+        const goalInp=document.createElement('input');goalInp.className='co-goal-inp';goalInp.value=co.goal||'';goalInp.placeholder='z.B. 2026 Q3: 1000 Views/Monat';
+        goalInp.onblur=e=>{co.goal=e.target.value;save();};
+        box.append(delBtn,nameInp,goalLbl,goalInp);
+        wrap.appendChild(box);
+        cont.appendChild(wrap);
+    });
+}
+
+function addMTCompany(){
+    if(!S.mtCompanies)S.mtCompanies=[];
+    S.mtCompanies.push({name:'Neue Firma',goal:''});
+    save();renderMTHolding();
+}
+
+function saveMTHolding(){
+    // Collect all current input values
+    const nameInps=document.querySelectorAll('#mt-org-companies .co-name-inp');
+    const goalInps=document.querySelectorAll('#mt-org-companies .co-goal-inp');
+    nameInps.forEach((inp,i)=>{if(S.mtCompanies[i])S.mtCompanies[i].name=inp.value;});
+    goalInps.forEach((inp,i)=>{if(S.mtCompanies[i])S.mtCompanies[i].goal=inp.value;});
+    save();showToast('\u2705 MT Holding gespeichert!');
+}
+
 </script>
 <div class="toast" id="toast"></div>
 </body>
