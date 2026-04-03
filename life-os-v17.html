@@ -772,7 +772,6 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
 let S = {};
 
 // Life OS v17 - Modular JS
-let S = {};
 
 // ===== MODULE: DATABASE (IndexedDB/Dexie) =====
 const db = new Dexie('LifeOSv17');
@@ -911,16 +910,6 @@ document.querySelectorAll('.nav-item').forEach(el=>{
     if(!document.body.classList.contains('pc-mode')){sidebarOpen=false;document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebar-toggle').textContent='›';}
   };
 });
-function goPanel(id){
-  document.querySelectorAll('.nav-item').forEach(el=>{el.classList.toggle('active',el.dataset.panel===id);});
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('panel-'+id).classList.add('active');
-  renderPanel(id);
-}
-
-// ==============================
-// TOPBAR
-// ==============================
 function updateDate(){
   const now=new Date();
   const days=['So','Mo','Di','Mi','Do','Fr','Sa'];
