@@ -1690,7 +1690,7 @@ function renderGroupTasksHTML(grp, gi) {
   });
   html += '<div class="task-add-row">'
     + '<input type="text" class="task-inp" placeholder="+ Aufgabe hinzufügen..."'
-    + ' onkeydown="if(event.key==='Enter')addTask(' + gi + ',this)">'
+    + ' onkeydown="if(event.key===&quot;Enter&quot;)addTask(' + gi + ',this)">'
     + '<button class="btn-add-task" onclick="addTask(' + gi + ',this.previousElementSibling)">+</button>'
     + '</div></div>';
   return html;
@@ -1751,7 +1751,7 @@ function renderMTHolding() {
     });
     html += '</div>'
       + '<div class="org-goal-add">'
-      + '<input type="text" class="org-goal-inp" id="mt-goal-inp-' + ci + '" placeholder="+ Ziel hinzufügen" onkeydown="if(event.key==='Enter')addMTGoal(' + ci + ')">'
+      + '<input type="text" class="org-goal-inp" id="mt-goal-inp-' + ci + '" placeholder="+ Ziel hinzufügen" onkeydown="if(event.key===&quot;Enter&quot;)addMTGoal(' + ci + ')">'
       + '<button class="org-goal-btn" onclick="addMTGoal(' + ci + ')">+</button>'
       + '</div>'
       + '</div></div>';
@@ -1894,7 +1894,7 @@ async function initApp() {
     if (dbStatus) { dbStatus.textContent = 'LS'; dbStatus.title = 'LocalStorage Fallback'; }
   }
   await loadAllState();
-  if (window._syncChannel) window._syncChannel.life-os-v17.htmlclose();
+  if (window._syncChannel) window._syncChannel.close();
   window._syncChannel = new BroadcastChannel('lifeos_sync');
   window._syncChannel.onmessage = async (ev) => {
     if (ev.data && ev.data.type === 'STATE_UPDATE') {
