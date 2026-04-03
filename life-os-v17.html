@@ -1968,23 +1968,23 @@ function logWeight() {
   const now = new Date();
   const date = now.toLocaleDateString('de-DE');
   S.fitness.weights.push({val, date, ts: now.toISOString()});
-  saveState(); renderFitness();
+  save(); renderFitness();
 }
 function setZiggi() {
   S.fitness.ziggi = new Date().toISOString().substring(0,16).replace('T',' ');
-  saveState(); renderFitness();
+  save(); renderFitness();
 }
 function setZiggiDate() {
   const inp = document.getElementById('ziggiDateInput');
   if (!inp || !inp.value) return showToast('Bitte Datum wählen');
   S.fitness.ziggi = inp.value.replace('T',' ');
-  saveState(); renderFitness();
+  save(); renderFitness();
 }
 function saveKcal() {
   const val = parseInt(document.getElementById('kcalInput').value);
   if (isNaN(val)) return;
   S.fitness.kcal = val;
-  saveState();
+  save();
   showToast('Kalorien gespeichert');
 }
 function kalNavMonth(dir) {
@@ -1993,7 +1993,7 @@ function kalNavMonth(dir) {
   S.kalView.month += dir;
   if (S.kalView.month < 0) { S.kalView.month = 11; S.kalView.year--; }
   if (S.kalView.month > 11) { S.kalView.month = 0; S.kalView.year++; }
-  saveState(); renderKalender();
+  save(); renderKalender();
 }
 function addKalEvent(dateKey) {
   const inp = document.getElementById('kalEvTitle');
@@ -2001,7 +2001,7 @@ function addKalEvent(dateKey) {
   if (!S.kalender.events) S.kalender.events = {};
   if (!S.kalender.events[dateKey]) S.kalender.events[dateKey] = [];
   S.kalender.events[dateKey].push({title: inp.value.trim(), ts: Date.now()});
-  saveState();
+  save();
   document.querySelector('.kal-day-modal') && document.querySelector('.kal-day-modal').remove();
   const parts = dateKey.split('-');
   openKalDay(parseInt(parts[2]), parseInt(parts[1]), parseInt(parts[0]));
@@ -2011,7 +2011,7 @@ function delKalEvent(dateKey, idx) {
   if (!S.kalender.events || !S.kalender.events[dateKey]) return;
   S.kalender.events[dateKey].splice(idx, 1);
   if (S.kalender.events[dateKey].length === 0) delete S.kalender.events[dateKey];
-  saveState();
+  save();
   document.querySelector('.kal-day-modal') && document.querySelector('.kal-day-modal').remove();
   const parts = dateKey.split('-');
   const dayEvents = (S.kalender.events || {})[dateKey] || [];
@@ -2024,7 +2024,7 @@ function toggleSubtask(gid, ti, si) {
   const task = g.tasks[ti];
   if (!task || !task.subtasks) return;
   task.subtasks[si].done = !task.subtasks[si].done;
-  saveState(); renderTagesplan();
+  save(); renderTagesplan();
 }
 function addSubtask(gid, ti) {
   const inp = document.getElementById('subinp_' + gid + '_' + ti);
@@ -2033,13 +2033,13 @@ function addSubtask(gid, ti) {
   if (!g) return;
   if (!g.tasks[ti].subtasks) g.tasks[ti].subtasks = [];
   g.tasks[ti].subtasks.push({text: inp.value.trim(), done: false});
-  saveState(); renderTagesplan();
+  save(); renderTagesplan();
 }
 function delSubtask(gid, ti, si) {
   const g = S.tagesplan.groups.find(x => x.id === gid);
   if (!g || !g.tasks[ti] || !g.tasks[ti].subtasks) return;
   g.tasks[ti].subtasks.splice(si, 1);
-  saveState(); renderTagesplan();
+  save(); renderTagesplan();
 }
 function archiveToday() {
   const today = new Date().toLocaleDateString('de-DE', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
@@ -2054,7 +2054,7 @@ function archiveToday() {
     S.archive.push({date: today, groups, ts: Date.now()});
   }
   if (S.archive.length > 90) S.archive = S.archive.sort((a,b) => b.ts-a.ts).slice(0, 90);
-  saveState();
+  save();
   showToast('Tag archiviert!');
   renderArchiv();
 }
@@ -2175,7 +2175,7 @@ function migrateV16Data() {
         });
       }
       S.v16migrated = true;
-      if (changed) saveState();
+      if (changed) save();
       console.log('v16 migration done');
     }
   } catch(e) { console.warn('v16 migration error:', e); }
