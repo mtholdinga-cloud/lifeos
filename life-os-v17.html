@@ -1815,7 +1815,7 @@ async function showArchive() {
   let html = '<div class="archive-overlay" onclick="if(event.target===this)this.remove()">'
     + '<div class="archive-modal">'
     + '<div class="archive-header"><h3>📋 Archiv</h3>'
-    + '<button class="archive-close" onclick="this.closest('.archive-overlay').remove()">✕</button></div>'
+    + '<button class="archive-close" onclick="this.parentElement.parentElement.remove()">✕</button></div>'
     + '<div class="archive-list">';
   if (!entries.length) {
     html += '<div class="archive-empty">Noch keine archivierten Tage.</div>';
