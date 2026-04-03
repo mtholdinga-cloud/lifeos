@@ -1269,19 +1269,18 @@ function openKalDay(d, m, y) {
   const dateKey = y + '-' + m + '-' + d;
   const events = (S.kalender||{}).events || {};
   const dayEvents = events[dateKey] || [];
-  const evList = dayEvents.map((e,i) => '<div class=\"kal-event-chip\"><span class=\"kal-event-chip-text\">' + escHtml(e.title||e) + '</span><button class=\"kal-event-del\" onclick=\"delKalEvent(\\'' + dateKey + '\\',' + i + ')\">🗑</button></div>').join('');
+  const evList = dayEvents.map((e,i) => '<div class=\"kal-event-chip\"><span class=\"kal-event-chip-text\">' + escHtml(e.title||e) + '</span><button class=\"kal-event-del\" data-date=\"' + dateKey + '\" data-idx=\"' + i + '\" onclick=\"delKalEvent(this.dataset.date,parseInt(this.dataset.idx))\">🗑</button></div>').join('');
   const modal = document.createElement('div');
   modal.className = 'kal-day-modal';
   modal.innerHTML = '<div class=\"kal-day-modal-inner\"><h3>📅 ' + d + '.' + m + '.' + y + '</h3>' +
     '<div class=\"kal-day-modal-events\">' + (evList||'<em style=\"color:var(--txt2)\">Keine Termine</em>') + '</div>' +
     '<div class=\"kal-day-add-form\">' +
-    '<input id=\"kalEvTitle\" placeholder=\"Titel...\" onkeydown=\"if(event.key===&quot;Enter&quot;)addKalEvent(\\'' + dateKey + '\\')\"><button onclick=\"addKalEvent(\\'' + dateKey + '\\')\">+</button>' +
+    '<input id=\"kalEvTitle\" placeholder=\"Titel...\" data-date=\"' + dateKey + '\" onkeydown=\"if(event.key===&quot;Enter&quot;)addKalEvent(this.dataset.date)\"><button data-date=\"' + dateKey + '\" onclick=\"addKalEvent(this.dataset.date)\">+</button>' +
     '</div>' +
     '<button onclick=\"this.parentElement.parentElement.remove()\" style=\"margin-top:12px;background:none;border:none;color:var(--txt2);cursor:pointer;font-size:.85em;\">✕ Schließen</button>' +
     '</div>';
   document.body.appendChild(modal);
 }
-
 function renderFinRow(item,container,type){
   const row=document.createElement('div');row.className='fin-row';
   const cb=document.createElement('div');
@@ -1772,13 +1771,23 @@ function renderGroupTasksHTML(group) {
     const subtasks = task.subtasks || [];
     const subHTML = subtasks.map((st, si) =>
       '<div class=\"subtask-item\">' +
-      '<input type=\"checkbox\"' + (st.done?' checked':'') + ' onchange=\"toggleSubtask(\\'' + group.id + '\\',' + ti + ',' + si + ')\">' +
+      '<input type=\"checkbox\"' + (st.done?' checked':'') + 
+      ' data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\" data-si=\"' + si + '\"' +
+      ' onchange=\"var el=this;toggleSubtask(el.dataset.gid,+el.dataset.ti,+el.dataset.si)\">' +
       '<span class=\"sub-text\" style=\"' + (st.done?'text-decoration:line-through;opacity:.6':'') + '\">' + escHtml(st.text) + '</span>' +
-      (editMode ? '<button class=\"sub-del\" onclick=\"delSubtask(\\'' + group.id + '\\',' + ti + ',' + si + ')\">🗑</button>' : '') +
+      (editMode ? 
+        '<button class=\"sub-del\" data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\" data-si=\"' + si + '\"' +
+        ' onclick=\"var el=this;delSubtask(el.dataset.gid,+el.dataset.ti,+el.dataset.si)\">🗑</button>' 
+      : '') +
       '</div>'
     ).join('');
     const addSubHTML = editMode ?
-      '<div class=\"subtask-add\"><input type=\"text\" placeholder=\"Unteraufgabe...\" id=\"subinp_' + group.id + '_' + ti + '\" onkeydown=\"if(event.key===&quot;Enter&quot;)addSubtask(\\'' + group.id + '\\',' + ti + ')\"><button onclick=\"addSubtask(\\'' + group.id + '\\',' + ti + ')\">+</button></div>' : '';
+      '<div class=\"subtask-add\">' +
+      '<input type=\"text\" placeholder=\"Unteraufgabe...\" id=\"subinp_' + group.id + '_' + ti + '\"' +
+      ' data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\"' +
+      ' onkeydown=\"if(event.key===&quot;Enter&quot;){var el=this;addSubtask(el.dataset.gid,+el.dataset.ti)}\">' +
+      '<button data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\" onclick=\"var el=this;addSubtask(el.dataset.gid,+el.dataset.ti)\">+</button>' +
+      '</div>' : '';
     return '<div class=\"task-item\"' +
       ' draggable=\"true\"' +
       ' data-gid=\"' + group.id + '\"' +
@@ -1789,22 +1798,22 @@ function renderGroupTasksHTML(group) {
       ' ondragend=\"taskDragEnd(event)\"' +
       '>' +
       '<span class=\"task-drag-handle\" style=\"cursor:grab;padding:0 4px;color:var(--txt2)\">⠿</span>' +
-      '<span class=\"task-status ' + (task.status||'') + '\" onclick=\"toggleTask(\\'' + group.id + '\\',' + ti + ')\">' +
+      '<span class=\"task-status ' + (task.status||'') + '\" data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\" onclick=\"var el=this;toggleTask(el.dataset.gid,+el.dataset.ti)\">' +
         (task.done ? '✅' : task.notRelevant ? '➖' : '⬜') +
       '</span>' +
       '<span class=\"task-title' + (task.done?' done':'') + (task.notRelevant?' not-relevant':'') + '\"' +
-      ' ondblclick=\"editTask(\\'' + group.id + '\\',' + ti + ')\">' +
+      ' data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\"' +
+      ' ondblclick=\"var el=this;editTask(el.dataset.gid,+el.dataset.ti)\">' +
       escHtml(task.title) + '</span>' +
       (editMode ?
-        '<button onclick=\"toggleNotRelevant(\\'' + group.id + '\\',' + ti + ')\" title=\"Nicht relevant\" style=\"background:none;border:none;cursor:pointer;font-size:.8em;color:var(--txt2)\">➖</button>' +
-        '<button onclick=\"deleteTask(\\'' + group.id + '\\',' + ti + ')\" style=\"background:none;border:none;cursor:pointer;font-size:.8em;color:var(--err,#e74c3c)\">🗑</button>'
+        '<button data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\" onclick=\"var el=this;toggleNotRelevant(el.dataset.gid,+el.dataset.ti)\" title=\"Nicht relevant\" style=\"background:none;border:none;cursor:pointer;font-size:.8em;color:var(--txt2)\">➖</button>' +
+        '<button data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\" onclick=\"var el=this;deleteTask(el.dataset.gid,+el.dataset.ti)\" style=\"background:none;border:none;cursor:pointer;font-size:.8em;color:var(--err,#e74c3c)\">🗑</button>'
       : '') +
       '</div>' +
       (subtasks.length > 0 ? '<div class=\"subtask-list\">' + subHTML + '</div>' : '') +
       addSubHTML;
   }).join('');
 }
-
 function taskDragStart(e,gi,ti) { _dragSrcTask=ti; _dragSrcTaskGi=gi; e.dataTransfer.effectAllowed='move'; e.stopPropagation(); }
 function taskDragOver(e) { e.preventDefault(); e.stopPropagation(); }
 function taskDrop(e,gi,ti) {
