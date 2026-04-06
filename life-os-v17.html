@@ -1933,22 +1933,7 @@ function editMTCompanyName(ci) {
 
 
 // === MODULE 8: ARCHIVE ===
-async function archiveToday() {
-  if (!confirm('Heutigen Tag archivieren? Aufgaben-Status wird zurückgesetzt.')) return;
-  const today = new Date().toISOString().split('T')[0];
-  const snapshot = JSON.parse(JSON.stringify(S.tagesplan));
-  try {
-    await db.archive.put({ date: today, data: snapshot, ts: Date.now() });
-  } catch(e) {
-    const ar = JSON.parse(localStorage.getItem('lifeos_archive') || '[]');
-    ar.unshift({ date: today, data: snapshot }); ar.splice(30);
-    localStorage.setItem('lifeos_archive', JSON.stringify(ar));
-  }
-  S.tagesplan.groups.forEach(g => g.tasks.forEach(t => { t.done = false; }));
-  await save();
-  renderTagesplan();
-  showToast('✅ Archiviert: ' + today);
-}
+async 
 
 
 
@@ -2032,23 +2017,7 @@ function delSubtask(gid, ti, si) {
   g.tasks[ti].subtasks.splice(si, 1);
   save(); renderTagesplan();
 }
-function archiveToday() {
-  const today = new Date().toLocaleDateString('de-DE', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
-  const groups = (S.tagesplan.groups || []).map(g => ({
-    id: g.id, title: g.title,
-    tasks: (g.tasks||[]).map(t => ({title: t.title, done: t.done, notRelevant: t.notRelevant, subtasks: t.subtasks||[]}))
-  }));
-  const existing = S.archive.findIndex(d => d.date === today);
-  if (existing >= 0) {
-    S.archive[existing] = {date: today, groups, ts: Date.now()};
-  } else {
-    S.archive.push({date: today, groups, ts: Date.now()});
-  }
-  if (S.archive.length > 90) S.archive = S.archive.sort((a,b) => b.ts-a.ts).slice(0, 90);
-  save();
-  showToast('Tag archiviert!');
-  renderArchiv();
-}
+
 function renderArchiv() {
   const archive = S.archive || [];
   const sorted = archive.slice().sort((a,b) => b.date > a.date ? 1 : -1);
@@ -2237,7 +2206,7 @@ function archiveToday() {
   if (existing >= 0) S.archive[existing] = {date: today, groups, ts: Date.now()};
   else S.archive.push({date: today, groups, ts: Date.now()});
   if (S.archive.length > 90) S.archive = S.archive.sort((a,b) => b.ts-a.ts).slice(0, 90);
-  save(); showToast('Tag archiviert!'); goPanel(&quot;archiv&quot;);
+  save(); showToast('Tag archiviert!'); goPanel('archiv');
 }
 function openArchivDay(idx) {
   const sorted = (S.archive || []).slice().sort((a,b) => b.date > a.date ? 1 : -1);
