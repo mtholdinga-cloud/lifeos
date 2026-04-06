@@ -576,7 +576,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
       </div>
       <div style="display:flex;gap:8px;margin-bottom:12px;">
         <button onclick="archiveToday()" style="flex:1;padding:8px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;font-size:12px;cursor:pointer;color:var(--t2);">📦 Tag archivieren</button>
-        <button onclick="goPanel('archiv')" style="flex:1;padding:8px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;font-size:12px;cursor:pointer;color:var(--acc2);">📋 Archiv ansehen</button>
+        <button onclick="goPanel(&quot;archiv&quot;)" style="flex:1;padding:8px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;font-size:12px;cursor:pointer;color:var(--acc2);">📋 Archiv ansehen</button>
       </div>
       <div class="card">
         <div class="card-title">☀️ Morgenroutine</div>
@@ -632,7 +632,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
       </div>
       <div style="display:flex;gap:8px;margin-top:12px;">
         <button onclick="archiveToday()" style="flex:1;padding:8px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;font-size:12px;cursor:pointer;color:var(--t2);">📦 Tag archivieren</button>
-        <button onclick="goPanel('archiv')" style="flex:1;padding:8px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;font-size:12px;cursor:pointer;color:var(--acc2);">📋 Archiv</button>
+        <button onclick="goPanel(&quot;archiv&quot;)" style="flex:1;padding:8px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;font-size:12px;cursor:pointer;color:var(--acc2);">📋 Archiv</button>
         <button onclick="saveData()" style="flex:1;padding:8px;background:var(--acc);border:none;border-radius:8px;font-size:12px;cursor:pointer;color:#000;font-weight:700;">💾 Speichern</button>
       </div>
       <div class="mini-tiles">
@@ -1712,7 +1712,7 @@ function renderTagesplan() {
     + '<div class="tp-actions">'
     + '<button class="btn-sm" onclick="addGroup()">+ Gruppe</button>'
     + '<button class="btn-sm btn-arch" onclick="archiveToday()">📦 Archivieren</button>'
-    + '<button class="btn-sm btn-arch" onclick="goPanel('archiv')">📋 Archiv</button>'
+    + '<button class="btn-sm btn-arch" onclick="goPanel(&quot;archiv&quot;)">📋 Archiv</button>'
     + '</div></div>'
     + '<div id="tplan-groups">';
   groups.forEach((grp, gi) => {
@@ -2237,7 +2237,7 @@ function archiveToday() {
   if (existing >= 0) S.archive[existing] = {date: today, groups, ts: Date.now()};
   else S.archive.push({date: today, groups, ts: Date.now()});
   if (S.archive.length > 90) S.archive = S.archive.sort((a,b) => b.ts-a.ts).slice(0, 90);
-  save(); showToast('Tag archiviert!'); goPanel('archiv');
+  save(); showToast('Tag archiviert!'); goPanel(&quot;archiv&quot;);
 }
 function openArchivDay(idx) {
   const sorted = (S.archive || []).slice().sort((a,b) => b.date > a.date ? 1 : -1);
@@ -2340,7 +2340,7 @@ function renderHeute() {
     + '<div class="heute-pct">' + doneTasks + ' / ' + totalTasks + ' erledigt &nbsp;<span style="opacity:.5">' + pct + '%</span></div>'
     + '<div class="heute-archive-row">'
     + '<button class="btn-arch-full" onclick="archiveToday()">📦 Tag archivieren</button>'
-    + '<button class="btn-arch-full" onclick="goPanel('archiv')">📋 Archiv ansehen</button>'
+    + '<button class="btn-arch-full" onclick="goPanel(&quot;archiv&quot;)">📋 Archiv ansehen</button>'
     + '</div>';
   groups.forEach(grp => {
     const gDone = (grp.tasks||[]).filter(t=>t.done).length;
