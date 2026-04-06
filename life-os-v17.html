@@ -340,69 +340,88 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
 .co-goal-inp:focus{border-color:var(--acc2);color:var(--t0);}
 .co-del-btn{background:none;border:none;color:var(--acc3);cursor:pointer;font-size:12px;padding:2px 4px;float:right;margin-top:-4px;}
 
+.mt-org-wrap{padding:8px;}
+.mt-org-head{display:flex;flex-direction:column;align-items:center;margin-bottom:24px;}
+.mt-org-box{background:var(--bg2);border:2px solid var(--acc);border-radius:14px;padding:14px 24px;text-align:center;min-width:160px;}
+.mt-org-box .org-name{font-size:17px;font-weight:800;color:var(--t0);}
+.mt-org-box .org-subtitle{font-size:10px;color:var(--acc);text-transform:uppercase;letter-spacing:.8px;margin-top:2px;}
+.mt-org-line-v{width:2px;height:28px;background:var(--acc);margin:0 auto;}
+.mt-org-companies{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;position:relative;padding-top:28px;}
+.mt-org-companies::before{content:'';display:block;height:2px;background:var(--bg3);position:absolute;top:0;left:calc(100%/(var(--n,5)*2));right:calc(100%/(var(--n,5)*2));}
+.mt-org-company-wrap{display:flex;flex-direction:column;align-items:center;position:relative;}
+.mt-org-company-wrap::before{content:'';width:2px;height:28px;background:var(--bg3);position:absolute;top:-28px;left:50%;transform:translateX(-50%);}
+.mt-org-company{background:var(--bg2);border:1px solid var(--bg3);border-radius:12px;padding:12px;width:100%;transition:var(--trans);}
+.mt-org-company:hover{border-color:var(--acc2);}
+.co-name-inp{background:transparent;border:none;border-bottom:1px solid transparent;color:var(--t0);font-size:13px;font-weight:800;font-family:'Syne',sans-serif;outline:none;width:100%;margin-bottom:8px;padding:0 0 2px;}
+.co-name-inp:focus{border-bottom-color:var(--acc2);}
+.co-goal-label{font-size:9px;color:var(--acc2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;font-weight:700;}
+.co-goal-inp{background:var(--bg1);border:1px solid var(--bg3);border-radius:8px;padding:6px 8px;font-size:11px;color:var(--t2);font-family:'DM Mono',monospace;outline:none;width:100%;transition:var(--trans);}
+.co-goal-inp:focus{border-color:var(--acc2);color:var(--t0);}
+.co-del-btn{background:none;border:none;color:var(--acc3);cursor:pointer;font-size:12px;padding:2px 4px;float:right;margin-top:-4px;}
+
 /* === WEIGHT TRACKING === */
 .weight-log{padding:12px 0;}
 .weight-entry{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bg3);}
 .weight-entry:last-child{border-bottom:none;}
-.weight-val{font-size:1.1em;font-weight:700;color:var(--accent);}
-.weight-date{font-size:.75em;color:var(--txt2);}
+.weight-val{font-size:1.1em;font-weight:700;color:var(--acc);}
+.weight-date{font-size:.75em;color:var(--t2);}
 .weight-chart{width:100%;height:80px;display:flex;align-items:flex-end;gap:2px;padding:8px 0;}
 .weight-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;}
-.weight-bar{width:100%;background:var(--accent);border-radius:3px 3px 0 0;min-height:2px;transition:.3s;}
-.weight-bar-lbl{font-size:.6em;color:var(--txt2);}
+.weight-bar{width:100%;background:var(--acc);border-radius:3px 3px 0 0;min-height:2px;transition:.3s;}
+.weight-bar-lbl{font-size:.6em;color:var(--t2);}
 /* === SUBTASK EDITING === */
 .subtask-list{padding:4px 0 4px 20px;}
 .subtask-item{display:flex;align-items:center;gap:6px;padding:3px 0;}
-.subtask-item input[type=checkbox]{accent-color:var(--accent);}
+.subtask-item input[type=checkbox]{accent-color:var(--acc);}
 .subtask-item .sub-text{flex:1;font-size:.85em;}
-.subtask-item .sub-del{background:none;border:none;color:var(--err,#e74c3c);cursor:pointer;font-size:.8em;padding:2px 4px;}
+.subtask-item .sub-del{background:none;border:none;color:var(--acc3);cursor:pointer;font-size:.8em;padding:2px 4px;}
 .subtask-add{display:flex;gap:6px;margin-top:4px;padding-left:20px;}
-.subtask-add input{flex:1;padding:4px 8px;border-radius:6px;border:1px solid var(--bg3);background:var(--bg2);color:var(--txt);font-size:.82em;}
-.subtask-add button{padding:4px 10px;border-radius:6px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:.82em;}
+.subtask-add input{flex:1;padding:4px 8px;border-radius:6px;border:1px solid var(--bg3);background:var(--bg2);color:var(--t1);font-size:.82em;}
+.subtask-add button{padding:4px 10px;border-radius:6px;background:var(--acc);color:#fff;border:none;cursor:pointer;font-size:.82em;}
 /* === ARCHIVE TAB === */
 .archiv-panel{padding:16px;}
 .archiv-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
 .archiv-title{font-size:1.1em;font-weight:700;}
 .archiv-list{display:flex;flex-direction:column;gap:8px;}
 .archiv-day-card{background:var(--bg2);border-radius:12px;padding:12px 16px;cursor:pointer;transition:.2s;border:1px solid var(--bg3);}
-.archiv-day-card:hover{border-color:var(--accent);transform:translateX(3px);}
+.archiv-day-card:hover{border-color:var(--acc);transform:translateX(3px);}
 .archiv-day-header{display:flex;align-items:center;justify-content:space-between;}
 .archiv-day-date{font-weight:700;font-size:.95em;}
-.archiv-day-stats{font-size:.8em;color:var(--txt2);}
-.archiv-day-preview{font-size:.78em;color:var(--txt2);margin-top:4px;}
-.archiv-day-pdf{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:.78em;}
+.archiv-day-stats{font-size:.8em;color:var(--t2);}
+.archiv-day-preview{font-size:.78em;color:var(--t2);margin-top:4px;}
+.archiv-day-pdf{background:var(--acc);color:#fff;border:none;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:.78em;}
 .archiv-detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;display:flex;align-items:center;justify-content:center;padding:16px;}
 .archiv-detail-modal{background:var(--bg2);border-radius:16px;max-width:480px;width:100%;max-height:85vh;overflow-y:auto;padding:20px;position:relative;}
 .archiv-detail-modal h3{margin:0 0 12px;font-size:1em;}
 .archiv-detail-section{margin-bottom:12px;}
-.archiv-detail-section h4{font-size:.8em;font-weight:600;color:var(--txt2);text-transform:uppercase;margin:0 0 6px;}
-.archiv-close{position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.2em;cursor:pointer;color:var(--txt);}
-.archiv-empty{text-align:center;color:var(--txt2);padding:40px;font-size:.9em;}
-.archiv-pdf-btn{display:flex;align-items:center;gap:6px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.85em;margin-top:10px;}
+.archiv-detail-section h4{font-size:.8em;font-weight:600;color:var(--t2);text-transform:uppercase;margin:0 0 6px;}
+.archiv-close{position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.2em;cursor:pointer;color:var(--t1);}
+.archiv-empty{text-align:center;color:var(--t2);padding:40px;font-size:.9em;}
+.archiv-pdf-btn{display:flex;align-items:center;gap:6px;background:var(--acc);color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.85em;margin-top:10px;}
 /* === CALENDAR FULL MONTH === */
 .kal-month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px;}
-.kal-day-header{text-align:center;font-size:.7em;font-weight:600;color:var(--txt2);padding:4px;}
+.kal-day-header{text-align:center;font-size:.7em;font-weight:600;color:var(--t2);padding:4px;}
 .kal-day-cell{min-height:56px;background:var(--bg2);border-radius:8px;padding:4px 6px;cursor:pointer;transition:.15s;border:1px solid transparent;}
-.kal-day-cell:hover{border-color:var(--accent);}
-.kal-day-cell.today{border-color:var(--accent);background:var(--accent1,rgba(72,199,142,.15));}
+.kal-day-cell:hover{border-color:var(--acc);}
+.kal-day-cell.today{border-color:var(--acc);background:rgba(22,163,74,.15));}
 .kal-day-cell.other-month{opacity:.4;}
 .kal-day-cell.has-event{position:relative;}
-.kal-day-cell.has-event::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--accent);}
+.kal-day-cell.has-event::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--acc);}
 .kal-day-num{font-size:.75em;font-weight:600;margin-bottom:2px;}
-.kal-day-events{font-size:.62em;color:var(--accent);line-height:1.2;overflow:hidden;max-height:28px;}
+.kal-day-events{font-size:.62em;color:var(--acc);line-height:1.2;overflow:hidden;max-height:28px;}
 .kal-month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
 .kal-month-title{font-weight:700;font-size:.95em;}
-.kal-nav-btn{background:var(--bg2);border:none;border-radius:8px;padding:6px 12px;cursor:pointer;color:var(--txt);font-size:.9em;}
+.kal-nav-btn{background:var(--bg2);border:none;border-radius:8px;padding:6px 12px;cursor:pointer;color:var(--t1);font-size:.9em;}
 .kal-day-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;display:flex;align-items:center;justify-content:center;padding:16px;}
 .kal-day-modal-inner{background:var(--bg2);border-radius:16px;max-width:400px;width:100%;padding:20px;}
 .kal-day-modal-inner h3{margin:0 0 12px;}
 .kal-day-modal-events{margin-bottom:12px;}
 .kal-event-chip{display:flex;align-items:center;gap:6px;background:var(--bg3);border-radius:8px;padding:6px 10px;margin-bottom:6px;}
 .kal-event-chip-text{flex:1;font-size:.85em;}
-.kal-event-del{background:none;border:none;color:var(--err,#e74c3c);cursor:pointer;}
+.kal-event-del{background:none;border:none;color:var(--acc3);cursor:pointer;}
 .kal-day-add-form{display:flex;gap:6px;flex-wrap:wrap;}
-.kal-day-add-form input{flex:1;min-width:120px;padding:6px 10px;border-radius:8px;border:1px solid var(--bg3);background:var(--bg1,var(--bg));color:var(--txt);font-size:.85em;}
-.kal-day-add-form button{padding:6px 12px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:.85em;}
+.kal-day-add-form input{flex:1;min-width:120px;padding:6px 10px;border-radius:8px;border:1px solid var(--bg3);background:var(--bg1);color:var(--t1);font-size:.85em;}
+.kal-day-add-form button{padding:6px 12px;border-radius:8px;background:var(--acc);color:#fff;border:none;cursor:pointer;font-size:.85em;}
 .ziggi-date-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;}
 
 </style>
@@ -557,7 +576,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
       </div>
       <div style="display:flex;gap:8px;margin-bottom:12px;">
         <button onclick="archiveToday()" style="flex:1;padding:8px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;font-size:12px;cursor:pointer;color:var(--t2);">📦 Tag archivieren</button>
-        <button onclick="showArchive()" style="flex:1;padding:8px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;font-size:12px;cursor:pointer;color:var(--acc2);">📋 Archiv ansehen</button>
+        <button onclick="goPanel('archiv')" style="flex:1;padding:8px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;font-size:12px;cursor:pointer;color:var(--acc2);">📋 Archiv ansehen</button>
       </div>
       <div class="card">
         <div class="card-title">☀️ Morgenroutine</div>
@@ -613,7 +632,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
       </div>
       <div style="display:flex;gap:8px;margin-top:12px;">
         <button onclick="archiveToday()" style="flex:1;padding:8px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;font-size:12px;cursor:pointer;color:var(--t2);">📦 Tag archivieren</button>
-        <button onclick="showArchive()" style="flex:1;padding:8px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;font-size:12px;cursor:pointer;color:var(--acc2);">📋 Archiv</button>
+        <button onclick="goPanel('archiv')" style="flex:1;padding:8px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;font-size:12px;cursor:pointer;color:var(--acc2);">📋 Archiv</button>
         <button onclick="saveData()" style="flex:1;padding:8px;background:var(--acc);border:none;border-radius:8px;font-size:12px;cursor:pointer;color:#000;font-weight:700;">💾 Speichern</button>
       </div>
       <div class="mini-tiles">
@@ -815,7 +834,11 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
         </div>
       </div>
     </div>
-  </div><!-- /main -->
+  
+    <!-- ===== ARCHIV ===== -->
+    <div class="panel" id="panel-archiv"></div>
+
+    </div><!-- /main -->
 </div><!-- /app -->
 
 <!-- EDIT MODAL -->
@@ -993,7 +1016,7 @@ function updateGreet(){
 setInterval(updateDate,60000);updateDate();updateGreet();
 
 // PC Mode
-let pcMode=localStorage.getItem('lifeospcmode')==='1';
+let pcMode=localStorage.getItem('lifeospcmode')!=='0';
 function applyMode(){
   document.body.classList.toggle('pc-mode',pcMode);
   document.getElementById('modebtn').textContent=pcMode?'🌙 Dark':'🖥️ PC';
@@ -1112,7 +1135,7 @@ function renderFitness() {
   const f = S.fitness || {};
   const weights = f.weights || [];
   const ziggi = f.ziggi || '';
-  const kcal = f.kcal || '';
+  const kcal = f.kcal || 0;
   const reps = f.reps || {};
   const lastW = weights.length > 0 ? weights[weights.length-1] : null;
   const wChart = weights.slice(-14).map((w,i,arr) => {
@@ -1133,30 +1156,31 @@ function renderFitness() {
     else ziggiMsg = mins + ' Minuten rauchfrei';
   }
   const ziggiInputVal = ziggi ? ziggi.replace(' ','T').substring(0,16) : '';
-  document.getElementById('main').innerHTML = '<div class=\"panel-inner\"><h2>💪 Fitness</h2>' +
-    '<div class=\"card\"><div class=\"card-title\">⚖️ Gewicht</div>' +
+  const panel = document.getElementById('panel-fitness');
+  if (!panel) return;
+  panel.innerHTML = '<div class=\"card\"><div class=\"card-title\">⚖️ Gewicht</div>' +
     '<div style=\"display:flex;align-items:center;gap:10px;margin-bottom:8px;\">' +
-    '<input id=\"weightInput\" type=\"number\" step=\"0.1\" placeholder=\"kg eingeben\" style=\"flex:1;padding:8px 12px;border-radius:10px;border:1px solid var(--bg3);background:var(--bg2);color:var(--txt);font-size:.95em;\">' +
-    '<button onclick=\"logWeight()\" style=\"padding:8px 16px;border-radius:10px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:.9em;\">Eintragen</button>' +
+    '<input id=\"weightInput\" type=\"number\" step=\"0.1\" placeholder=\"kg eingeben\" style=\"flex:1;padding:8px 12px;border-radius:10px;border:1px solid var(--bg3);background:var(--bg1);color:var(--t1);font-size:.95em;\">' +
+    '<button onclick=\"logWeight()\" style=\"padding:8px 16px;border-radius:10px;background:var(--acc);color:#000;border:none;cursor:pointer;font-size:.9em;font-weight:700;\">Eintragen</button>' +
     '</div>' +
-    (lastW ? '<div style=\"margin-bottom:6px;\"><span class=\"weight-val\">' + lastW.val + ' kg</span> <span class=\"weight-date\">(' + lastW.date + ')</span></div>' : '') +
+    (lastW ? '<div style=\"margin-bottom:6px;\"><span style=\"font-size:1.2em;font-weight:800;color:var(--acc);\">' + lastW.val + ' kg</span> <span style=\"font-size:.75em;color:var(--t2)\">(' + lastW.date + ')</span></div>' : '') +
     (weights.length > 1 ? '<div class=\"weight-chart\">' + wChart + '</div>' : '') +
     '</div>' +
     '<div class=\"card\"><div class=\"card-title\">🚬 Letzte Zigarette</div>' +
-    '<div style=\"font-size:1.1em;font-weight:700;color:var(--accent);margin-bottom:8px;\">' + ziggiMsg + '</div>' +
+    '<div style=\"font-size:1.3em;font-weight:800;color:var(--acc);margin-bottom:8px;\">' + ziggiMsg + '</div>' +
     '<div class=\"ziggi-date-row\">' +
-    '<input type=\"datetime-local\" id=\"ziggiDateInput\" value=\"' + ziggiInputVal + '\" style=\"padding:6px 10px;border-radius:8px;border:1px solid var(--bg3);background:var(--bg2);color:var(--txt);font-size:.85em;\">' +
-    '<button onclick=\"setZiggi()\" style=\"padding:6px 14px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:.85em;\">Jetzt geraucht</button>' +
-    '<button onclick=\"setZiggiDate()\" style=\"padding:6px 14px;border-radius:8px;background:var(--bg3);color:var(--txt);border:none;cursor:pointer;font-size:.85em;\">Datum übernehmen</button>' +
+    '<input type=\"datetime-local\" id=\"ziggiDateInput\" value=\"' + ziggiInputVal + '\" style=\"padding:6px 10px;border-radius:8px;border:1px solid var(--bg3);background:var(--bg1);color:var(--t1);font-size:.85em;\">' +
+    '<button onclick=\"setZiggi()\" style=\"padding:6px 14px;border-radius:8px;background:var(--acc);color:#000;border:none;cursor:pointer;font-size:.85em;font-weight:700;\">Jetzt geraucht</button>' +
+    '<button onclick=\"setZiggiDate()\" style=\"padding:6px 14px;border-radius:8px;background:var(--bg2);color:var(--t1);border:1px solid var(--bg3);cursor:pointer;font-size:.85em;\">Datum übernehmen</button>' +
     '</div></div>' +
     '<div class=\"card\"><div class=\"card-title\">🍎 Kalorien</div>' +
     '<div style=\"display:flex;align-items:center;gap:10px;\">' +
-    '<input id=\"kcalInput\" type=\"number\" value=\"' + kcal + '\" placeholder=\"kcal\" style=\"flex:1;padding:8px 12px;border-radius:10px;border:1px solid var(--bg3);background:var(--bg2);color:var(--txt);font-size:.95em;\">' +
-    '<button onclick=\"saveKcal()\" style=\"padding:8px 16px;border-radius:10px;background:var(--accent);color:#fff;border:none;cursor:pointer;\">Speichern</button>' +
+    '<input id=\"kcalInput\" type=\"number\" value=\"' + kcal + '\" placeholder=\"kcal\" style=\"flex:1;padding:8px 12px;border-radius:10px;border:1px solid var(--bg3);background:var(--bg1);color:var(--t1);font-size:.95em;\">' +
+    '<button onclick=\"saveKcal()\" style=\"padding:8px 16px;border-radius:10px;background:var(--acc);color:#000;border:none;cursor:pointer;font-weight:700;\">Speichern</button>' +
     '</div></div>' +
     '<div class=\"card\"><div class=\"card-title\">🔁 Wiederholungen</div>' +
-    (Object.keys(reps).length > 0 ? Object.keys(reps).map(k => '<div style=\"margin-bottom:4px;\"><strong>' + k + '</strong>: ' + (reps[k]||[]).join(' | ') + '</div>').join('') : '<em style=\"color:var(--txt2)\">Noch keine Einträge</em>') +
-    '</div></div>';
+    (Object.keys(reps).length > 0 ? Object.keys(reps).map(k => '<div style=\"margin-bottom:4px;\"><strong>' + k + '</strong>: ' + (reps[k]||[]).join(' | ') + '</div>').join('') : '<em style=\"color:var(--t2)\">Noch keine Einträge</em>') +
+    '</div>';
 }
 
 function renderProjekte(){
@@ -1256,15 +1280,16 @@ function renderKalender() {
       '<div class=\"kal-day-events\">' + evPreview + '</div>' +
       '</div>';
   }
-  document.getElementById('main').innerHTML = '<div class=\"panel-inner\"><h2>📅 Kalender</h2>' +
-    '<div class=\"kal-month-nav\">' +
+  const panel = document.getElementById('panel-kalender');
+  if (!panel) return;
+  panel.innerHTML = '<div class=\"card\"><div class=\"kal-month-nav\">' +
     '<button class=\"kal-nav-btn\" onclick=\"kalNavMonth(-1)\">◀</button>' +
     '<span class=\"kal-month-title\">' + monthNames[vm] + ' ' + vy + '</span>' +
     '<button class=\"kal-nav-btn\" onclick=\"kalNavMonth(1)\">▶</button>' +
     '</div>' +
-    '<div class=\"kal-month-grid\">' + cells + '</div>' +
-    '</div>';
+    '<div class=\"kal-month-grid\">' + cells + '</div></div>';
 }
+
 function openKalDay(d, m, y) {
   const dateKey = y + '-' + m + '-' + d;
   const events = (S.kalender||{}).events || {};
@@ -1273,11 +1298,11 @@ function openKalDay(d, m, y) {
   const modal = document.createElement('div');
   modal.className = 'kal-day-modal';
   modal.innerHTML = '<div class=\"kal-day-modal-inner\"><h3>📅 ' + d + '.' + m + '.' + y + '</h3>' +
-    '<div class=\"kal-day-modal-events\">' + (evList||'<em style=\"color:var(--txt2)\">Keine Termine</em>') + '</div>' +
+    '<div class=\"kal-day-modal-events\">' + (evList||'<em style=\"color:var(--t2)\">Keine Termine</em>') + '</div>' +
     '<div class=\"kal-day-add-form\">' +
     '<input id=\"kalEvTitle\" placeholder=\"Titel...\" data-date=\"' + dateKey + '\" onkeydown=\"if(event.key===&quot;Enter&quot;)addKalEvent(this.dataset.date)\"><button data-date=\"' + dateKey + '\" onclick=\"addKalEvent(this.dataset.date)\">+</button>' +
     '</div>' +
-    '<button onclick=\"this.parentElement.parentElement.remove()\" style=\"margin-top:12px;background:none;border:none;color:var(--txt2);cursor:pointer;font-size:.85em;\">✕ Schließen</button>' +
+    '<button onclick=\"this.parentElement.parentElement.remove()\" style=\"margin-top:12px;background:none;border:none;color:var(--t2);cursor:pointer;font-size:.85em;\">✕ Schließen</button>' +
     '</div>';
   document.body.appendChild(modal);
 }
@@ -1649,7 +1674,7 @@ function renderPanel(id) {
   document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
   const panel = document.getElementById('panel-' + id);
   if (panel) panel.classList.remove('hidden');
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   const btn = document.querySelector('[data-panel="' + id + '"]');
   if (btn) btn.classList.add('active');
   if (id === 'heute') renderHeute();
@@ -1687,7 +1712,7 @@ function renderTagesplan() {
     + '<div class="tp-actions">'
     + '<button class="btn-sm" onclick="addGroup()">+ Gruppe</button>'
     + '<button class="btn-sm btn-arch" onclick="archiveToday()">📦 Archivieren</button>'
-    + '<button class="btn-sm btn-arch" onclick="showArchive()">📋 Archiv</button>'
+    + '<button class="btn-sm btn-arch" onclick="goPanel('archiv')">📋 Archiv</button>'
     + '</div></div>'
     + '<div id="tplan-groups">';
   groups.forEach((grp, gi) => {
@@ -1797,7 +1822,7 @@ function renderGroupTasksHTML(group) {
       ' ondrop=\"taskDrop(event)\"' +
       ' ondragend=\"taskDragEnd(event)\"' +
       '>' +
-      '<span class=\"task-drag-handle\" style=\"cursor:grab;padding:0 4px;color:var(--txt2)\">⠿</span>' +
+      '<span class=\"task-drag-handle\" style=\"cursor:grab;padding:0 4px;color:var(--t2)\">⠿</span>' +
       '<span class=\"task-status ' + (task.status||'') + '\" data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\" onclick=\"var el=this;toggleTask(el.dataset.gid,+el.dataset.ti)\">' +
         (task.done ? '✅' : task.notRelevant ? '➖' : '⬜') +
       '</span>' +
@@ -1806,7 +1831,7 @@ function renderGroupTasksHTML(group) {
       ' ondblclick=\"var el=this;editTask(el.dataset.gid,+el.dataset.ti)\">' +
       escHtml(task.title) + '</span>' +
       (editMode ?
-        '<button data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\" onclick=\"var el=this;toggleNotRelevant(el.dataset.gid,+el.dataset.ti)\" title=\"Nicht relevant\" style=\"background:none;border:none;cursor:pointer;font-size:.8em;color:var(--txt2)\">➖</button>' +
+        '<button data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\" onclick=\"var el=this;toggleNotRelevant(el.dataset.gid,+el.dataset.ti)\" title=\"Nicht relevant\" style=\"background:none;border:none;cursor:pointer;font-size:.8em;color:var(--t2)\">➖</button>' +
         '<button data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\" onclick=\"var el=this;deleteTask(el.dataset.gid,+el.dataset.ti)\" style=\"background:none;border:none;cursor:pointer;font-size:.8em;color:var(--err,#e74c3c)\">🗑</button>'
       : '') +
       '</div>' +
@@ -1925,40 +1950,6 @@ async function archiveToday() {
   showToast('✅ Archiviert: ' + today);
 }
 
-async function showArchive() {
-  let entries = [];
-  try { entries = await db.archive.orderBy('date').reverse().limit(30).toArray(); } catch(e) {
-    try { entries = JSON.parse(localStorage.getItem('lifeos_archive') || '[]'); } catch(e2) {}
-  }
-  let html = '<div class="archive-overlay" onclick="if(event.target===this)this.remove()">'
-    + '<div class="archive-modal">'
-    + '<div class="archive-header"><h3>📋 Archiv</h3>'
-    + '<button class="archive-close" onclick="this.parentElement.parentElement.remove()">✕</button></div>'
-    + '<div class="archive-list">';
-  if (!entries.length) {
-    html += '<div class="archive-empty">Noch keine archivierten Tage.</div>';
-  }
-  entries.forEach(e => {
-    const groups = e.data && e.data.groups ? e.data.groups : [];
-    const total = groups.reduce((a,g) => a + (g.tasks||[]).length, 0);
-    const done  = groups.reduce((a,g) => a + (g.tasks||[]).filter(t=>t.done).length, 0);
-    const pct = total ? Math.round(done/total*100) : 0;
-    html += '<div class="archive-entry">'
-      + '<div class="archive-date">' + escHtml(e.date) + '</div>'
-      + '<div class="archive-stats">' + done + '/' + total + ' (' + pct + '%)</div>'
-      + '<div class="archive-groups">';
-    groups.forEach(g => {
-      const gDone = (g.tasks||[]).filter(t=>t.done).length;
-      html += '<div class="archive-group-row"><span class="archive-grp-name">' + escHtml(g.title) + '</span>'
-        + '<span class="archive-grp-pct">' + gDone + '/' + (g.tasks||[]).length + '</span></div>';
-    });
-    html += '</div></div>';
-  });
-  html += '</div></div></div>';
-  const existing = document.querySelector('.archive-overlay');
-  if (existing) existing.remove();
-  document.body.insertAdjacentHTML('beforeend', html);
-}
 
 
 function logWeight() {
@@ -2080,14 +2071,17 @@ function renderArchiv() {
         '</div>';
     }).join('');
   }
-  document.getElementById('main').innerHTML = '<div class=\"archiv-panel\">' +
+  const panel = document.getElementById('panel-archiv');
+  if (!panel) return;
+  panel.innerHTML = '<div class=\"archiv-panel\">' +
     '<div class=\"archiv-header\">' +
     '<span class=\"archiv-title\">📦 Archiv</span>' +
-    '<button onclick=\"archiveToday()\" style=\"padding:6px 14px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:.85em;\">+ Heute archivieren</button>' +
+    '<button onclick=\"archiveToday()\" style=\"padding:6px 14px;border-radius:8px;background:var(--acc);color:#000;border:none;cursor:pointer;font-size:.85em;font-weight:700;\">+ Heute archivieren</button>' +
     '</div>' +
     '<div class=\"archiv-list\">' + listHTML + '</div>' +
     '</div>';
 }
+
 function openArchivDay(idx) {
   const archive = S.archive || [];
   const sorted = archive.slice().sort((a,b) => b.date > a.date ? 1 : -1);
@@ -2180,6 +2174,151 @@ function migrateV16Data() {
     }
   } catch(e) { console.warn('v16 migration error:', e); }
 }
+
+function logWeight() {
+  const val = parseFloat(document.getElementById('weightInput').value);
+  if (isNaN(val) || val < 20 || val > 300) return showToast('Ungültiges Gewicht');
+  if (!S.fitness.weights) S.fitness.weights = [];
+  const now = new Date();
+  S.fitness.weights.push({val, date: now.toLocaleDateString('de-DE'), ts: now.toISOString()});
+  save(); renderFitness();
+}
+function setZiggi() {
+  S.fitness.ziggi = new Date().toISOString().substring(0,16).replace('T',' ');
+  save(); renderFitness();
+}
+function setZiggiDate() {
+  const inp = document.getElementById('ziggiDateInput');
+  if (!inp || !inp.value) return showToast('Bitte Datum wählen');
+  S.fitness.ziggi = inp.value.replace('T',' ');
+  save(); renderFitness();
+}
+function saveKcal() {
+  const val = parseInt(document.getElementById('kcalInput').value);
+  if (isNaN(val)) return;
+  S.fitness.kcal = val; save(); showToast('Kalorien gespeichert');
+}
+function kalNavMonth(dir) {
+  const now = new Date();
+  if (!S.kalView) S.kalView = {year: now.getFullYear(), month: now.getMonth()};
+  S.kalView.month += dir;
+  if (S.kalView.month < 0) { S.kalView.month = 11; S.kalView.year--; }
+  if (S.kalView.month > 11) { S.kalView.month = 0; S.kalView.year++; }
+  save(); renderKalender();
+}
+function addKalEvent(dateKey) {
+  const inp = document.getElementById('kalEvTitle');
+  if (!inp || !inp.value.trim()) return;
+  if (!S.kalender.events) S.kalender.events = {};
+  if (!S.kalender.events[dateKey]) S.kalender.events[dateKey] = [];
+  S.kalender.events[dateKey].push({title: inp.value.trim(), ts: Date.now()});
+  save();
+  document.querySelector('.kal-day-modal') && document.querySelector('.kal-day-modal').remove();
+  const parts = dateKey.split('-');
+  openKalDay(parseInt(parts[2]), parseInt(parts[1]), parseInt(parts[0]));
+  renderKalender();
+}
+function delKalEvent(dateKey, idx) {
+  if (!S.kalender.events || !S.kalender.events[dateKey]) return;
+  S.kalender.events[dateKey].splice(idx, 1);
+  if (S.kalender.events[dateKey].length === 0) delete S.kalender.events[dateKey];
+  save();
+  document.querySelector('.kal-day-modal') && document.querySelector('.kal-day-modal').remove();
+  renderKalender();
+}
+function archiveToday() {
+  if (!confirm('Heutigen Tag archivieren?')) return;
+  const today = new Date().toLocaleDateString('de-DE', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+  const groups = (S.tagesplan.groups || []).map(g => ({
+    id: g.id, title: g.title,
+    tasks: (g.tasks||[]).map(t => ({title: t.title, done: t.done, notRelevant: t.notRelevant, subtasks: t.subtasks||[]}))
+  }));
+  const existing = S.archive.findIndex(d => d.date === today);
+  if (existing >= 0) S.archive[existing] = {date: today, groups, ts: Date.now()};
+  else S.archive.push({date: today, groups, ts: Date.now()});
+  if (S.archive.length > 90) S.archive = S.archive.sort((a,b) => b.ts-a.ts).slice(0, 90);
+  save(); showToast('Tag archiviert!'); goPanel('archiv');
+}
+function openArchivDay(idx) {
+  const sorted = (S.archive || []).slice().sort((a,b) => b.date > a.date ? 1 : -1);
+  const day = sorted[idx]; if (!day) return;
+  let content = '';
+  (day.groups||[]).forEach(g => {
+    const tasks = g.tasks || []; if (tasks.length === 0) return;
+    content += '<div class=\"archiv-detail-section\"><h4>' + escHtml(g.title||g.id) + '</h4>' +
+      tasks.map(t => '<div style=\"display:flex;align-items:center;gap:6px;padding:3px 0;\"><span>' + (t.done?'✅':'⬜') + '</span><span style=\"font-size:.85em;' + (t.done?'':'opacity:.7') + '\">' + escHtml(t.title) + '</span></div>').join('') + '</div>';
+  });
+  const overlay = document.createElement('div');
+  overlay.className = 'archiv-detail-overlay';
+  overlay.innerHTML = '<div class=\"archiv-detail-modal\">' +
+    '<button class=\"archiv-close\" onclick=\"this.parentElement.parentElement.remove()\">✕</button>' +
+    '<h3>📅 ' + day.date + '</h3>' + content +
+    '<button class=\"archiv-pdf-btn\" onclick=\"exportArchivPDF(' + idx + ')\">📄 PDF exportieren</button>' +
+    '</div>';
+  document.body.appendChild(overlay);
+}
+function exportArchivPDF(idx) {
+  const sorted = (S.archive || []).slice().sort((a,b) => b.date > a.date ? 1 : -1);
+  const day = sorted[idx]; if (!day) return;
+  let html = '<html><head><meta charset=\"utf-8\"><title>Life OS - ' + day.date + '</title>' +
+    '<style>body{font-family:Arial,sans-serif;padding:20px;color:#333;}h1{font-size:1.3em;border-bottom:2px solid #16a34a;padding-bottom:8px;}h2{font-size:1em;color:#666;margin:12px 0 4px;}.task{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:.9em;}.done{opacity:.6;text-decoration:line-through;}</style></head><body>' +
+    '<h1>📋 Life OS — ' + day.date + '</h1>';
+  (day.groups||[]).forEach(g => {
+    const tasks = g.tasks || []; if (tasks.length === 0) return;
+    const done = tasks.filter(t=>t.done).length;
+    html += '<h2>' + (g.title||g.id) + ' (' + done + '/' + tasks.length + ')</h2>';
+    tasks.forEach(t => { html += '<div class=\"task ' + (t.done?'done':'') + '\"><span>' + (t.done?'✅':'⬜') + '</span><span>' + (t.title||'') + '</span></div>'; });
+  });
+  html += '</body></html>';
+  const w = window.open('', '_blank'); w.document.write(html); w.document.close(); setTimeout(() => w.print(), 500);
+}
+function toggleSubtask(gid, ti, si) {
+  const g = S.tagesplan.groups.find(x => x.id === gid); if (!g) return;
+  const task = g.tasks[ti]; if (!task || !task.subtasks) return;
+  task.subtasks[si].done = !task.subtasks[si].done; save(); renderTagesplan();
+}
+function addSubtask(gid, ti) {
+  const inp = document.getElementById('subinp_' + gid + '_' + ti);
+  if (!inp || !inp.value.trim()) return;
+  const g = S.tagesplan.groups.find(x => x.id === gid); if (!g) return;
+  if (!g.tasks[ti].subtasks) g.tasks[ti].subtasks = [];
+  g.tasks[ti].subtasks.push({text: inp.value.trim(), done: false}); save(); renderTagesplan();
+}
+function delSubtask(gid, ti, si) {
+  const g = S.tagesplan.groups.find(x => x.id === gid);
+  if (!g || !g.tasks[ti] || !g.tasks[ti].subtasks) return;
+  g.tasks[ti].subtasks.splice(si, 1); save(); renderTagesplan();
+}
+function migrateV16Data() {
+  try {
+    const v16raw = localStorage.getItem('lifeosv16'); if (!v16raw) return;
+    const v16 = JSON.parse(v16raw); let changed = false;
+    const gMap = {morgenTasks:'morgen', fokusTasks:'fokus', haushalTasks:'haus', abendTasks:'abend'};
+    const gTitles = {morgen:'☀️ Morgenroutine', fokus:'⚡ Fokus-Tasks', haus:'🏠 Haushalt', abend:'🌙 Abendroutine'};
+    if (!S.v16migrated) {
+      Object.keys(gMap).forEach(k => {
+        const gid = gMap[k]; const v16t = v16[k] || [];
+        let g = S.tagesplan.groups.find(x => x.id === gid);
+        if (!g) { g = {id:gid, title:gTitles[gid], collapsed:false, tasks:[]}; S.tagesplan.groups.push(g); }
+        if (g.tasks.length === 0 || (g.tasks.length === 1 && g.tasks[0].title === 'tstdf')) {
+          g.tasks = v16t.map(t => ({id:'t'+Date.now()+Math.random().toString(36).substr(2,4), title:t.text||t.title||'', done:t.status==='done', notRelevant:false, subtasks:[]}));
+          changed = true;
+        }
+      });
+      if (v16.ern && v16.ern.ziggi && !S.fitness.ziggi) { S.fitness.ziggi = '2026-01-01T'+v16.ern.ziggi; changed = true; }
+      if (v16.kcal && !S.fitness.kcal) { S.fitness.kcal = v16.kcal; changed = true; }
+      if (v16.calNotes) {
+        Object.keys(v16.calNotes).forEach(dk => {
+          const note = v16.calNotes[dk]; if (!note) return;
+          if (!S.kalender.events[dk]) S.kalender.events[dk] = [];
+          if (!S.kalender.events[dk].some(e => e.title === note)) { S.kalender.events[dk].push({title:note, ts:Date.now()}); changed = true; }
+        });
+      }
+      S.v16migrated = true; if (changed) save(); console.log('v16 migration done');
+    }
+  } catch(e) { console.warn('v16 migration error:', e); }
+}
+
 function showToast(msg) {
   let t = document.getElementById('_toast');
   if (!t) { t = document.createElement('div'); t.id='_toast'; t.className='toast-msg'; document.body.appendChild(t); }
@@ -2201,7 +2340,7 @@ function renderHeute() {
     + '<div class="heute-pct">' + doneTasks + ' / ' + totalTasks + ' erledigt &nbsp;<span style="opacity:.5">' + pct + '%</span></div>'
     + '<div class="heute-archive-row">'
     + '<button class="btn-arch-full" onclick="archiveToday()">📦 Tag archivieren</button>'
-    + '<button class="btn-arch-full" onclick="showArchive()">📋 Archiv ansehen</button>'
+    + '<button class="btn-arch-full" onclick="goPanel('archiv')">📋 Archiv ansehen</button>'
     + '</div>';
   groups.forEach(grp => {
     const gDone = (grp.tasks||[]).filter(t=>t.done).length;
