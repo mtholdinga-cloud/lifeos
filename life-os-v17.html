@@ -2183,6 +2183,25 @@ function showToast(msg) {
 
 
 // === MODULE 10: INIT APP ===
+
+function normalizeState(){
+  if(!S.finanzen) S.finanzen = {};
+  if(!Array.isArray(S.finanzen.ausgaben)) S.finanzen.ausgaben = [];
+  if(!Array.isArray(S.finanzen.einnahmen)) S.finanzen.einnahmen = [];
+  if(!Array.isArray(S.finanzen.investments)) S.finanzen.investments = [];
+  if(!Array.isArray(S.notizen)) S.notizen = [];
+  if(!S.tagesplan) S.tagesplan = {};
+  if(!Array.isArray(S.tagesplan.groups)) S.tagesplan.groups = [];
+  if(!Array.isArray(S.mitspieler)) S.mitspieler = [];
+  if(!S.mtholding) S.mtholding = {};
+  if(!Array.isArray(S.mtholding.companies)) S.mtholding.companies = [];
+  if(!S.kalender) S.kalender = {};
+  if(!Array.isArray(S.kalender.events)) S.kalender.events = [];
+  if(!Array.isArray(S.morgenTasks)) S.morgenTasks = [];
+  if(!Array.isArray(S.fokusTasks)) S.fokusTasks = [];
+  if(!Array.isArray(S.archive)) S.archive = [];
+}
+
 async function initApp() {
   const dbStatus = document.getElementById('db-status');
   try {
@@ -2192,6 +2211,7 @@ async function initApp() {
     if (dbStatus) { dbStatus.textContent = 'LS'; dbStatus.title = 'LocalStorage Fallback'; }
   }
   await loadAllState();
+  normalizeState();
   migrateV16Data();
   if (window._syncChannel) window._syncChannel.close();
   window._syncChannel = new BroadcastChannel('lifeos_sync');
