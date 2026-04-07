@@ -2197,8 +2197,16 @@ function normalizeState(){
   if(!Array.isArray(S.mtholding.companies)) S.mtholding.companies = [];
   if(!S.kalender) S.kalender = {};
   if(!Array.isArray(S.kalender.events)) S.kalender.events = [];
-  if(!Array.isArray(S.morgenTasks)) S.morgenTasks = [];
-  if(!Array.isArray(S.fokusTasks)) S.fokusTasks = [];
+  if(!S.fitness) S.fitness = {};
+  if(!S.fitness.reps || typeof S.fitness.reps !== 'object') S.fitness.reps = {};
+  if(!Array.isArray(S.fitness.reps.lies)) S.fitness.reps.lies = [];
+  if(!Array.isArray(S.fitness.reps.unter)) S.fitness.reps.unter = [];
+  if(!Array.isArray(S.fitness.reps.klim)) S.fitness.reps.klim = [];
+  S.reps = S.fitness.reps;
+  if(!Array.isArray(S.fitness.weights)) S.fitness.weights = [];
+  if(!S.fitness.ern) S.fitness.ern = {morgens:'',mittags:'',abends:''};
+  if(!Array.isArray(S.fitness.supps)) S.fitness.supps = [];
+  if(!Array.isArray(S.fitness.suppDone)) S.fitness.suppDone = [];
   if(!Array.isArray(S.archive)) S.archive = [];
 }
 
