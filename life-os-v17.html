@@ -856,7 +856,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
 </div>
 
 
-<div class="db-status"><span class="db-status-badge db-idb" id="db-badge">📊 IndexedDB</span><span id="db-info">Init...</span><span style="margin-left:auto;" id="db-last-save"></span></div>
+<div class="db-status" style="display:none"><span class="db-status-badge db-idb" id="db-badge">📊 IndexedDB</span><span id="db-info">Init...</span><span style="margin-left:auto;" id="db-last-save"></span></div>
 <script>// Life OS v17 - Fixed Build
 let S = {};
 
@@ -1670,24 +1670,24 @@ document.getElementById('ai-inp').addEventListener('keydown',e=>{if(e.key==='Ent
 
 
 // === PANEL RENDERER ===
-function renderPanel(id) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
+function renderPanel(id){
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   const panel = document.getElementById('panel-' + id);
-  if (panel) panel.classList.remove('hidden');
+  if(panel) panel.classList.add('active');
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   const btn = document.querySelector('[data-panel="' + id + '"]');
-  if (btn) btn.classList.add('active');
-  if (id === 'heute') renderHeute();
-  else if (id === 'tagesplan') renderTagesplan();
-  else if (id === 'fitness') renderFitness();
-  else if (id === 'projekte') renderProjekte();
-  else if (id === 'kalender') renderKalender();
-  else if (id === 'finanzen') renderFinanzen();
-  else if (id === 'notizen') {}
-  else if (id === 'ki') {}
-  else if (id === 'mitspieler') renderPlayers();
-  else if (id === 'mtholding') renderMTHolding();
-  else if (id === 'archiv') renderArchiv();
+  if(btn) btn.classList.add('active');
+  if(id==='heute') renderHeute();
+  else if(id==='tagesplan') renderTagesplan();
+  else if(id==='fitness') renderFitness();
+  else if(id==='projekte') renderProjekte();
+  else if(id==='kalender') renderKalender();
+  else if(id==='finanzen') renderFinanzen();
+  else if(id==='notizen') renderNotizen();
+  else if(id==='ki') { /* KI panel is static */ }
+  else if(id==='mitspieler') renderPlayers();
+  else if(id==='mtholding') renderMTHolding();
+  else if(id==='archiv') renderArchiv();
 }
 function goPanel(id) {
   const btns = document.querySelectorAll('.nav-btn');
@@ -2142,57 +2142,13 @@ function migrateV16Data() {
   } catch(e) { console.warn('v16 migration error:', e); }
 }
 
-function logWeight() {
-  const val = parseFloat(document.getElementById('weightInput').value);
-  if (isNaN(val) || val < 20 || val > 300) return showToast('Ungültiges Gewicht');
-  if (!S.fitness.weights) S.fitness.weights = [];
-  const now = new Date();
-  S.fitness.weights.push({val, date: now.toLocaleDateString('de-DE'), ts: now.toISOString()});
-  save(); renderFitness();
-}
-function setZiggi() {
-  S.fitness.ziggi = new Date().toISOString().substring(0,16).replace('T',' ');
-  save(); renderFitness();
-}
-function setZiggiDate() {
-  const inp = document.getElementById('ziggiDateInput');
-  if (!inp || !inp.value) return showToast('Bitte Datum wählen');
-  S.fitness.ziggi = inp.value.replace('T',' ');
-  save(); renderFitness();
-}
-function saveKcal() {
-  const val = parseInt(document.getElementById('kcalInput').value);
-  if (isNaN(val)) return;
-  S.fitness.kcal = val; save(); showToast('Kalorien gespeichert');
-}
-function kalNavMonth(dir) {
-  const now = new Date();
-  if (!S.kalView) S.kalView = {year: now.getFullYear(), month: now.getMonth()};
-  S.kalView.month += dir;
-  if (S.kalView.month < 0) { S.kalView.month = 11; S.kalView.year--; }
-  if (S.kalView.month > 11) { S.kalView.month = 0; S.kalView.year++; }
-  save(); renderKalender();
-}
-function addKalEvent(dateKey) {
-  const inp = document.getElementById('kalEvTitle');
-  if (!inp || !inp.value.trim()) return;
-  if (!S.kalender.events) S.kalender.events = {};
-  if (!S.kalender.events[dateKey]) S.kalender.events[dateKey] = [];
-  S.kalender.events[dateKey].push({title: inp.value.trim(), ts: Date.now()});
-  save();
-  document.querySelector('.kal-day-modal') && document.querySelector('.kal-day-modal').remove();
-  const parts = dateKey.split('-');
-  openKalDay(parseInt(parts[2]), parseInt(parts[1]), parseInt(parts[0]));
-  renderKalender();
-}
-function delKalEvent(dateKey, idx) {
-  if (!S.kalender.events || !S.kalender.events[dateKey]) return;
-  S.kalender.events[dateKey].splice(idx, 1);
-  if (S.kalender.events[dateKey].length === 0) delete S.kalender.events[dateKey];
-  save();
-  document.querySelector('.kal-day-modal') && document.querySelector('.kal-day-modal').remove();
-  renderKalender();
-}
+
+
+
+
+
+
+
 function archiveToday() {
   if (!confirm('Heutigen Tag archivieren?')) return;
   const today = new Date().toLocaleDateString('de-DE', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
@@ -2206,85 +2162,12 @@ function archiveToday() {
   if (S.archive.length > 90) S.archive = S.archive.sort((a,b) => b.ts-a.ts).slice(0, 90);
   save(); showToast('Tag archiviert!'); goPanel('archiv');
 }
-function openArchivDay(idx) {
-  const sorted = (S.archive || []).slice().sort((a,b) => b.date > a.date ? 1 : -1);
-  const day = sorted[idx]; if (!day) return;
-  let content = '';
-  (day.groups||[]).forEach(g => {
-    const tasks = g.tasks || []; if (tasks.length === 0) return;
-    content += '<div class=\"archiv-detail-section\"><h4>' + escHtml(g.title||g.id) + '</h4>' +
-      tasks.map(t => '<div style=\"display:flex;align-items:center;gap:6px;padding:3px 0;\"><span>' + (t.done?'✅':'⬜') + '</span><span style=\"font-size:.85em;' + (t.done?'':'opacity:.7') + '\">' + escHtml(t.title) + '</span></div>').join('') + '</div>';
-  });
-  const overlay = document.createElement('div');
-  overlay.className = 'archiv-detail-overlay';
-  overlay.innerHTML = '<div class=\"archiv-detail-modal\">' +
-    '<button class=\"archiv-close\" onclick=\"this.parentElement.parentElement.remove()\">✕</button>' +
-    '<h3>📅 ' + day.date + '</h3>' + content +
-    '<button class=\"archiv-pdf-btn\" onclick=\"exportArchivPDF(' + idx + ')\">📄 PDF exportieren</button>' +
-    '</div>';
-  document.body.appendChild(overlay);
-}
-function exportArchivPDF(idx) {
-  const sorted = (S.archive || []).slice().sort((a,b) => b.date > a.date ? 1 : -1);
-  const day = sorted[idx]; if (!day) return;
-  let html = '<html><head><meta charset=\"utf-8\"><title>Life OS - ' + day.date + '</title>' +
-    '<style>body{font-family:Arial,sans-serif;padding:20px;color:#333;}h1{font-size:1.3em;border-bottom:2px solid #16a34a;padding-bottom:8px;}h2{font-size:1em;color:#666;margin:12px 0 4px;}.task{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:.9em;}.done{opacity:.6;text-decoration:line-through;}</style></head><body>' +
-    '<h1>📋 Life OS — ' + day.date + '</h1>';
-  (day.groups||[]).forEach(g => {
-    const tasks = g.tasks || []; if (tasks.length === 0) return;
-    const done = tasks.filter(t=>t.done).length;
-    html += '<h2>' + (g.title||g.id) + ' (' + done + '/' + tasks.length + ')</h2>';
-    tasks.forEach(t => { html += '<div class=\"task ' + (t.done?'done':'') + '\"><span>' + (t.done?'✅':'⬜') + '</span><span>' + (t.title||'') + '</span></div>'; });
-  });
-  html += '</body></html>';
-  const w = window.open('', '_blank'); w.document.write(html); w.document.close(); setTimeout(() => w.print(), 500);
-}
-function toggleSubtask(gid, ti, si) {
-  const g = S.tagesplan.groups.find(x => x.id === gid); if (!g) return;
-  const task = g.tasks[ti]; if (!task || !task.subtasks) return;
-  task.subtasks[si].done = !task.subtasks[si].done; save(); renderTagesplan();
-}
-function addSubtask(gid, ti) {
-  const inp = document.getElementById('subinp_' + gid + '_' + ti);
-  if (!inp || !inp.value.trim()) return;
-  const g = S.tagesplan.groups.find(x => x.id === gid); if (!g) return;
-  if (!g.tasks[ti].subtasks) g.tasks[ti].subtasks = [];
-  g.tasks[ti].subtasks.push({text: inp.value.trim(), done: false}); save(); renderTagesplan();
-}
-function delSubtask(gid, ti, si) {
-  const g = S.tagesplan.groups.find(x => x.id === gid);
-  if (!g || !g.tasks[ti] || !g.tasks[ti].subtasks) return;
-  g.tasks[ti].subtasks.splice(si, 1); save(); renderTagesplan();
-}
-function migrateV16Data() {
-  try {
-    const v16raw = localStorage.getItem('lifeosv16'); if (!v16raw) return;
-    const v16 = JSON.parse(v16raw); let changed = false;
-    const gMap = {morgenTasks:'morgen', fokusTasks:'fokus', haushalTasks:'haus', abendTasks:'abend'};
-    const gTitles = {morgen:'☀️ Morgenroutine', fokus:'⚡ Fokus-Tasks', haus:'🏠 Haushalt', abend:'🌙 Abendroutine'};
-    if (!S.v16migrated) {
-      Object.keys(gMap).forEach(k => {
-        const gid = gMap[k]; const v16t = v16[k] || [];
-        let g = S.tagesplan.groups.find(x => x.id === gid);
-        if (!g) { g = {id:gid, title:gTitles[gid], collapsed:false, tasks:[]}; S.tagesplan.groups.push(g); }
-        if (g.tasks.length === 0 || (g.tasks.length === 1 && g.tasks[0].title === 'tstdf')) {
-          g.tasks = v16t.map(t => ({id:'t'+Date.now()+Math.random().toString(36).substr(2,4), title:t.text||t.title||'', done:t.status==='done', notRelevant:false, subtasks:[]}));
-          changed = true;
-        }
-      });
-      if (v16.ern && v16.ern.ziggi && !S.fitness.ziggi) { S.fitness.ziggi = '2026-01-01T'+v16.ern.ziggi; changed = true; }
-      if (v16.kcal && !S.fitness.kcal) { S.fitness.kcal = v16.kcal; changed = true; }
-      if (v16.calNotes) {
-        Object.keys(v16.calNotes).forEach(dk => {
-          const note = v16.calNotes[dk]; if (!note) return;
-          if (!S.kalender.events[dk]) S.kalender.events[dk] = [];
-          if (!S.kalender.events[dk].some(e => e.title === note)) { S.kalender.events[dk].push({title:note, ts:Date.now()}); changed = true; }
-        });
-      }
-      S.v16migrated = true; if (changed) save(); console.log('v16 migration done');
-    }
-  } catch(e) { console.warn('v16 migration error:', e); }
-}
+
+
+
+
+
+
 
 function showToast(msg) {
   let t = document.getElementById('_toast');
@@ -2296,36 +2179,7 @@ function showToast(msg) {
 
 
 // === MODULE 9: RENDER HEUTE ===
-function renderHeute() {
-  const panel = document.getElementById('panel-heute');
-  if (!panel) return;
-  const groups = (S.tagesplan && S.tagesplan.groups) ? S.tagesplan.groups : [];
-  let totalTasks = 0, doneTasks = 0;
-  groups.forEach(g => { totalTasks += (g.tasks||[]).length; doneTasks += (g.tasks||[]).filter(t=>t.done).length; });
-  const pct = totalTasks ? Math.round(doneTasks/totalTasks*100) : 0;
-  let html = '<div class="heute-progress-bar"><div class="heute-fill" style="width:' + pct + '%"></div></div>'
-    + '<div class="heute-pct">' + doneTasks + ' / ' + totalTasks + ' erledigt &nbsp;<span style="opacity:.5">' + pct + '%</span></div>'
-    + '<div class="heute-archive-row">'
-    + '<button class="btn-arch-full" onclick="archiveToday()">📦 Tag archivieren</button>'
-    + '<button class="btn-arch-full" onclick="goPanel(&quot;archiv&quot;)">📋 Archiv ansehen</button>'
-    + '</div>';
-  groups.forEach(grp => {
-    const gDone = (grp.tasks||[]).filter(t=>t.done).length;
-    const gTotal = (grp.tasks||[]).length;
-    html += '<div class="heute-group">'
-      + '<div class="heute-grp-hdr">' + escHtml(grp.title) + ' <span class="heute-grp-ct">(' + gDone + '/' + gTotal + ')</span></div>';
-    if (gTotal > 0) {
-      html += '<div class="heute-tasks">';
-      (grp.tasks||[]).forEach(t => {
-        html += '<div class="heute-task' + (t.done?' done':'') + (t.notRelevant?' not-relevant':'') + '">'
-          + escHtml(t.title) + '</div>';
-      });
-      html += '</div>';
-    }
-    html += '</div>';
-  });
-  panel.innerHTML = html;
-}
+
 
 
 // === MODULE 10: INIT APP ===
@@ -2353,6 +2207,141 @@ async function initApp() {
   renderPanel(active ? active.dataset.panel : 'heute');
 }
 document.addEventListener('DOMContentLoaded', initApp);
+
+
+// === COMPAT: Missing functions from V16 ===
+function saveData(){
+  save();
+  showToast('✅ Gespeichert!');
+}
+function calNav(dir){
+  kalNavMonth(dir);
+}
+function saveErn(){
+  save();
+  showToast('✅ Ernährung gespeichert');
+}
+function addExpense(){
+  const label=document.getElementById('new-exp-label').value.trim();
+  const amt=parseFloat(document.getElementById('new-exp-amt').value);
+  if(!label||isNaN(amt)||amt<=0){showToast('⚠️ Bezeichnung und Betrag eingeben!');return;}
+  const newId='e'+(Date.now());
+  S.finanzen.expense.push({id:newId,label:label,amt:-Math.abs(amt),paid:false});
+  save();renderFinanzen();
+  document.getElementById('new-exp-label').value='';
+  document.getElementById('new-exp-amt').value='';
+  showToast('✅ Ausgabe hinzugefügt!');
+}
+function exportData(){
+  const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='lifeos-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  showToast('📤 Export gestartet!');
+}
+function importData(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      S=JSON.parse(ev.target.result);
+      save();
+      renderPanel(document.querySelector('.nav-item.active')?.dataset.panel||'heute');
+      showToast('📥 Daten importiert!');
+    }catch(err){showToast('❌ Fehler beim Import!');}
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+function addMTCompany(){
+    if(!S.mtCompanies)S.mtCompanies=[];
+    S.mtCompanies.push({name:'Neue Firma',goal:''});
+    save();renderMTHolding();
+}
+function saveMTHolding(){
+    // Collect all current input values
+    const nameInps=document.querySelectorAll('#mt-org-companies .co-name-inp');
+    const goalInps=document.querySelectorAll('#mt-org-companies .co-goal-inp');
+    nameInps.forEach((inp,i)=>{if(S.mtCompanies[i])S.mtCompanies[i].name=inp.value;});
+    goalInps.forEach((inp,i)=>{if(S.mtCompanies[i])S.mtCompanies[i].goal=inp.value;});
+    save();showToast('\u2705 MT Holding gespeichert!');
+}
+function saveCalNote(){
+  if(!selectedCalDay)return;
+  S.calNotes[selectedCalDay]=document.getElementById('cal-note').value;
+  save();renderKalender();
+}
+function addTaskToSection(key, containerEl, renderFn) {
+  const text = prompt('Neue Aufgabe:');
+  if (!text) return;
+  const newId = Date.now();
+  S[key].push({id: newId, text, status:'open'});
+  save();
+  renderFn();
+}
+function deleteTaskFromSection(id, key, renderFn) {
+  S[key] = S[key].filter(t => t.id !== id);
+  save();
+  renderFn();
+}
+function editTaskInSection(id, key, renderFn) {
+  const task = S[key].find(t => t.id === id);
+  if (!task) return;
+  const newText = prompt('Aufgabe bearbeiten:', task.text);
+  if (newText !== null && newText.trim()) { task.text = newText.trim(); save(); renderFn(); }
+}
+function renderEditableTaskList(tasks, key, container, renderFn, numbered) {
+    if (!container) return;
+    container.innerHTML = '';
+    let dragSrc = null;
+    tasks.forEach((t, i) => {
+        const row = document.createElement('div');
+        row.className = 'task-row';
+        row.draggable = true;
+        row.dataset.idx = i;
+        row.addEventListener('dragstart', e => { dragSrc = i; row.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+        row.addEventListener('dragend', () => { row.classList.remove('dragging'); container.querySelectorAll('.task-row').forEach(r => r.classList.remove('drag-over')); });
+        row.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; row.classList.add('drag-over'); });
+        row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
+        row.addEventListener('drop', e => {
+            e.preventDefault(); row.classList.remove('drag-over');
+            if (dragSrc === null || dragSrc === i) return;
+            const moved = tasks.splice(dragSrc, 1)[0]; tasks.splice(i, 0, moved);
+            S[key] = tasks; save();
+            renderEditableTaskList(tasks, key, container, renderFn, numbered);
+        });
+        const num = document.createElement('div'); num.className = 'task-num'; num.textContent = numbered ? (i+1) : ' ';
+        const cb = document.createElement('div');
+        cb.className = 'task-cb' + (t.status==='done'?' done':t.status==='late'?' late':'');
+        cb.textContent = t.status==='done'?'\u2713':t.status==='late'?'\u2717':'';
+        cb.onclick = () => { cycleTask(t.id, tasks, () => renderEditableTaskList(tasks, key, container, renderFn, numbered)); };
+        const txt = document.createElement('input');
+        txt.style.cssText = 'flex:1;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--t1);font-size:15px;font-family:"Syne",sans-serif;outline:none;padding:2px 4px;' + (t.status==='done'?'text-decoration:line-through;color:var(--t2);':'') + (t.status==='late'?'text-decoration:line-through;color:var(--acc3);':'');
+        txt.value = t.text;
+        txt.onfocus = e => e.target.style.borderBottomColor = 'var(--acc2)';
+        txt.onblur = e => { e.target.style.borderBottomColor = 'transparent'; t.text = e.target.value; save(); };
+        const acts = document.createElement('div'); acts.className = 'task-actions';
+        const bdone = document.createElement('button'); bdone.className = 'task-btn'; bdone.textContent = '\u2705';
+        bdone.onclick = e => { e.stopPropagation(); setTask(t.id, tasks, 'done', () => renderEditableTaskList(tasks, key, container, renderFn, numbered)); };
+        const blate = document.createElement('button'); blate.className = 'task-btn'; blate.textContent = '\u274c';
+        blate.onclick = e => { e.stopPropagation(); setTask(t.id, tasks, 'late', () => renderEditableTaskList(tasks, key, container, renderFn, numbered)); };
+        const bdel = document.createElement('button'); bdel.className = 'task-btn'; bdel.title = 'L\u00f6schen';
+        bdel.innerHTML = '\u{1F5D1}\uFE0F';
+        bdel.onclick = e => { e.stopPropagation(); const idx2 = S[key].findIndex(x => x.id === t.id); if(idx2 > -1){ S[key].splice(idx2,1); save(); renderEditableTaskList(S[key], key, container, renderFn, numbered); } };
+        acts.append(bdone, blate, bdel);
+        row.append(num, cb, txt, acts);
+        container.appendChild(row);
+    });
+    const addBtn = document.createElement('button');
+    addBtn.className = 'section-add-main-btn';
+    addBtn.textContent = '\uff0b Aufgabe hinzuf\u00fcgen';
+    addBtn.onclick = () => {
+        const text = prompt('Neue Aufgabe:');
+        if (text && text.trim()) { S[key].push({id:Date.now(), text:text.trim(), status:'open'}); save(); renderEditableTaskList(S[key], key, container, renderFn, numbered); }
+    };
+    container.appendChild(addBtn);
+}
 
 </script>
       </html>
