@@ -957,7 +957,7 @@ async function loadAllState() {
 
 function _getMorgenTasks() {
   const g = S.tagesplan && S.tagesplan.groups ? S.tagesplan.groups.find(g => g.id === 'morgen') : null;
-  return g ? g : { tasks: [] };
+  return g ? g.tasks : [];
 }
 function _getFokusTasks() {
   const g = S.tagesplan && S.tagesplan.groups ? S.tagesplan.groups.find(g => g.id === 'fokus') : null;
@@ -1072,7 +1072,7 @@ function renderTaskList(tasks,container,renderFn,numbered=true){
 // ==============================
 function renderHeute(){
   const cont=document.getElementById('morgen-list');
-  renderTaskList(S.morgenTasks,cont,renderHeute,true);
+  renderTaskList(_getMorgenTasks(),cont,renderHeute,true);
   // Progress
   const done=_getMorgenTasks().filter(t=>t.status==='done').length;
   const total=_getMorgenTasks().length;
