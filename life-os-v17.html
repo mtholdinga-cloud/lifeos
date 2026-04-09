@@ -375,6 +375,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
 .subtask-item input[type=checkbox]{accent-color:var(--acc);}
 .subtask-item .sub-text{flex:1;font-size:.85em;}
 .subtask-item .sub-del{background:none;border:none;color:var(--acc3);cursor:pointer;font-size:.8em;padding:2px 4px;}
+.subtask-item.sub-drag-over{border-top:2px solid var(--acc);background:var(--bg3);}
 .subtask-add{display:flex;gap:6px;margin-top:4px;padding-left:20px;}
 .subtask-add input{flex:1;padding:4px 8px;border-radius:6px;border:1px solid var(--bg3);background:var(--bg2);color:var(--t1);font-size:.82em;}
 .subtask-add button{padding:4px 10px;border-radius:6px;background:var(--acc);color:#fff;border:none;cursor:pointer;font-size:.82em;}
@@ -1072,11 +1073,34 @@ function renderTaskList(tasks,container,renderFn,numbered=true){
 // ==============================
 function renderHeute(){
   const cont=document.getElementById('morgen-list');
-  renderTaskList(_getMorgenTasks(),cont,renderHeute,true);
+  const morgenTasks=_getMorgenTasks();
+  cont.innerHTML='';
+  morgenTasks.forEach((t,i)=>{
+    const row=document.createElement('div');row.className='task-row';
+    const num=document.createElement('div');num.className='task-num';num.textContent=i+1;
+    const cb=document.createElement('div');
+    cb.className='task-cb'+(t.done?' done':t.notRelevant?' late':'');
+    cb.textContent=t.done?'✓':t.notRelevant?'✗':'';
+    cb.onclick=()=>{
+      const g=S.tagesplan.groups.find(x=>x.id==='morgen');
+      if(!g)return;
+      const task=g.tasks[i];
+      if(!task)return;
+      if(!task.done&&!task.notRelevant){task.done=true;}
+      else if(task.done){task.done=false;task.notRelevant=true;}
+      else{task.done=false;task.notRelevant=false;}
+      save();renderHeute();if(typeof renderTagesplan==='function')renderTagesplan();
+    };
+    const txt=document.createElement('div');
+    txt.className='task-text'+(t.done?' done':t.notRelevant?' late':'');
+    txt.textContent=t.title||t.text||'';
+    row.append(num,cb,txt);
+    cont.appendChild(row);
+  });
   // Progress
-  const done=_getMorgenTasks().filter(t=>t.status==='done').length;
-  const total=_getMorgenTasks().length;
-  const pct=Math.round(done/total*100);
+  const done=morgenTasks.filter(t=>t.done).length;
+  const total=morgenTasks.length;
+  const pct=total>0?Math.round(done/total*100):0;
   document.getElementById('prog-text').textContent=`${done} von ${total} erledigt`;
   document.getElementById('prog-pct').textContent=`${pct}%`;
   document.getElementById('prog-fill').style.width=pct+'%';
@@ -1084,8 +1108,9 @@ function renderHeute(){
   const sportDone=S.reps.lies.length+S.reps.unter.length+S.reps.klim.length;
   document.getElementById('mini-sport').textContent=sportDone?`${sportDone*10}Rep`:'—';
   // Mini fokus
-  const fdone=_getFokusTasks().filter(t=>t.status==='done').length;
-  document.getElementById('mini-fokus').textContent=`${fdone}/${_getFokusTasks().length}`;
+  const fTasks=_getFokusTasks();
+  const fdone=fTasks.filter(t=>t.done).length;
+  document.getElementById('mini-fokus').textContent=`${fdone}/${fTasks.length}`;
 }
 
 // ==============================
@@ -1796,7 +1821,18 @@ function renderGroupTasksHTML(group) {
   return tasks.map((task, ti) => {
     const subtasks = task.subtasks || [];
     const subHTML = subtasks.map((st, si) =>
-      '<div class=\"subtask-item\">' +
+      (editMode ?
+      '<div class=\"subtask-item\" draggable=\"true\"' +
+      ' data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\" data-si=\"' + si + '\"' +
+      ' ondragstart=\"var el=this;subDragStart(el.dataset.gid,+el.dataset.ti,+el.dataset.si)\"' +
+      ' ondragover=\"event.preventDefault();event.currentTarget.classList.add(&quot;sub-drag-over&quot;)\"' +
+      ' ondragleave=\"event.currentTarget.classList.remove(&quot;sub-drag-over&quot;)\"' +
+      ' ondrop=\"event.preventDefault();event.currentTarget.classList.remove(&quot;sub-drag-over&quot;);var el=this;subDrop(el.dataset.gid,+el.dataset.ti,+el.dataset.si)\"' +
+      ' ondragend=\"subDragEnd()\">' +
+      '<span style=\"cursor:grab;padding:0 4px;color:var(--t2);font-size:.85em\">⠿</span>'
+    :
+      '<div class=\"subtask-item\">'
+    ) +
       '<input type=\"checkbox\"' + (st.done?' checked':'') + 
       ' data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\" data-si=\"' + si + '\"' +
       ' onchange=\"var el=this;toggleSubtask(el.dataset.gid,+el.dataset.ti,+el.dataset.si)\">' +
@@ -1846,17 +1882,32 @@ function renderGroupTasksHTML(group) {
     + '<button class="btn-add-task" data-gid="' + group.id + '" onclick="addTaskByGid(this.dataset.gid,this.previousElementSibling)">+</button>'
     + '</div>';
 }
-function taskDragStart(e,gi,ti) { _dragSrcTask=ti; _dragSrcTaskGi=gi; e.dataTransfer.effectAllowed='move'; e.stopPropagation(); }
-function taskDragOver(e) { e.preventDefault(); e.stopPropagation(); }
-function taskDrop(e,gi,ti) {
+function taskDragStart(e) {
+  const el=e.currentTarget;
+  _dragSrcTask=parseInt(el.dataset.tid);
+  _dragSrcTaskGi=el.dataset.gid;
+  e.dataTransfer.effectAllowed='move';
+  el.classList.add('dragging');
+  e.stopPropagation();
+}
+function taskDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); e.stopPropagation(); }
+function taskDrop(e) {
   e.preventDefault(); e.stopPropagation();
-  if (_dragSrcTask===null || _dragSrcTaskGi!==gi || _dragSrcTask===ti) return;
-  const tasks = S.tagesplan.groups[gi].tasks;
-  const moved = tasks.splice(_dragSrcTask,1)[0];
-  tasks.splice(ti,0,moved);
+  const el=e.currentTarget;
+  el.classList.remove('drag-over');
+  const tGid=el.dataset.gid;
+  const tTi=parseInt(el.dataset.tid);
+  if (_dragSrcTask===null || _dragSrcTaskGi!==tGid || _dragSrcTask===tTi) return;
+  const g=_getGroupByGid(tGid);
+  if(!g)return;
+  const moved=g.tasks.splice(_dragSrcTask,1)[0];
+  g.tasks.splice(tTi,0,moved);
   save(); renderTagesplan();
 }
-function taskDragEnd(e) { _dragSrcTask=null; _dragSrcTaskGi=null; }
+function taskDragEnd(e) {
+  _dragSrcTask=null; _dragSrcTaskGi=null;
+  document.querySelectorAll('.task-item').forEach(el=>el.classList.remove('dragging','drag-over'));
+}
 
 function addTask(gi,inp) {
   const t = inp.value.trim(); if(!t) return;
@@ -1873,11 +1924,16 @@ function addTaskByGid(gid, inp) {
   inp.value = '';
   save(); renderTagesplan();
 }
-function deleteTask(gi,ti) { S.tagesplan.groups[gi].tasks.splice(ti,1); save(); renderTagesplan(); }
-function toggleTask(gi,ti,v) { S.tagesplan.groups[gi].tasks[ti].done=v; save(); }
-function toggleNotRelevant(gi,ti) { const t=S.tagesplan.groups[gi].tasks[ti]; t.notRelevant=!t.notRelevant; save(); renderTagesplan(); }
-function editTask(gi,ti) {
-  const t=S.tagesplan.groups[gi].tasks[ti];
+function _getGroupByGid(gid) {
+  const g=S.tagesplan.groups.find(x=>x.id===gid);
+  return g||null;
+}
+function deleteTask(gid,ti) { const g=_getGroupByGid(gid); if(!g)return; g.tasks.splice(ti,1); save(); renderTagesplan(); }
+function toggleTask(gid,ti) { const g=_getGroupByGid(gid); if(!g)return; const t=g.tasks[ti]; if(!t)return; t.done=!t.done; if(t.done)t.notRelevant=false; save(); renderTagesplan(); renderHeute(); }
+function toggleNotRelevant(gid,ti) { const g=_getGroupByGid(gid); if(!g)return; const t=g.tasks[ti]; if(!t)return; t.notRelevant=!t.notRelevant; save(); renderTagesplan(); }
+function editTask(gid,ti) {
+  const g=_getGroupByGid(gid); if(!g)return;
+  const t=g.tasks[ti];
   const nv=prompt('Aufgabe:',t.title); if(nv===null) return;
   t.title=nv; save(); renderTagesplan();
 }
@@ -2032,6 +2088,23 @@ function delSubtask(gid, ti, si) {
   g.tasks[ti].subtasks.splice(si, 1);
   save(); renderTagesplan();
 }
+
+let _subDragSrc = null;
+function subDragStart(gid, ti, si) { _subDragSrc = {gid, ti, si}; }
+function subDrop(gid, ti, si) {
+  if (!_subDragSrc) return;
+  if (_subDragSrc.gid !== gid || _subDragSrc.ti !== ti || _subDragSrc.si === si) { _subDragSrc=null; return; }
+  const g = S.tagesplan.groups.find(x => x.id === gid);
+  if (!g || !g.tasks[ti] || !g.tasks[ti].subtasks) { _subDragSrc=null; return; }
+  const subs = g.tasks[ti].subtasks;
+  const fromSi = _subDragSrc.si;
+  const moved = subs.splice(fromSi, 1)[0];
+  const targetSi = fromSi < si ? si - 1 : si;
+  subs.splice(targetSi, 0, moved);
+  _subDragSrc = null;
+  save(); renderTagesplan();
+}
+function subDragEnd() { _subDragSrc = null; document.querySelectorAll('.subtask-item').forEach(el=>el.classList.remove('sub-drag-over')); }
 
 function renderArchiv() {
   const archive = S.archive || [];
