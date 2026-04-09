@@ -961,7 +961,7 @@ function _getMorgenTasks() {
 }
 function _getFokusTasks() {
   const g = S.tagesplan && S.tagesplan.groups ? S.tagesplan.groups.find(g => g.id === 'fokus') : null;
-  return g ? g : { tasks: [] };
+  return g ? g.tasks : [];
 }
 
 // === MODULE 4: SAVE (ASYNC + DEBOUNCE + BROADCAST) ===
@@ -2227,6 +2227,7 @@ function normalizeState(){
   if(!Array.isArray(S.archive)) S.archive = [];
   // Data aliases for render functions
   S.notes = Array.isArray(S.notizen) ? S.notizen : [];
+  S.players = Array.isArray(S.mitspieler) ? S.mitspieler : [];
   if(!Array.isArray(S.projekte)) S.projekte = [];
   if(!S.reflex) S.reflex = {gut:'', verb:'', ziel1:'', ziel2:'', ziel3:''};
   if(!Array.isArray(S.finanzen.konten)) S.finanzen.konten = [];
