@@ -528,7 +528,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
   <div class="logo">Life<span>OS</span> <span style="font-size:10px;color:var(--t2);font-weight:400">v17</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div class="date-chip" id="datechip"></div>
-    <div class="live-dot"></div><span class="sync-dot" id="sync-dot"></span><span class="sync-label" id="sync-label">IDB</span>
+    <div class="live-dot"></div><span class="sync-dot" id="sync-dot"></span><span class="sync-label" id="sync-label"></span>
   </div>
   <div class="topbar-right">
     <div class="zoom-ctrl">
@@ -2318,7 +2318,7 @@ function normalizeState(){
   if(!S.finanzen) S.finanzen = {};
   if(!Array.isArray(S.finanzen.ausgaben)) S.finanzen.ausgaben = [];
   if(!Array.isArray(S.finanzen.einnahmen)) S.finanzen.einnahmen = [];
-  if(!Array.isArray(S.finanzen.investments)) S.finanzen.investments = [];
+  if(!Array.isArray(S.finanzen.investments)) S.finanzen.investments = [{name:'🏦 Rücklagen',val:1001.65,goal:25000},{name:'🏠 Bausparvertrag',val:538.27,goal:50000},{name:'📊 Mintos',val:2319.20,goal:null},{name:'📈 Trade Republic',val:38.35,goal:null},{name:'🐦 Robinhood',val:56.54,goal:null},{name:'📱 N26 Invest',val:66.03,goal:null}];
   if(!Array.isArray(S.notizen)) S.notizen = [];
   if(!S.tagesplan) S.tagesplan = {};
   if(!Array.isArray(S.tagesplan.groups)) S.tagesplan.groups = [];
