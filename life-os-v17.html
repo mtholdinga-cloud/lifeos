@@ -1124,7 +1124,7 @@ function renderHeute(){
 // FITNESS
 // ==============================
 function updateKcal(v){
-  S.kcal=v;save();
+  S.kcal=v;S.fitness.kcal=v;save();
   document.getElementById('kcal-val').textContent=v.toLocaleString('de-DE');
   document.getElementById('kcal-slider').value=v;
   document.getElementById('kcal-direct').value=v;
@@ -1160,8 +1160,6 @@ function renderFitness() {
   const f = S.fitness || {};
   const weights = f.weights || [];
   const ziggi = f.ziggi || '';
-  const kcal = f.kcal || 0;
-  const reps = f.reps || {};
   const lastW = weights.length > 0 ? weights[weights.length-1] : null;
   const wChart = weights.slice(-14).map((w,i,arr) => {
     const max = Math.max(...arr.map(x=>x.val));
@@ -1183,29 +1181,71 @@ function renderFitness() {
   const ziggiInputVal = ziggi ? ziggi.replace(' ','T').substring(0,16) : '';
   const panel = document.getElementById('panel-fitness');
   if (!panel) return;
-  panel.innerHTML = '<div class=\"card\"><div class=\"card-title\">⚖️ Gewicht</div>' +
+  panel.innerHTML =
+    '<div class=\"card\"><div class=\"card-title\">⚖️ Gewicht</div>' +
     '<div style=\"display:flex;align-items:center;gap:10px;margin-bottom:8px;\">' +
     '<input id=\"weightInput\" type=\"number\" step=\"0.1\" placeholder=\"kg eingeben\" style=\"flex:1;padding:8px 12px;border-radius:10px;border:1px solid var(--bg3);background:var(--bg1);color:var(--t1);font-size:.95em;\">' +
     '<button onclick=\"logWeight()\" style=\"padding:8px 16px;border-radius:10px;background:var(--acc);color:#000;border:none;cursor:pointer;font-size:.9em;font-weight:700;\">Eintragen</button>' +
     '</div>' +
-    (lastW ? '<div style=\"margin-bottom:6px;\"><span style=\"font-size:1.2em;font-weight:800;color:var(--acc);\">' + lastW.val + ' kg</span> <span style=\"font-size:.75em;color:var(--t2)\">(' + lastW.date + ')</span></div>' : '') +
-    (weights.length > 1 ? '<div class=\"weight-chart\">' + wChart + '</div>' : '') +
+    (lastW ? '<div style=\"margin-bottom:6px;\"><span style=\"font-size:1.2em;font-weight:800;color:var(--acc);\">'+lastW.val+' kg</span> <span style=\"font-size:.75em;color:var(--t2);\">('+lastW.date+')</span></div>' : '') +
+    (weights.length > 1 ? '<div class=\"weight-chart\">'+wChart+'</div>' : '') +
     '</div>' +
     '<div class=\"card\"><div class=\"card-title\">🚬 Letzte Zigarette</div>' +
-    '<div style=\"font-size:1.3em;font-weight:800;color:var(--acc);margin-bottom:8px;\">' + ziggiMsg + '</div>' +
+    '<div style=\"font-size:1.3em;font-weight:800;color:var(--acc);margin-bottom:8px;\">'+ziggiMsg+'</div>' +
     '<div class=\"ziggi-date-row\">' +
-    '<input type=\"datetime-local\" id=\"ziggiDateInput\" value=\"' + ziggiInputVal + '\" style=\"padding:6px 10px;border-radius:8px;border:1px solid var(--bg3);background:var(--bg1);color:var(--t1);font-size:.85em;\">' +
+    '<input type=\"datetime-local\" id=\"ziggiDateInput\" value=\"'+ziggiInputVal+'\" style=\"padding:6px 10px;border-radius:8px;border:1px solid var(--bg3);background:var(--bg1);color:var(--t1);font-size:.85em;\">' +
     '<button onclick=\"setZiggi()\" style=\"padding:6px 14px;border-radius:8px;background:var(--acc);color:#000;border:none;cursor:pointer;font-size:.85em;font-weight:700;\">Jetzt geraucht</button>' +
     '<button onclick=\"setZiggiDate()\" style=\"padding:6px 14px;border-radius:8px;background:var(--bg2);color:var(--t1);border:1px solid var(--bg3);cursor:pointer;font-size:.85em;\">Datum übernehmen</button>' +
     '</div></div>' +
-    '<div class=\"card\"><div class=\"card-title\">🍎 Kalorien</div>' +
-    '<div style=\"display:flex;align-items:center;gap:10px;\">' +
-    '<input id=\"kcalInput\" type=\"number\" value=\"' + kcal + '\" placeholder=\"kcal\" style=\"flex:1;padding:8px 12px;border-radius:10px;border:1px solid var(--bg3);background:var(--bg1);color:var(--t1);font-size:.95em;\">' +
-    '<button onclick=\"saveKcal()\" style=\"padding:8px 16px;border-radius:10px;background:var(--acc);color:#000;border:none;cursor:pointer;font-weight:700;\">Speichern</button>' +
-    '</div></div>' +
-    '<div class=\"card\"><div class=\"card-title\">🔁 Wiederholungen</div>' +
-    (Object.keys(reps).length > 0 ? Object.keys(reps).map(k => '<div style=\"margin-bottom:4px;\"><strong>' + k + '</strong>: ' + (reps[k]||[]).join(' | ') + '</div>').join('') : '<em style=\"color:var(--t2)\">Noch keine Einträge</em>') +
+    '<div class=\"card\"><div class=\"card-title\">🔥 Kalorien</div>' +
+    '<div class=\"kcal-display\"><span id=\"kcal-val\">0</span> kcal</div>' +
+    '<div class=\"kcal-bar-wrap\" id=\"kcal-bar-wrap\">' +
+    '<div class=\"kcal-fill\" id=\"kcal-fill\" style=\"width:0%\"></div>' +
+    '<div class=\"kcal-marker-line\" style=\"left:41.8%\"></div><div class=\"kcal-marker\" style=\"left:41.8%\">2.300</div>' +
+    '<div class=\"kcal-marker-line\" style=\"left:63.6%\"></div><div class=\"kcal-marker\" style=\"left:63.6%\">3.500</div>' +
+    '<div class=\"kcal-marker-line\" style=\"left:90.9%\"></div><div class=\"kcal-marker\" style=\"left:90.9%\">5.000</div>' +
+    '</div>' +
+    '<input type=\"range\" class=\"kcal-slider\" id=\"kcal-slider\" min=\"0\" max=\"5500\" value=\"0\">' +
+    '<div class=\"kcal-zone\" id=\"kcal-zone\">⚠️ Kaloriendefizit</div>' +
+    '<div class=\"kcal-input-row\"><input class=\"kcal-inp\" type=\"number\" id=\"kcal-direct\" placeholder=\"Direkte Eingabe...\" value=\"0\"></div>' +
+    '</div>' +
+    '<div class=\"card\"><div class=\"card-title\">🏋️ Sport-Tracker</div>' +
+    '<div class=\"section-hdr\">💪 Liegestütze — 100 Reps</div><div class=\"rep-grid\" id=\"reps-lies\"></div>' +
+    '<div class=\"section-hdr\">🤜 Unterarm-Squeezes — 100 Reps</div><div class=\"rep-grid\" id=\"reps-unter\"></div>' +
+    '<div class=\"section-hdr\">🔝 Klimmzüge — 50 Reps</div><div class=\"rep-grid\" id=\"reps-klim\"></div>' +
+    '</div>' +
+    '<div class=\"card\"><div class=\"card-title\">💊 Supplemente</div>' +
+    '<div class=\"supp-grid\" id=\"supp-grid\"></div>' +
+    '</div>' +
+    '<div class=\"card\"><div class=\"card-title\">🍽️ Ernährung</div>' +
+    '<div class=\"ern-row-big\"><div class=\"ern-label-big\">🌅 Morgens</div><textarea class=\"ern-textarea\" id=\"ern-morgens\" placeholder=\"z.B. Haferflocken, Proteinshake, Obst...\"></textarea></div>' +
+    '<div class=\"ern-row-big\"><div class=\"ern-label-big\">☀️ Mittags</div><textarea class=\"ern-textarea\" id=\"ern-mittags\" placeholder=\"z.B. Hähnchen mit Reis, Salat...\"></textarea></div>' +
+    '<div class=\"ern-row-big\"><div class=\"ern-label-big\">🌙 Abends</div><textarea class=\"ern-textarea\" id=\"ern-abends\" placeholder=\"z.B. Quark, Gemüse, Proteinriegel...\"></textarea></div>' +
     '</div>';
+
+  updateKcal(S.kcal || 0);
+  document.getElementById('kcal-slider').oninput = e => updateKcal(+e.target.value);
+  document.getElementById('kcal-direct').oninput = e => updateKcal(Math.max(0, Math.min(5500, +e.target.value || 0)));
+  renderReps(S.reps.lies, 'reps-lies', 10, 100);
+  renderReps(S.reps.unter, 'reps-unter', 10, 100);
+  renderReps(S.reps.klim, 'reps-klim', 5, 50);
+  const sg = document.getElementById('supp-grid'); sg.innerHTML = '';
+  const icons = ['🌿','☀️','🔵','🐟','💪','🌱','🪨','🧬','⚡'];
+  S.supps.forEach((s, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'supp-btn' + (S.suppDone.includes(i) ? ' done' : '');
+    btn.innerHTML = '<div class=\"supp-icon\">' + (icons[i] || '💊') + '</div><div class=\"supp-name\">' + s + '</div>';
+    btn.onclick = () => {
+      if (S.suppDone.includes(i)) S.suppDone.splice(S.suppDone.indexOf(i), 1); else S.suppDone.push(i);
+      S.fitness.suppDone = S.suppDone;
+      save(); renderFitness();
+    };
+    sg.appendChild(btn);
+  });
+  ['morgens','mittags','abends'].forEach(k => {
+    const el = document.getElementById('ern-' + k);
+    if (el) { el.value = S.ern[k] || ''; el.oninput = e => { S.ern[k] = e.target.value; S.fitness.ern[k] = e.target.value; save(); }; }
+  });
 }
 
 function renderProjekte(){
@@ -2295,8 +2335,13 @@ function normalizeState(){
   S.reps = S.fitness.reps;
   if(!Array.isArray(S.fitness.weights)) S.fitness.weights = [];
   if(!S.fitness.ern) S.fitness.ern = {morgens:'',mittags:'',abends:''};
-  if(!Array.isArray(S.fitness.supps)) S.fitness.supps = [];
+  if(!Array.isArray(S.fitness.supps)) S.fitness.supps = ['Multivitamin','D3/K2','Magnesium','Omega-3','Whey','Ashwagandha','Shilajit','Ecdysteron','Kreatin'];
   if(!Array.isArray(S.fitness.suppDone)) S.fitness.suppDone = [];
+  // Aliases for V16 compatibility
+  S.kcal = S.fitness.kcal || 0;
+  S.supps = S.fitness.supps;
+  S.suppDone = S.fitness.suppDone;
+  S.ern = S.fitness.ern;
   if(!Array.isArray(S.archive)) S.archive = [];
   // Data aliases for render functions
   S.notes = Array.isArray(S.notizen) ? S.notizen : [];
