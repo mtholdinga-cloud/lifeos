@@ -532,7 +532,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
   <div class="topbar-right">
     <div class="zoom-ctrl">
       <span style="font-size:10px;color:var(--t2);">🔍</span>
-      <input type="range" class="zoom-slider" id="zoom-slider" min="70" max="130" value="100" title="Zoom">
+      <input type="range" class="zoom-slider" id="zoom-slider" min="70" max="130" value="100" title="Zoom" oninput="setZoom(this.value)">
       <span style="font-size:10px;color:var(--t2);font-family:DM Mono,monospace;" id="zoom-label">100%</span>
     </div>
     <button class="save-btn" id="savebtn" onclick="saveData()">💾 Speichern</button>
@@ -1711,6 +1711,7 @@ function renderTagesplan() {
   let html = '<div class="tp-header"><h2>Tagesplanung</h2>'
     + '<div class="tp-actions">'
     + '<button class="btn-sm" onclick="addGroup()">+ Gruppe</button>'
+    + '<button class="btn-sm" onclick="toggleTpEditMode()" style="background:'+(S.tpEditMode?'var(--acc)':'var(--bg3)')+';color:'+(S.tpEditMode?'#000':'var(--t1)')+';">✏️ '+(S.tpEditMode?'Fertig':'Bearbeiten')+'</button>'
     + '<button class="btn-sm btn-arch" onclick="archiveToday()">📦 Archivieren</button>'
     + '<button class="btn-sm btn-arch" onclick="goPanel(&quot;archiv&quot;)">📋 Archiv</button>'
     + '</div></div>'
@@ -1837,7 +1838,12 @@ function renderGroupTasksHTML(group) {
       '</div>' +
       (subtasks.length > 0 ? '<div class=\"subtask-list\">' + subHTML + '</div>' : '') +
       addSubHTML;
-  }).join('');
+  }).join('') +
+    '<div class="task-add-row">'
+    + '<input type="text" class="task-inp" placeholder="+ Aufgabe hinzufügen..." id="taskinp_' + group.id + '"'
+    + ' onkeydown="if(event.key==='Enter'){var g=S.tagesplan.groups.find(x=>x.id==='' + group.id + '');if(g){g.tasks.push({id:'t'+Date.now(),title:this.value.trim(),done:false,notRelevant:false});this.value='';save();renderTagesplan();}}">'
+    + '<button onclick="var inp=document.getElementById('taskinp_' + group.id + '');if(inp&&inp.value.trim()){var g=S.tagesplan.groups.find(x=>x.id==='' + group.id + '');if(g){g.tasks.push({id:'t'+Date.now(),title:inp.value.trim(),done:false,notRelevant:false});inp.value='';save();renderTagesplan();}}" class="btn-add-task">+</button>'
+    + '</div>';
 }
 function taskDragStart(e,gi,ti) { _dragSrcTask=ti; _dragSrcTaskGi=gi; e.dataTransfer.effectAllowed='move'; e.stopPropagation(); }
 function taskDragOver(e) { e.preventDefault(); e.stopPropagation(); }
@@ -2208,6 +2214,13 @@ function normalizeState(){
   if(!Array.isArray(S.fitness.supps)) S.fitness.supps = [];
   if(!Array.isArray(S.fitness.suppDone)) S.fitness.suppDone = [];
   if(!Array.isArray(S.archive)) S.archive = [];
+  // Data aliases for render functions
+  S.notes = Array.isArray(S.notizen) ? S.notizen : [];
+  if(!Array.isArray(S.projekte)) S.projekte = [];
+  if(!S.reflex) S.reflex = {gut:'', verb:'', ziel1:'', ziel2:'', ziel3:''};
+  if(!Array.isArray(S.finanzen.konten)) S.finanzen.konten = [];
+  if(!Array.isArray(S.finanzen.income)) S.finanzen.income = [];
+  if(!Array.isArray(S.finanzen.expense)) S.finanzen.expense = [];
 }
 
 async function initApp() {
@@ -2235,6 +2248,42 @@ async function initApp() {
   renderPanel(active ? active.dataset.panel : 'heute');
 }
 document.addEventListener('DOMContentLoaded', initApp);
+
+// Zoom control
+function setZoom(v) {
+  document.body.style.zoom = v + '%';
+  const lbl = document.getElementById('zoom-label');
+  if (lbl) lbl.textContent = v + '%';
+  localStorage.setItem('lifeos-zoom', v);
+}
+(function() {
+  const z = localStorage.getItem('lifeos-zoom');
+  if (z) {
+    const sl = document.getElementById('zoom-slider');
+    if (sl) sl.value = z;
+    const lbl = document.getElementById('zoom-label');
+    if (lbl) lbl.textContent = z + '%';
+    document.body.style.zoom = z + '%';
+  }
+})();
+
+// Tagesplan edit mode toggle
+function toggleTpEditMode() {
+  S.tpEditMode = !S.tpEditMode;
+  renderTagesplan();
+}
+
+// Expense summary renderer
+function renderExpenseSummary(exps, container) {
+  if (!container) return;
+  if (!Array.isArray(exps)) exps = [];
+  container.innerHTML = exps.map(e =>
+    '<div class="exp-row" style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bg3)">'
+    + '<span>' + (e.label||'') + '</span>'
+    + '<span style="color:var(--acc3)">-' + Math.abs(e.amt||0).toFixed(2) + '€</span>'
+    + '</div>'
+  ).join('') || '<div style="color:var(--t2);font-size:13px;padding:8px 0">Keine Ausgaben</div>';
+}
 
 
 // === COMPAT: Missing functions from V16 ===
