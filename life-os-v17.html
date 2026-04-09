@@ -532,7 +532,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
   <div class="topbar-right">
     <div class="zoom-ctrl">
       <span style="font-size:10px;color:var(--t2);">🔍</span>
-      <input type="range" class="zoom-slider" id="zoom-slider" min="70" max="130" value="100" title="Zoom" oninput="setZoom(this.value)">
+      <input type="range" class="zoom-slider" id="zoom-slider" min="70" max="130" value="100" title="Zoom">
       <span style="font-size:10px;color:var(--t2);font-family:DM Mono,monospace;" id="zoom-label">100%</span>
     </div>
     <button class="save-btn" id="savebtn" onclick="saveData()">💾 Speichern</button>
@@ -1840,9 +1840,10 @@ function renderGroupTasksHTML(group) {
       addSubHTML;
   }).join('') +
     '<div class="task-add-row">'
-    + '<input type="text" class="task-inp" placeholder="+ Aufgabe hinzufügen..." id="taskinp_' + group.id + '"'
-    + ' onkeydown="if(event.key==='Enter'){var g=S.tagesplan.groups.find(x=>x.id==='' + group.id + '');if(g){g.tasks.push({id:'t'+Date.now(),title:this.value.trim(),done:false,notRelevant:false});this.value='';save();renderTagesplan();}}">'
-    + '<button onclick="var inp=document.getElementById('taskinp_' + group.id + '');if(inp&&inp.value.trim()){var g=S.tagesplan.groups.find(x=>x.id==='' + group.id + '');if(g){g.tasks.push({id:'t'+Date.now(),title:inp.value.trim(),done:false,notRelevant:false});inp.value='';save();renderTagesplan();}}" class="btn-add-task">+</button>'
+    + '<input type="text" class="task-inp" placeholder="+ Aufgabe hinzufügen..."'
+    + ' data-gid="' + group.id + '"'
+    + ' onkeydown="if(event.key===String.fromCharCode(13))addTaskByGid(this.dataset.gid,this)">'
+    + '<button class="btn-add-task" data-gid="' + group.id + '" onclick="addTaskByGid(this.dataset.gid,this.previousElementSibling)">+</button>'
     + '</div>';
 }
 function taskDragStart(e,gi,ti) { _dragSrcTask=ti; _dragSrcTaskGi=gi; e.dataTransfer.effectAllowed='move'; e.stopPropagation(); }
@@ -1861,6 +1862,16 @@ function addTask(gi,inp) {
   const t = inp.value.trim(); if(!t) return;
   S.tagesplan.groups[gi].tasks.push({id:'t'+Date.now(),title:t,done:false,notRelevant:false});
   inp.value=''; save(); renderTagesplan();
+}
+function addTaskByGid(gid, inp) {
+  if (!inp) return;
+  const t = (typeof inp.value !== 'undefined') ? inp.value.trim() : String(inp);
+  if (!t) return;
+  const g = S.tagesplan.groups.find(x => x.id === gid);
+  if (!g) return;
+  g.tasks.push({id:'t'+Date.now(), title:t, done:false, notRelevant:false});
+  inp.value = '';
+  save(); renderTagesplan();
 }
 function deleteTask(gi,ti) { S.tagesplan.groups[gi].tasks.splice(ti,1); save(); renderTagesplan(); }
 function toggleTask(gi,ti,v) { S.tagesplan.groups[gi].tasks[ti].done=v; save(); }
@@ -2250,22 +2261,24 @@ async function initApp() {
 document.addEventListener('DOMContentLoaded', initApp);
 
 // Zoom control
-function setZoom(v) {
-  document.body.style.zoom = v + '%';
-  const lbl = document.getElementById('zoom-label');
-  if (lbl) lbl.textContent = v + '%';
-  localStorage.setItem('lifeos-zoom', v);
-}
-(function() {
-  const z = localStorage.getItem('lifeos-zoom');
-  if (z) {
-    const sl = document.getElementById('zoom-slider');
-    if (sl) sl.value = z;
-    const lbl = document.getElementById('zoom-label');
-    if (lbl) lbl.textContent = z + '%';
-    document.body.style.zoom = z + '%';
+document.addEventListener('DOMContentLoaded', function() {
+  const zslider = document.getElementById('zoom-slider');
+  const zlabel = document.getElementById('zoom-label');
+  if (zslider) {
+    zslider.addEventListener('input', function() {
+      const v = this.value;
+      document.body.style.zoom = v + '%';
+      if (zlabel) zlabel.textContent = v + '%';
+      localStorage.setItem('lifeos-zoom', v);
+    });
+    const savedZoom = localStorage.getItem('lifeos-zoom');
+    if (savedZoom) {
+      zslider.value = savedZoom;
+      if (zlabel) zlabel.textContent = savedZoom + '%';
+      document.body.style.zoom = savedZoom + '%';
+    }
   }
-})();
+});
 
 // Tagesplan edit mode toggle
 function toggleTpEditMode() {
