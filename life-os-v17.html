@@ -2150,59 +2150,83 @@ function subDragEnd() { _subDragSrc = null; document.querySelectorAll('.subtask-
 function renderArchiv() {
   const archive = S.archive || [];
   const sorted = archive.slice().sort((a,b) => b.date > a.date ? 1 : -1);
-  let listHTML = '';
   if (sorted.length === 0) {
-    listHTML = '<div class=\"archiv-empty\">📭 Noch kein Archiv vorhanden.<br>Nutze den Button um den heutigen Tag zu archivieren.</div>';
-  } else {
-    listHTML = sorted.map((day, i) => {
-      const groups = day.groups || [];
-      const totalTasks = groups.reduce((s,g) => s + (g.tasks||[]).length, 0);
-      const doneTasks = groups.reduce((s,g) => s + (g.tasks||[]).filter(t=>t.done).length, 0);
-      const pct = totalTasks > 0 ? Math.round(doneTasks/totalTasks*100) : 0;
-      const preview = groups.map(g => (g.tasks||[]).filter(t=>t.done).slice(0,2).map(t=>escHtml(t.title)).join(', ')).filter(Boolean).slice(0,2).join(' • ');
-      return '<div class=\"archiv-day-card\" onclick=\"openArchivDay(' + i + ')\">' +
-        '<div class=\"archiv-day-header\">' +
-        '<span class=\"archiv-day-date\">' + day.date + '</span>' +
-        '<span class=\"archiv-day-stats\">' + doneTasks + '/' + totalTasks + ' (' + pct + '%) <button class=\"archiv-day-pdf\" onclick=\"event.stopPropagation();exportArchivPDF(' + i + ')\" title=\"PDF\">📄 PDF</button></span>' +
-        '</div>' +
-        (preview ? '<div class=\"archiv-day-preview\">' + preview + '</div>' : '') +
-        '</div>';
-    }).join('');
+    document.getElementById('panel-archiv').innerHTML = '<div style="padding:1.5em;color:#888;text-align:center;">Noch keine archivierten Tage vorhanden.<br>Nutze den Button unten, um den heutigen Tag zu archivieren.</div>';
+    return;
   }
   const panel = document.getElementById('panel-archiv');
-  if (!panel) return;
-  panel.innerHTML = '<div class=\"archiv-panel\">' +
-    '<div class=\"archiv-header\">' +
-    '<span class=\"archiv-title\">📦 Archiv</span>' +
-    '<button onclick=\"archiveToday()\" style=\"padding:6px 14px;border-radius:8px;background:var(--acc);color:#000;border:none;cursor:pointer;font-size:.85em;font-weight:700;\">+ Heute archivieren</button>' +
-    '</div>' +
-    '<div class=\"archiv-list\">' + listHTML + '</div>' +
-    '</div>';
+  panel.innerHTML = '<div class="archiv-list">' + sorted.map((day, i) => {
+    const groups = day.groups || [];
+    const totalTasks = groups.reduce((s,g) => s + (g.tasks||[]).length, 0);
+    const doneTasks = groups.reduce((s,g) => s + (g.tasks||[]).filter(t=>t.done).length, 0);
+    const pct = totalTasks ? Math.round(doneTasks/totalTasks*100) : 0;
+    const preview = groups.map(g => (g.tasks||[]).filter(t=>t.done).slice(0,2).map(t=>escHtml(t.title)).join(', ')).filter(Boolean).slice(0,2).join(' • ');
+    const fit = day.fitness || {};
+    const kcal = day.kcal || fit.kcal || 0;
+    const gew = fit.weights && fit.weights.length ? fit.weights[0].val + ' kg' : (fit.gewicht ? fit.gewicht + ' kg' : '');
+    const trainCount = (fit.training||[]).length;
+    const suppDoneCount = (day.suppDone||[]).length;
+    const suppTotal = (day.supps||[]).length;
+    const fitnessLine = [
+      kcal ? kcal + ' kcal' : '',
+      gew ? '⚖ ' + gew : '',
+      trainCount ? trainCount + ' Übung' + (trainCount>1?'en':'') : '',
+      suppTotal ? suppDoneCount + '/' + suppTotal + ' Suppl.' : ''
+    ].filter(Boolean).join(' · ');
+    const reflex = day.reflex || {};
+    const hasReflex = reflex.gut || reflex.verb || reflex.ziel1;
+    return '<div class="archiv-card" onclick="openArchivDay(' + i + ')" style="cursor:pointer;padding:.75em 1em;margin:.4em 0;border-radius:8px;background:var(--bg2,#f5f5f5);border:1px solid var(--border,#ddd);">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+      '<span style="font-weight:600;">' + day.date + '</span>' +
+      '<span class="pct-badge" style="font-size:.85em;font-weight:700;padding:.1em .5em;border-radius:12px;background:' + (pct>=80?'#4caf50':pct>=50?'#ff9800':'#f44336') + ';color:#fff;">' + pct + '%</span></div>' +
+      (fitnessLine ? '<div style="font-size:.8em;color:#888;margin-top:.2em;">' + fitnessLine + '</div>' : '') +
+      (hasReflex ? '<div style="font-size:.75em;color:#aaa;margin-top:.15em;">📝 Reflexion vorhanden</div>' : '') +
+      (preview ? '<div style="font-size:.78em;color:#777;margin-top:.25em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">✅ ' + preview + '</div>' : '') +
+      '</div>';
+  }).join('') + '</div>';
 }
-
 function openArchivDay(idx) {
   const archive = S.archive || [];
   const sorted = archive.slice().sort((a,b) => b.date > a.date ? 1 : -1);
   const day = sorted[idx];
   if (!day) return;
   const groups = day.groups || [];
-  let content = '';
-  groups.forEach(g => {
+  const fit = day.fitness || {};
+  const reflex = day.reflex || {};
+  const notizen = day.notizen || [];
+  const kcal = day.kcal || fit.kcal || 0;
+  const suppDone = day.suppDone || [];
+  const supps = day.supps || [];
+  let tasksHtml = groups.map(g => {
     const tasks = g.tasks || [];
-    if (tasks.length === 0) return;
-    content += '<div class=\"archiv-detail-section\">' +
-      '<h4>' + escHtml(g.title||g.id) + '</h4>' +
-      tasks.map(t => '<div style=\"display:flex;align-items:center;gap:6px;padding:3px 0;\"><span>' + (t.done?'✅':'⬜') + '</span><span style=\"font-size:.85em;' + (t.done?'':'opacity:.7') + '\">' + escHtml(t.title) + '</span></div>').join('') +
-      '</div>';
-  });
+    if (!tasks.length) return '';
+    return '<div style="margin-bottom:.75em;"><h4 style="margin:0 0 .3em;font-size:.95em;">' + escHtml(g.title||g.id) + '</h4>' +
+      tasks.map(t => '<div style="display:flex;align-items:center;gap:.4em;font-size:.88em;' + (t.done?'':' opacity:.6') + '">' +
+        '<span>' + (t.done?'✅':'⬜') + '</span><span>' + escHtml(t.title) + '</span></div>').join('') + '</div>';
+  }).join('');
+  const trainList = (fit.training||[]).map(ex => '<div style="font-size:.85em;padding:.2em 0;">' + escHtml(ex.name||ex) + (ex.sets?' · '+ex.sets+' Sätze':'') + '</div>').join('');
+  const weights = fit.weights || [];
+  const gewHtml = weights.length ? '<div style="font-size:.85em;">⚖ Gewicht: ' + weights[0].val + ' kg</div>' : '';
+  const kcalHtml = kcal ? '<div style="font-size:.85em;">🔥 Kalorien: ' + kcal + ' kcal</div>' : '';
+  const ernObj = fit.ern || {};
+  const ernHtml = Object.entries(ernObj).filter(([k,v])=>v).map(([k,v])=>'<div style="font-size:.84em;"><b>' + escHtml(k) + ':</b> ' + escHtml(v) + '</div>').join('');
+  const suppHtml = supps.length ? supps.map(s=>'<span style="display:inline-block;font-size:.8em;padding:.15em .4em;margin:.1em;border-radius:4px;background:' + (suppDone.includes(s)?'#4caf50':'#ddd') + ';color:' + (suppDone.includes(s)?'#fff':'#666') + '">' + escHtml(s) + '</span>').join('') : '';
+  const fitnessSection = (gewHtml||kcalHtml||trainList||ernHtml||suppHtml) ? '<div style="margin-bottom:1em;"><h3 style="margin:0 0 .4em;">💪 Fitness</h3>' + gewHtml + kcalHtml + (trainList?'<div style="margin-top:.3em;">'+trainList+'</div>':'') + (ernHtml?'<div style="margin-top:.4em;"><b style="font-size:.88em;">Ernährung:</b>'+ernHtml+'</div>':'') + (suppHtml?'<div style="margin-top:.4em;"><b style="font-size:.88em;">Supplemente:</b><br>'+suppHtml+'</div>':'') + '</div>' : '';
+  const reflexHtml = (reflex.gut||reflex.verb||reflex.ziel1||reflex.ziel2||reflex.ziel3) ? '<div style="margin-bottom:1em;"><h3 style="margin:0 0 .4em;">📝 Reflexion</h3>' +
+    (reflex.gut?'<div style="font-size:.85em;"><b>Was lief gut:</b> ' + escHtml(reflex.gut) + '</div>':'')+
+    (reflex.verb?'<div style="font-size:.85em;"><b>Verbesserung:</b> ' + escHtml(reflex.verb) + '</div>':'')+
+    [reflex.ziel1,reflex.ziel2,reflex.ziel3].filter(Boolean).map(z=>'<div style="font-size:.85em;">🎯 ' + escHtml(z) + '</div>').join('') + '</div>' : '';
+  const notizenHtml = notizen.length ? '<div style="margin-bottom:1em;"><h3 style="margin:0 0 .4em;">🗒 Notizen (' + notizen.length + ')</h3>' + notizen.slice(0,5).map(n=>'<div style="font-size:.84em;padding:.2em 0;border-bottom:1px solid var(--border,#eee);">' + escHtml(typeof n === 'string' ? n : (n.text||n.title||JSON.stringify(n))).substring(0,120) + '</div>').join('') + '</div>' : '';
+  let content = '<div style="margin-bottom:1em;"><h3 style="margin:0 0 .4em;">📋 Tagesplan</h3>' + (tasksHtml||'<div style="color:#999;font-size:.9em;">Keine Aufgaben.</div>') + '</div>' + fitnessSection + reflexHtml + notizenHtml;
   const overlay = document.createElement('div');
   overlay.className = 'archiv-detail-overlay';
-  overlay.innerHTML = '<div class=\"archiv-detail-modal\">' +
-    '<button class=\"archiv-close\" onclick=\"this.parentElement.parentElement.remove()\">✕</button>' +
-    '<h3>📅 ' + day.date + '</h3>' +
-    content +
-    '<button class=\"archiv-pdf-btn\" onclick=\"exportArchivPDF(' + idx + ')\">📄 PDF exportieren</button>' +
-    '</div>';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1em;';
+  overlay.innerHTML = '<div style="background:var(--bg,#fff);border-radius:12px;max-width:500px;width:100%;max-height:85vh;overflow-y:auto;padding:1.25em;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75em;">' +
+    '<h3 style="margin:0;font-size:1.05em;">' + day.date + '</h3>' +
+    '<button onclick="this.parentElement.parentElement.parentElement.remove()" style="background:none;border:none;font-size:1.3em;cursor:pointer;">✕</button></div>' +
+    content + '</div>';
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
   document.body.appendChild(overlay);
 }
 function exportArchivPDF(idx) {
@@ -2282,24 +2306,31 @@ function migrateV16Data() {
 
 function archiveToday() {
   if (!confirm('Heutigen Tag archivieren?')) return;
-  const today = new Date().toLocaleDateString('de-DE', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+  const today = new Date().toLocaleDateString('de-DE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const groups = (S.tagesplan.groups || []).map(g => ({
     id: g.id, title: g.title,
-    tasks: (g.tasks||[]).map(t => ({title: t.title, done: t.done, notRelevant: t.notRelevant, subtasks: t.subtasks||[]}))
+    tasks: (g.tasks || []).map(t => ({title: t.title, done: t.done, notRelevant: t.notRelevant}))
   }));
+  const snapshot = {
+    date: today,
+    ts: Date.now(),
+    groups,
+    fitness: JSON.parse(JSON.stringify(S.fitness || {})),
+    kcal: S.kcal || 0,
+    reps: JSON.parse(JSON.stringify(S.reps || {})),
+    supps: (S.supps || []).slice(),
+    suppDone: (S.suppDone || []).slice(),
+    ern: (S.ern || []).slice(),
+    reflex: JSON.parse(JSON.stringify(S.reflex || {})),
+    notizen: JSON.parse(JSON.stringify(S.notizen || []))
+  };
   const existing = S.archive.findIndex(d => d.date === today);
-  if (existing >= 0) S.archive[existing] = {date: today, groups, ts: Date.now()};
-  else S.archive.push({date: today, groups, ts: Date.now()});
+  if (existing >= 0) S.archive[existing] = snapshot;
+  else S.archive.push(snapshot);
   if (S.archive.length > 90) S.archive = S.archive.sort((a,b) => b.ts-a.ts).slice(0, 90);
+  S.archive = S.archive.sort((a,b) => b.ts-a.ts).slice();
   save(); showToast('Tag archiviert!'); goPanel('archiv');
 }
-
-
-
-
-
-
-
 function showToast(msg) {
   let t = document.getElementById('_toast');
   if (!t) { t = document.createElement('div'); t.id='_toast'; t.className='toast-msg'; document.body.appendChild(t); }
