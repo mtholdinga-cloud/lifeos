@@ -971,7 +971,8 @@ async function save() {
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(async () => {
     try {
-      await db.state.put({ id: 'main', data: S, ts: Date.now() });
+      await db.state.put({ key: 'main', data: S, ts: Date.now() });
+      try { localStorage.setItem('lifeos_v17_state', JSON.stringify(S)); } catch(e3) {}
     } catch(e) {
       try { localStorage.setItem('lifeos_v17_state', JSON.stringify(S)); } catch(e2) {}
     }
@@ -1021,7 +1022,7 @@ let pcMode=localStorage.getItem('lifeospcmode')!=='0';
 function applyMode(){
   document.body.classList.toggle('pc-mode',pcMode);
   document.getElementById('modebtn').textContent=pcMode?'🌙 Dark':'🖥️ PC';
-  if(pcMode){sidebarOpen=true;document.getElementById('sidebar').classList.add('open');document.getElementById('sidebar-toggle').textContent='‹';}
+
   localStorage.setItem('lifeospcmode',pcMode?'1':'0');
 }
 document.getElementById('modebtn').onclick=()=>{pcMode=!pcMode;applyMode();};
@@ -2230,7 +2231,22 @@ function exportArchivPDF(idx) {
       });
     });
   });
-  html += '<div class=\"stat\">Exportiert: ' + new Date().toLocaleString('de-DE') + '</div></body></html>';
+  html += '<div class=\"stat\">Exportiert: ' + new Date().toLocaleString('de-DE') + '</div><script>
+// Auto-update: check every 2 min if a newer version is available, reload if tab is hidden
+(function(){
+  let _lastSize = null;
+  async function checkUpdate(){
+    try {
+      const r = await fetch(location.pathname + '?nc=' + Date.now(), {cache:'no-store'});
+      const txt = await r.text();
+      if(_lastSize === null){ _lastSize = txt.length; return; }
+      if(txt.length !== _lastSize){ _lastSize = txt.length; location.reload(); }
+    } catch(e){}
+  }
+  setTimeout(function(){ checkUpdate(); setInterval(checkUpdate, 120000); }, 8000);
+})();
+</script>
+</body></html>';
   const w = window.open('', '_blank');
   w.document.write(html);
   w.document.close();
