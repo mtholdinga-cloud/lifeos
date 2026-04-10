@@ -2231,22 +2231,7 @@ function exportArchivPDF(idx) {
       });
     });
   });
-  html += '<div class=\"stat\">Exportiert: ' + new Date().toLocaleString('de-DE') + '</div><script>
-// Auto-update: check every 2 min if a newer version is available, reload if tab is hidden
-(function(){
-  let _lastSize = null;
-  async function checkUpdate(){
-    try {
-      const r = await fetch(location.pathname + '?nc=' + Date.now(), {cache:'no-store'});
-      const txt = await r.text();
-      if(_lastSize === null){ _lastSize = txt.length; return; }
-      if(txt.length !== _lastSize){ _lastSize = txt.length; location.reload(); }
-    } catch(e){}
-  }
-  setTimeout(function(){ checkUpdate(); setInterval(checkUpdate, 120000); }, 8000);
-})();
-</script>
-</body></html>';
+  html += '<div class=\"stat\">Exportiert: ' + new Date().toLocaleString('de-DE') + '</div></body></html>';
   const w = window.open('', '_blank');
   w.document.write(html);
   w.document.close();
@@ -2568,5 +2553,8 @@ function renderEditableTaskList(tasks, key, container, renderFn, numbered) {
     container.appendChild(addBtn);
 }
 
+</script>
+<script>
+(function(){var _z=null;function _u(){var x=new XMLHttpRequest();x.open('GET',location.pathname+'?n='+Date.now(),true);x.onload=function(){if(_z===null){_z=x.responseText.length;return;}if(x.responseText.length!==_z){_z=x.responseText.length;location.reload();}};x.send();}setTimeout(function(){_u();setInterval(_u,120000);},8000);})();
 </script>
       </html>
