@@ -737,23 +737,33 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
       <div class="card">
         <div class="card-title">📥 Einnahmen</div>
         <div id="fin-income"></div>
+        <div class="add-expense-form" id="add-income-static" style="margin-top:10px;">
+          <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">&#x2795; Neue Einnahme</div>
+          <div class="form-row" style="flex-wrap:wrap;gap:8px;align-items:center;">
+            <input class="add-expense-inp" id="new-inc-label" placeholder="Bezeichnung (z.B. Gehalt)">
+            <input class="add-expense-inp" id="new-inc-amt" type="number" placeholder="Betrag" min="0" step="0.01" style="max-width:100px;">
+            <input class="add-expense-inp" id="new-inc-date" type="date" style="max-width:140px;">
+            <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);white-space:nowrap;">
+              <input type="checkbox" id="new-inc-monthly" style="width:16px;height:16px;accent-color:var(--acc2);">&#x1F504; monatlich
+            </label>
+          </div>
+          <button class="add-btn" onclick="addIncome()" style="margin-top:8px;">&#x2795; Hinzufügen</button>
+        </div>
       </div>
       <div class="card">
         <div class="card-title">📤 Ausgaben</div>
         <div id="fin-expense"></div>
         <div class="add-expense-form" id="add-expense-static" style="margin-top:10px;">
           <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">&#x2795; Neue Ausgabe</div>
-          <div class="form-row">
+          <div class="form-row" style="flex-wrap:wrap;gap:8px;align-items:center;">
             <input class="add-expense-inp" id="new-exp-label" placeholder="Bezeichnung (z.B. Handy)">
             <input class="add-expense-inp" id="new-exp-amt" type="number" placeholder="Betrag" min="0" step="0.01" style="max-width:100px;">
-          </div>
-          <div class="form-row" style="gap:8px;align-items:center;flex-wrap:wrap;">
-            <input class="add-expense-inp" id="new-exp-date" type="date" style="flex:1;min-width:120px;">
-            <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);">
+            <input class="add-expense-inp" id="new-exp-date" type="date" style="max-width:140px;">
+            <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);white-space:nowrap;">
               <input type="checkbox" id="new-exp-monthly" style="width:16px;height:16px;accent-color:var(--acc2);">&#x1F504; monatlich
             </label>
           </div>
-          <button class="add-btn" onclick="addExpense()">&#x2795; Hinzufügen</button>
+          <button class="add-btn" onclick="addExpense()" style="margin-top:8px;">&#x2795; Hinzufügen</button>
         </div>
         
 
@@ -2493,11 +2503,30 @@ function addExpense(){
   const amt=parseFloat(document.getElementById('new-exp-amt').value);
   if(!label||isNaN(amt)||amt<=0){showToast('⚠️ Bezeichnung und Betrag eingeben!');return;}
   const newId='e'+(Date.now());
-  S.finanzen.expense.push({id:newId,label:label,amt:-Math.abs(amt),paid:false});
+  const dueDate=document.getElementById('new-exp-date').value||'';
+  const monthly=document.getElementById('new-exp-monthly').checked;
+  S.finanzen.expense.push({id:newId,label:label,amt:-Math.abs(amt),paid:false,dueDate:dueDate,monthly:monthly});
   save();renderFinanzen();
   document.getElementById('new-exp-label').value='';
   document.getElementById('new-exp-amt').value='';
+  document.getElementById('new-exp-date').value='';
+  document.getElementById('new-exp-monthly').checked=false;
   showToast('✅ Ausgabe hinzugefügt!');
+}
+function addIncome(){
+  const label=document.getElementById('new-inc-label').value.trim();
+  const amt=parseFloat(document.getElementById('new-inc-amt').value);
+  if(!label||isNaN(amt)||amt<=0){showToast('⚠️ Bezeichnung und Betrag eingeben!');return;}
+  const newId='i'+(Date.now());
+  const dueDate=document.getElementById('new-inc-date').value||'';
+  const monthly=document.getElementById('new-inc-monthly').checked;
+  S.finanzen.income.push({id:newId,label:label,amt:Math.abs(amt),paid:false,dueDate:dueDate,monthly:monthly});
+  save();renderFinanzen();
+  document.getElementById('new-inc-label').value='';
+  document.getElementById('new-inc-amt').value='';
+  document.getElementById('new-inc-date').value='';
+  document.getElementById('new-inc-monthly').checked=false;
+  showToast('✅ Einnahme hinzugefügt!');
 }
 function exportData(){
   const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
