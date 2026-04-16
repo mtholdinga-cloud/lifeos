@@ -15,14 +15,16 @@
 <style>
 :root {
   --bg0:#0f0f0f;--bg1:#1a1a1a;--bg2:#242424;--bg3:#2e2e2e;
-  --t0:#ffffff;--t1:#e8e8e8;--t2:#a0a0a0;
-  --acc:#4ade80;--acc2:#60a5fa;--acc3:#f87171;--acc4:#fbbf24;
+  --t0:#ffffff;--t1:#e8e8e8;--t2:#a0a0a0;--t3:#555555;
+  --acc:#4ade80;--acc1:#fbbf24;--acc2:#60a5fa;--acc3:#f87171;--acc4:#fbbf24;
+  --border:#2e2e2e;--bg:#1a1a1a;
   --r:12px;--trans:.2s cubic-bezier(.4,0,.2,1);
 }
 .pc-mode {
   --bg0:#f0f0f0;--bg1:#ffffff;--bg2:#f5f5f5;--bg3:#e8e8e8;
-  --t0:#111111;--t1:#333333;--t2:#666666;
-  --acc:#16a34a;--acc2:#2563eb;--acc3:#dc2626;
+  --t0:#111111;--t1:#333333;--t2:#666666;--t3:#aaaaaa;
+  --acc:#16a34a;--acc1:#d97706;--acc2:#2563eb;--acc3:#dc2626;
+  --border:#e0e0e0;--bg:#ffffff;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{font-family:'Syne',sans-serif;background:var(--bg0);color:var(--t1);min-height:100vh;overflow:auto;display:flex;flex-direction:column;}
@@ -794,7 +796,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
         <div class="quick-btn" onclick="quickAsk('sport')">💪 Sport</div>
         <div class="quick-btn" onclick="quickAsk('tag')">📋 Mein Tag</div>
       </div>
-      <div class="ai-chat" id="ai-chat"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><span style="font-size:.8em;color:var(--t2);" id="ai-key-status">🔑 Kein API-Key</span><button onclick="toggleAIKeySection()" style="font-size:.75em;padding:2px 8px;border-radius:6px;background:var(--bg3);color:var(--t2);border:none;cursor:pointer;">API-Key</button></div><div id="ai-key-section" style="margin-bottom:8px;display:none;"><div style="font-size:.78em;color:var(--t2);margin-bottom:4px;">🔑 Anthropic API-Key (wird lokal gespeichert)</div><div style="display:flex;gap:6px;"><input type="password" id="ai-key-inp" placeholder="sk-ant-..." style="flex:1;padding:6px 10px;border-radius:8px;border:1px solid var(--bg3);background:var(--bg2);color:var(--t1);font-size:.85em;" /><button onclick="saveAIKey()" style="padding:6px 12px;border-radius:8px;background:var(--acc);color:#000;border:none;cursor:pointer;font-size:.85em;font-weight:700;">Speichern</button></div></div><div class="ai-chat" id="ai-chat"></div>
       <div class="ai-input-row">
         <textarea class="ai-inp" id="ai-inp" placeholder="Frag mich alles – ich bin dein Mentor & Berater..." rows="1"></textarea>
         <button class="ai-send" id="ai-send" onclick="sendAI()">➤</button>
@@ -1683,29 +1685,72 @@ function getContext(){
   const naechsteAusgaben=S.finanzen.expense.filter(e=>e.dueDate&&!e.paid).sort((a,b)=>new Date(a.dueDate)-new Date(b.dueDate)).slice(0,3).map(e=>e.label+' ('+e.amt+'€)').join(', ');
   return 'Du bist MT-AI, der persoenliche Mentor und strategische Berater im Life OS.\n\nDEINE PERSOENLICHKEIT:\n- Direkt, klar und fordernd – kein leeres Lob\n- Strategisches Denken, erkennst Muster in Daten\n- Proaktiv wenn etwas nicht optimal laeuft\n- Max. 3-4 Saetze ausser bei expliziten Analysen\n\nSTATUS DES NUTZERS:\n- Morgenroutine: '+morgenDone+'/7\n- Fokus: '+focusDone+'/7\n- Sport: '+repsTotal+' Reps\n- Kalorien: '+S.kcal+' kcal\n- Supplemente: '+S.suppDone.length+'/9\n- Einnahmen: '+totalIncome+'€ | Ausgaben: '+Math.abs(totalExpense)+'€ | Saldo: '+(totalIncome+totalExpense).toFixed(0)+'€\n- Eigenkapital: '+ekTotal.toFixed(2)+'€ / 100.000€\n- Projekte: '+offeneProjekte+'\n- Naechste Ausgaben: '+(naechsteAusgaben||'keine')+'\n\nAntworte auf Deutsch. Sei praezise, strategisch und motivierend.';
 }
+function saveAIKey(){
+  const inp = document.getElementById('ai-key-inp');
+  if(!inp) return;
+  const key = inp.value.trim();
+  if(key){
+    localStorage.setItem('lifeos_ai_key', key);
+    inp.value = '';
+    document.getElementById('ai-key-section').style.display='none';
+    const status = document.getElementById('ai-key-status');
+    if(status) status.textContent = '✅ API-Key gespeichert';
+    addMsg('✅ API-Key gespeichert. Du kannst jetzt Fragen stellen.','ai');
+  }
+}
+function toggleAIKeySection(){
+  const sec = document.getElementById('ai-key-section');
+  if(!sec) return;
+  sec.style.display = sec.style.display === 'none' ? 'block' : 'none';
+  const existing = localStorage.getItem('lifeos_ai_key');
+  if(existing && sec.style.display === 'block'){
+    const inp = document.getElementById('ai-key-inp');
+    if(inp && !inp.value) inp.placeholder = existing.substring(0,8) + '...' + existing.slice(-4);
+  }
+}
+function initAIKeyStatus(){
+  const key = localStorage.getItem('lifeos_ai_key');
+  const status = document.getElementById('ai-key-status');
+  if(status) status.textContent = key ? '✅ API-Key aktiv' : '🔑 Kein API-Key';
+}
 async function sendAI(){
+  const key = localStorage.getItem('lifeos_ai_key') || '';
+  if(!key){
+    const sec = document.getElementById('ai-key-section');
+    if(sec) sec.style.display='block';
+    addMsg('⚠️ Bitte zuerst deinen Anthropic API-Key eingeben.','ai');
+    return;
+  }
   const inp=document.getElementById('ai-inp');
   const msg=inp.value.trim();if(!msg)return;
-  inp.value='';inp.style.height='auto';
+  inp.value='';
   addMsg(msg,'user');
-  aiHistory.push({role:'user',content:msg});
-  const loadId=addMsg('⏳ Denke nach...','ai');
+  const loadId=addMsg('Denke nach...','ai');
   document.getElementById('ai-send').disabled=true;
   try{
     const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':key,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-request-allowed':'true'
+      },
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',max_tokens:1000,
         system:getContext(),
-        messages:aiHistory
+        messages:aiHistory.concat([{role:'user',content:msg}])
       })
     });
     const data=await resp.json();
-    const reply=data.content&&data.content[0]?data.content[0].text:'Keine Antwort erhalten.';
-    updateMsg(loadId,reply,'ai');
-    aiHistory.push({role:'assistant',content:reply});
-    if(aiHistory.length>20)aiHistory=aiHistory.slice(-20);
+    if(data.error){updateMsg(loadId,'⚠️ '+data.error.message,'ai');}
+    else{
+      const reply=data.content&&data.content[0]?data.content[0].text:'Keine Antwort erhalten.';
+      updateMsg(loadId,reply,'ai');
+      aiHistory.push({role:'user',content:msg});
+      aiHistory.push({role:'assistant',content:reply});
+      if(aiHistory.length>20)aiHistory=aiHistory.slice(-20);
+    }
   }catch(e){updateMsg(loadId,'⚠️ Fehler: '+e.message,'ai');}
   document.getElementById('ai-send').disabled=false;
 }
@@ -1750,7 +1795,7 @@ function renderPanel(id){
   else if(id==='kalender') renderKalender();
   else if(id==='finanzen') renderFinanzen();
   else if(id==='notizen') renderNotizen();
-  else if(id==='ki') { /* KI panel is static */ }
+  else if(id==='ki') { initAIKeyStatus(); }
   else if(id==='mitspieler') renderPlayers();
   else if(id==='mtholding') renderMTHolding();
   else if(id==='archiv') renderArchiv();
