@@ -83,7 +83,7 @@ body{font-family:'Syne',sans-serif;background:var(--bg0);color:var(--t1);min-hei
 .task-num{font-size:12px;color:var(--t2);font-family:DM Mono,monospace;width:18px;flex-shrink:0;}
 .task-cb{width:30px;height:30px;border:2px solid var(--bg3);border-radius:8px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:var(--trans);}
 .task-cb.done{background:var(--acc);border-color:var(--acc);color:#000;}
-.task-cb.late{background:var(--acc3);border-color:var(--acc3);color:#fff;}
+.task-cb.late{background:var(--acc3);border-color:var(--acc3);color:#fff;}.task-cb.pending{background:var(--bg3);border-color:var(--bg3);color:var(--t2);}.task-cb.not-rel{background:var(--bg3);border-color:var(--bg3);color:var(--t3);font-size:11px;}
 .task-text{flex:1;font-size:16px;color:var(--t1);}
 .task-text.done{text-decoration:line-through;color:var(--t2);}
 .task-text.late{text-decoration:line-through;color:var(--acc3);}
@@ -239,7 +239,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
 .tp-section-title{font-size:13px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;}
 
 /* PC MODE OVERRIDES */
-.pc-mode #sidebar{width:200px;}
+.pc-mode #sidebar.open{width:200px;}
 .pc-mode .task-btn{width:40px;height:40px;}
 .pc-mode .task-cb{width:26px;height:26px;}
 .pc-mode #main{padding:8px;}
@@ -1902,71 +1902,52 @@ function editGroupTitle(gi) {
 let _dragSrcTask = null, _dragSrcTaskGi = null;
 
 function renderGroupTasksHTML(group) {
-  const tasks = group.tasks || [];
-  const editMode = S.tpEditMode;
-  return tasks.map((task, ti) => {
-    const subtasks = task.subtasks || [];
-    const subHTML = subtasks.map((st, si) =>
-      (editMode ?
-      '<div class=\"subtask-item\" draggable=\"true\"' +
-      ' data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\" data-si=\"' + si + '\"' +
-      ' ondragstart=\"var el=this;subDragStart(el.dataset.gid,+el.dataset.ti,+el.dataset.si)\"' +
-      ' ondragover=\"event.preventDefault();event.currentTarget.classList.add(&quot;sub-drag-over&quot;)\"' +
-      ' ondragleave=\"event.currentTarget.classList.remove(&quot;sub-drag-over&quot;)\"' +
-      ' ondrop=\"event.preventDefault();event.currentTarget.classList.remove(&quot;sub-drag-over&quot;);var el=this;subDrop(el.dataset.gid,+el.dataset.ti,+el.dataset.si)\"' +
-      ' ondragend=\"subDragEnd()\">' +
-      '<span style=\"cursor:grab;padding:0 4px;color:var(--t2);font-size:.85em\">⠿</span>'
-    :
-      '<div class=\"subtask-item\">'
-    ) +
-      '<input type=\"checkbox\"' + (st.done?' checked':'') + 
-      ' data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\" data-si=\"' + si + '\"' +
-      ' onchange=\"var el=this;toggleSubtask(el.dataset.gid,+el.dataset.ti,+el.dataset.si)\">' +
-      '<span class=\"sub-text\" style=\"' + (st.done?'text-decoration:line-through;opacity:.6':'') + '\">' + escHtml(st.text) + '</span>' +
-      (editMode ? 
-        '<button class=\"sub-del\" data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\" data-si=\"' + si + '\"' +
-        ' onclick=\"var el=this;delSubtask(el.dataset.gid,+el.dataset.ti,+el.dataset.si)\">🗑</button>' 
-      : '') +
-      '</div>'
-    ).join('');
-    const addSubHTML = editMode ?
-      '<div class=\"subtask-add\">' +
-      '<input type=\"text\" placeholder=\"Unteraufgabe...\" id=\"subinp_' + group.id + '_' + ti + '\"' +
-      ' data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\"' +
-      ' onkeydown=\"if(event.key===&quot;Enter&quot;){var el=this;addSubtask(el.dataset.gid,+el.dataset.ti)}\">' +
-      '<button data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\" onclick=\"var el=this;addSubtask(el.dataset.gid,+el.dataset.ti)\">+</button>' +
-      '</div>' : '';
-    return '<div class=\"task-item\"' +
-      ' draggable=\"true\"' +
-      ' data-gid=\"' + group.id + '\"' +
-      ' data-tid=\"' + ti + '\"' +
-      ' ondragstart=\"taskDragStart(event)\"' +
-      ' ondragover=\"taskDragOver(event)\"' +
-      ' ondrop=\"taskDrop(event)\"' +
-      ' ondragend=\"taskDragEnd(event)\"' +
-      '>' +
-      '<span class=\"task-drag-handle\" style=\"cursor:grab;padding:0 4px;color:var(--t2)\">⠿</span>' +
-      '<span class=\"task-status ' + (task.status||'') + '\" data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\" onclick=\"var el=this;toggleTask(el.dataset.gid,+el.dataset.ti)\">' +
-        (task.done ? '✅' : task.notRelevant ? '➖' : '⬜') +
-      '</span>' +
-      '<span class=\"task-title' + (task.done?' done':'') + (task.notRelevant?' not-relevant':'') + '\"' +
-      ' data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\"' +
-      ' ondblclick=\"var el=this;editTask(el.dataset.gid,+el.dataset.ti)\">' +
-      escHtml(task.title) + '</span>' +
-      (editMode ?
-        '<button data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\" onclick=\"var el=this;toggleNotRelevant(el.dataset.gid,+el.dataset.ti)\" title=\"Nicht relevant\" style=\"background:none;border:none;cursor:pointer;font-size:.8em;color:var(--t2)\">➖</button>' +
-        '<button data-gid=\"' + group.id + '\" data-ti=\"' + ti + '\" onclick=\"var el=this;deleteTask(el.dataset.gid,+el.dataset.ti)\" style=\"background:none;border:none;cursor:pointer;font-size:.8em;color:var(--err,#e74c3c)\">🗑</button>'
-      : '') +
-      '</div>' +
-      (subtasks.length > 0 ? '<div class=\"subtask-list\">' + subHTML + '</div>' : '') +
-      addSubHTML;
-  }).join('') +
-    '<div class="task-add-row">'
-    + '<input type="text" class="task-inp" placeholder="+ Aufgabe hinzufügen..."'
-    + ' data-gid="' + group.id + '"'
-    + ' onkeydown="if(event.key===String.fromCharCode(13))addTaskByGid(this.dataset.gid,this)">'
-    + '<button class="btn-add-task" data-gid="' + group.id + '" onclick="addTaskByGid(this.dataset.gid,this.previousElementSibling)">+</button>'
-    + '</div>';
+  var tasks = group.tasks || [];
+  var gid = group.id;
+  var gi = S.tagesplan.groups.indexOf(group);
+  var collapsed = group.collapsed;
+  var total = tasks.length;
+  var doneCount = tasks.filter(function(t){return t.done;}).length;
+  var hdr = '<div class="tplan-group-header" onclick="toggleGroupCollapse('+gi+')">' +
+    '<span class="grp-drag">\u2803</span>' +
+    '<span class="grp-toggle">' + (collapsed ? "\u25ba" : "\u25bc") + '</span>' +
+    '<span class="grp-title">' + escHtml(group.title||gid) + '</span>' +
+    '<span class="grp-count">' + doneCount + '/' + total + '</span>' +
+    '<button class="btn-icon-sm" onclick="event.stopPropagation();deleteGroup(\''+ gid +'\')">\�\�\️</button>' +
+    '</div>';
+  var taskRows = '';
+  if (!collapsed) {
+    for (var ti = 0; ti < tasks.length; ti++) {
+      var t = tasks[ti];
+      var cbCls = t.done ? "task-cb done" : (t.notRelevant ? "task-cb not-rel" : "task-cb pending");
+      var cbIco = t.done ? "\u2713" : (t.notRelevant ? "\u00b7" : "\u2717");
+      var txtCls = (t.done||t.notRelevant) ? "task-text done" : "task-text";
+      var nrCls = t.notRelevant ? " not-relevant" : "";
+      taskRows += '<div class="task-row'+nrCls+'" draggable="true"' +
+        ' ondragstart="taskDragStart(event,'+gi+','+ti+')"' +
+        ' ondragover="taskDragOver(event)"' +
+        ' ondrop="taskDrop(event,'+gi+','+ti+')"' +
+        ' ondragend="taskDragEnd(event)">' +
+        '<div class="task-num">' + (ti+1) + '</div>' +
+        '<div class="' + cbCls + '" onclick="toggleTask(\''+ gid +'\',' + ti + ')">'+ cbIco +'</div>' +
+        '<div class="' + txtCls + '">' + escHtml(t.title) + '</div>' +
+        '<div class="task-actions">' +
+        '<button class="task-btn" onclick="toggleTask(\''+ gid +'\',' + ti + ')">\u2705</button>' +
+        '<button class="task-btn" onclick="toggleNotRelevant(\''+ gid +'\',' + ti + ')">\u274c</button>' +
+        '<button class="task-btn" onclick="deleteTask(\''+ gid +'\',' + ti + ')">\ud83d\uddd1\ufe0f</button>' +
+        '</div></div>';
+    }
+    taskRows += '<div class="task-add-row">' +
+      '<input class="task-inp" type="text" placeholder="+ Aufgabe hinzuf\xfcgen..." onkeydown="if(event.key===\'Enter\')addTaskByGid(\''+ gid +'\',this)">' +
+      '<button class="btn-add-task" onclick="addTaskByGid(\''+ gid +'\',this.previousElementSibling)">+</button>' +
+      '</div>';
+  }
+  return '<div class="tplan-group' + (collapsed ? ' collapsed' : '') + '" id="tgrp-' + gid + '" draggable="true"' +
+    ' ondragstart="tplanGroupDragStart(event,\''+ gid +'\')" ' +
+    ' ondragover="tplanGroupDragOver(event)"' +
+    ' ondrop="tplanGroupDrop(event,\''+ gid +'\')" ' +
+    ' ondragend="tplanGroupDragEnd(event)">' +
+    hdr + taskRows + '</div>';
 }
 function taskDragStart(e) {
   const el=e.currentTarget;
