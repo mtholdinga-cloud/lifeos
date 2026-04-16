@@ -401,6 +401,51 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
 .archiv-close{position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.2em;cursor:pointer;color:var(--t1);}
 .archiv-empty{text-align:center;color:var(--t2);padding:40px;font-size:.9em;}
 .archiv-pdf-btn{display:flex;align-items:center;gap:6px;background:var(--acc);color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.85em;margin-top:10px;}
+/* === ARCHIVE REDESIGN === */
+.archiv-header-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.archiv-header-title{font-size:1.15em;font-weight:800;letter-spacing:.5px;}
+.archiv-stats-bar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.archiv-stat-chip{background:var(--bg2);border:1px solid var(--bg3);border-radius:10px;padding:6px 12px;font-size:.78em;font-weight:600;color:var(--t2);}
+.archiv-card-v2{background:var(--bg2);border:1px solid var(--bg3);border-radius:14px;padding:14px 16px;cursor:pointer;transition:.2s;margin-bottom:10px;position:relative;overflow:hidden;}
+.archiv-card-v2:hover{border-color:var(--acc);transform:translateX(4px);box-shadow:0 4px 18px rgba(0,0,0,.18);}
+.archiv-card-v2::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
+.archiv-card-v2.pct-high::before{background:#4ade80;}
+.archiv-card-v2.pct-mid::before{background:#fbbf24;}
+.archiv-card-v2.pct-low::before{background:#f87171;}
+.archiv-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.archiv-card-date{font-weight:700;font-size:.95em;}
+.archiv-card-badges{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.archiv-badge{font-size:.75em;font-weight:700;padding:2px 8px;border-radius:20px;}
+.archiv-badge-pct.high{background:#4ade80;color:#000;}
+.archiv-badge-pct.mid{background:#fbbf24;color:#000;}
+.archiv-badge-pct.low{background:#f87171;color:#fff;}
+.archiv-card-modules{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0;}
+.archiv-mod-tag{font-size:.72em;padding:2px 7px;border-radius:6px;background:var(--bg3);color:var(--t2);}
+.archiv-card-preview{font-size:.78em;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.archiv-card-actions{display:flex;gap:8px;margin-top:10px;}
+.archiv-btn-detail{background:var(--bg3);border:none;border-radius:8px;padding:5px 12px;font-size:.78em;cursor:pointer;color:var(--t1);font-family:inherit;}
+.archiv-btn-pdf{background:var(--acc);border:none;border-radius:8px;padding:5px 12px;font-size:.78em;cursor:pointer;color:#000;font-family:inherit;font-weight:700;}
+.archiv-modal-v2{background:var(--bg1);border-radius:20px;max-width:680px;width:100%;max-height:90vh;overflow-y:auto;padding:0;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+.archiv-modal-head{padding:20px 20px 0;position:sticky;top:0;background:var(--bg1);z-index:10;border-bottom:1px solid var(--bg3);padding-bottom:12px;}
+.archiv-modal-head-title{font-size:1.1em;font-weight:800;}
+.archiv-modal-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px;}
+.archiv-tab-btn{background:var(--bg3);border:none;border-radius:8px;padding:5px 11px;font-size:.78em;cursor:pointer;color:var(--t2);font-family:inherit;transition:.15s;}
+.archiv-tab-btn.active{background:var(--acc);color:#000;font-weight:700;}
+.archiv-modal-body{padding:16px 20px 20px;}
+.archiv-section{margin-bottom:18px;}
+.archiv-section-title{font-size:.82em;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.archiv-task-item{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:.88em;border-bottom:1px solid var(--bg3);}
+.archiv-task-item:last-child{border-bottom:none;}
+.archiv-fin-row{display:flex;justify-content:space-between;padding:4px 0;font-size:.84em;border-bottom:1px solid var(--bg3);}
+.archiv-fin-pos{color:#4ade80;font-weight:700;}
+.archiv-fin-neg{color:#f87171;font-weight:700;}
+.archiv-proj-item{padding:6px 0;font-size:.85em;border-bottom:1px solid var(--bg3);}
+.pdf-progress-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+.pdf-progress-box{background:var(--bg2,#1e1e2e);border-radius:16px;padding:28px 36px;text-align:center;min-width:280px;}
+.pdf-progress-title{font-size:1.1em;font-weight:700;margin-bottom:12px;}
+.pdf-progress-bar-wrap{background:var(--bg3,#333);border-radius:99px;height:8px;overflow:hidden;margin-bottom:8px;}
+.pdf-progress-bar{background:var(--acc,#4ade80);height:100%;border-radius:99px;transition:width .3s;}
+.pdf-progress-label{font-size:.82em;color:var(--t2,#888);}
 /* === CALENDAR FULL MONTH === */
 .kal-month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px;}
 .kal-day-header{text-align:center;font-size:.7em;font-weight:600;color:var(--t2);padding:4px;}
@@ -2185,187 +2230,197 @@ function subDragEnd() { _subDragSrc = null; document.querySelectorAll('.subtask-
 
 function renderArchiv() {
   const archive = S.archive || [];
-  const sorted = archive.slice().sort((a,b) => b.date > a.date ? 1 : -1);
+  const sorted = archive.slice().sort((a,b) => b.ts - a.ts);
+  const panel = document.getElementById('panel-archiv');
   if (sorted.length === 0) {
-    document.getElementById('panel-archiv').innerHTML = '<div style="padding:1.5em;color:#888;text-align:center;">Noch keine archivierten Tage vorhanden.<br>Nutze den Button unten, um den heutigen Tag zu archivieren.</div>';
+    panel.innerHTML = '<div style="padding:2em;color:var(--t2);text-align:center;font-size:.95em;">📦 Noch keine archivierten Tage.<br><span style="font-size:.85em;opacity:.7;">Nutze &quot;Tag archivieren&quot; auf der Startseite.</span></div>';
     return;
   }
-  const panel = document.getElementById('panel-archiv');
-  panel.innerHTML = '<div class="archiv-list">' + sorted.map((day, i) => {
-    const groups = day.groups || [];
-    const totalTasks = groups.reduce((s,g) => s + (g.tasks||[]).length, 0);
-    const doneTasks = groups.reduce((s,g) => s + (g.tasks||[]).filter(t=>t.done).length, 0);
-    const pct = totalTasks ? Math.round(doneTasks/totalTasks*100) : 0;
-    const preview = groups.map(g => (g.tasks||[]).filter(t=>t.done).slice(0,2).map(t=>escHtml(t.title)).join(', ')).filter(Boolean).slice(0,2).join(' • ');
-    const fit = day.fitness || {};
-    const kcal = day.kcal || fit.kcal || 0;
-    const gew = fit.weights && fit.weights.length ? fit.weights[0].val + ' kg' : (fit.gewicht ? fit.gewicht + ' kg' : '');
-    const trainCount = (fit.training||[]).length;
-    const suppDoneCount = (day.suppDone||[]).length;
-    const suppTotal = (day.supps||[]).length;
-    const fitnessLine = [
-      kcal ? kcal + ' kcal' : '',
-      gew ? '⚖ ' + gew : '',
-      trainCount ? trainCount + ' Übung' + (trainCount>1?'en':'') : '',
-      suppTotal ? suppDoneCount + '/' + suppTotal + ' Suppl.' : ''
-    ].filter(Boolean).join(' · ');
-    const reflex = day.reflex || {};
-    const hasReflex = reflex.gut || reflex.verb || reflex.ziel1;
-    return '<div class="archiv-card" onclick="openArchivDay(' + i + ')" style="cursor:pointer;padding:.75em 1em;margin:.4em 0;border-radius:8px;background:var(--bg2,#f5f5f5);border:1px solid var(--border,#ddd);">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-      '<span style="font-weight:600;">' + day.date + '</span>' +
-      '<span class="pct-badge" style="font-size:.85em;font-weight:700;padding:.1em .5em;border-radius:12px;background:' + (pct>=80?'#4caf50':pct>=50?'#ff9800':'#f44336') + ';color:#fff;">' + pct + '%</span></div>' +
-      (fitnessLine ? '<div style="font-size:.8em;color:#888;margin-top:.2em;">' + fitnessLine + '</div>' : '') +
-      (hasReflex ? '<div style="font-size:.75em;color:#aaa;margin-top:.15em;">📝 Reflexion vorhanden</div>' : '') +
-      (preview ? '<div style="font-size:.78em;color:#777;margin-top:.25em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">✅ ' + preview + '</div>' : '') +
-      '</div>';
-  }).join('') + '</div>';
+  const totalDays = sorted.length;
+  const avgPct = Math.round(sorted.reduce((s,d)=>{const g=d.groups||[];const tot=g.reduce((a,x)=>a+(x.tasks||[]).length,0);const done=g.reduce((a,x)=>a+(x.tasks||[]).filter(t=>t.done).length,0);return s+(tot?done/tot*100:0);},0)/totalDays);
+  const totalTasks = sorted.reduce((s,d)=>s+(d.groups||[]).reduce((a,g)=>a+(g.tasks||[]).filter(t=>t.done).length,0),0);
+  let out = '<div style="padding:16px;">';
+  out += '<div class="archiv-header-bar"><span class="archiv-header-title">📦 Archiv</span></div>';
+  out += '<div class="archiv-stats-bar"><span class="archiv-stat-chip">📅 '+totalDays+' Tag'+(totalDays!==1?'e':'')+'</span><span class="archiv-stat-chip">✅ '+totalTasks+' erledigt</span><span class="archiv-stat-chip">📊 Ø '+avgPct+'% Completion</span></div>';
+  sorted.forEach((day,i)=>{
+    const groups=day.groups||[];
+    const totalT=groups.reduce((s,g)=>s+(g.tasks||[]).length,0);
+    const doneT=groups.reduce((s,g)=>s+(g.tasks||[]).filter(t=>t.done).length,0);
+    const pct=totalT?Math.round(doneT/totalT*100):0;
+    const pctClass=pct>=80?'high':pct>=50?'mid':'low';
+    const fit=day.fitness||{};const kcal=day.kcal||fit.kcal||0;
+    const gew=fit.weights&&fit.weights.length?fit.weights[0].val+'kg':(fit.gewicht?fit.gewicht+'kg':'');
+    const trainCount=(fit.training||[]).length;
+    const fin=day.finanzen||{};
+    const tI=(fin.income||[]).reduce((s,x)=>s+Math.abs(x.amt||0),0);
+    const tE=(fin.expense||[]).reduce((s,x)=>s+Math.abs(x.amt||0),0);
+    const projekte=day.projekte||[];const notizen=day.notizen||[];
+    const reflex=day.reflex||{};const players=day.players||day.mitspieler||[];
+    const kalEvents=Object.values(day.kalender||{}).flat().length;
+    const preview=groups.map(g=>(g.tasks||[]).filter(t=>t.done).slice(0,2).map(t=>t.title).join(', ')).filter(Boolean).slice(0,2).join(' · ');
+    const mods=[];
+    if(totalT>0)mods.push('✅ '+doneT+'/'+totalT+' Tasks');
+    if(kcal||gew||trainCount)mods.push('💪 Fitness'+(gew?' ('+gew+')':''));
+    if(tI||tE)mods.push('💰 Finanzen');
+    if(projekte.length)mods.push('🎯 '+projekte.length+' Projekte');
+    if(kalEvents)mods.push('📅 '+kalEvents+' Events');
+    if(notizen.length)mods.push('📝 '+notizen.length+' Notizen');
+    if(reflex.gut||reflex.verb)mods.push('📋 Reflexion');
+    if(players.length)mods.push('🎮 '+players.length+' Spieler');
+    out+='<div class="archiv-card-v2 pct-'+pctClass+'" onclick="openArchivDay('+i+')" style="padding-left:20px;">';
+    out+='<div class="archiv-card-top"><span class="archiv-card-date">'+escHtml(day.date)+'</span>';
+    out+='<div class="archiv-card-badges"><span class="archiv-badge archiv-badge-pct '+pctClass+'">'+pct+'%</span></div></div>';
+    if(mods.length)out+='<div class="archiv-card-modules">'+mods.map(m=>'<span class="archiv-mod-tag">'+m+'</span>').join('')+'</div>';
+    if(preview)out+='<div class="archiv-card-preview">✅ '+escHtml(preview)+'</div>';
+    out+='<div class="archiv-card-actions" onclick="event.stopPropagation()"><button class="archiv-btn-detail" onclick="openArchivDay('+i+')">🔍 Details</button><button class="archiv-btn-pdf" onclick="exportArchivPDF('+i+')">📄 PDF Export</button></div></div>';
+  });
+  out+='</div>';
+  panel.innerHTML=out;
 }
 function openArchivDay(idx) {
-  const archive = S.archive || [];
-  const sorted = archive.slice().sort((a,b) => b.date > a.date ? 1 : -1);
-  const day = sorted[idx];
-  if (!day) return;
-  const groups = day.groups || [];
-  const fit = day.fitness || {};
-  const reflex = day.reflex || {};
-  const notizen = day.notizen || [];
-  const kcal = day.kcal || fit.kcal || 0;
-  const suppDone = day.suppDone || [];
-  const supps = day.supps || [];
-  let tasksHtml = groups.map(g => {
-    const tasks = g.tasks || [];
-    if (!tasks.length) return '';
-    return '<div style="margin-bottom:.75em;"><h4 style="margin:0 0 .3em;font-size:.95em;">' + escHtml(g.title||g.id) + '</h4>' +
-      tasks.map(t => '<div style="display:flex;align-items:center;gap:.4em;font-size:.88em;' + (t.done?'':' opacity:.6') + '">' +
-        '<span>' + (t.done?'✅':'⬜') + '</span><span>' + escHtml(t.title) + '</span></div>').join('') + '</div>';
-  }).join('');
-  const trainList = (fit.training||[]).map(ex => '<div style="font-size:.85em;padding:.2em 0;">' + escHtml(ex.name||ex) + (ex.sets?' · '+ex.sets+' Sätze':'') + '</div>').join('');
-  const weights = fit.weights || [];
-  const gewHtml = weights.length ? '<div style="font-size:.85em;">⚖ Gewicht: ' + weights[0].val + ' kg</div>' : '';
-  const kcalHtml = kcal ? '<div style="font-size:.85em;">🔥 Kalorien: ' + kcal + ' kcal</div>' : '';
-  const ernObj = fit.ern || {};
-  const ernHtml = Object.entries(ernObj).filter(([k,v])=>v).map(([k,v])=>'<div style="font-size:.84em;"><b>' + escHtml(k) + ':</b> ' + escHtml(v) + '</div>').join('');
-  const suppHtml = supps.length ? supps.map(s=>'<span style="display:inline-block;font-size:.8em;padding:.15em .4em;margin:.1em;border-radius:4px;background:' + (suppDone.includes(s)?'#4caf50':'#ddd') + ';color:' + (suppDone.includes(s)?'#fff':'#666') + '">' + escHtml(s) + '</span>').join('') : '';
-  const fitnessSection = (gewHtml||kcalHtml||trainList||ernHtml||suppHtml) ? '<div style="margin-bottom:1em;"><h3 style="margin:0 0 .4em;">💪 Fitness</h3>' + gewHtml + kcalHtml + (trainList?'<div style="margin-top:.3em;">'+trainList+'</div>':'') + (ernHtml?'<div style="margin-top:.4em;"><b style="font-size:.88em;">Ernährung:</b>'+ernHtml+'</div>':'') + (suppHtml?'<div style="margin-top:.4em;"><b style="font-size:.88em;">Supplemente:</b><br>'+suppHtml+'</div>':'') + '</div>' : '';
-  const reflexHtml = (reflex.gut||reflex.verb||reflex.ziel1||reflex.ziel2||reflex.ziel3) ? '<div style="margin-bottom:1em;"><h3 style="margin:0 0 .4em;">📝 Reflexion</h3>' +
-    (reflex.gut?'<div style="font-size:.85em;"><b>Was lief gut:</b> ' + escHtml(reflex.gut) + '</div>':'')+
-    (reflex.verb?'<div style="font-size:.85em;"><b>Verbesserung:</b> ' + escHtml(reflex.verb) + '</div>':'')+
-    [reflex.ziel1,reflex.ziel2,reflex.ziel3].filter(Boolean).map(z=>'<div style="font-size:.85em;">🎯 ' + escHtml(z) + '</div>').join('') + '</div>' : '';
-  const notizenHtml = notizen.length ? '<div style="margin-bottom:1em;"><h3 style="margin:0 0 .4em;">🗒 Notizen (' + notizen.length + ')</h3>' + notizen.slice(0,5).map(n=>'<div style="font-size:.84em;padding:.2em 0;border-bottom:1px solid var(--border,#eee);">' + escHtml(typeof n === 'string' ? n : (n.text||n.title||JSON.stringify(n))).substring(0,120) + '</div>').join('') + '</div>' : '';
-  let content = '<div style="margin-bottom:1em;"><h3 style="margin:0 0 .4em;">📋 Tagesplan</h3>' + (tasksHtml||'<div style="color:#999;font-size:.9em;">Keine Aufgaben.</div>') + '</div>' + fitnessSection + reflexHtml + notizenHtml;
-  const overlay = document.createElement('div');
-  overlay.className = 'archiv-detail-overlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1em;';
-  overlay.innerHTML = '<div style="background:var(--bg,#fff);border-radius:12px;max-width:500px;width:100%;max-height:85vh;overflow-y:auto;padding:1.25em;">' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75em;">' +
-    '<h3 style="margin:0;font-size:1.05em;">' + day.date + '</h3>' +
-    '<button onclick="this.parentElement.parentElement.parentElement.remove()" style="background:none;border:none;font-size:1.3em;cursor:pointer;">✕</button></div>' +
-    content + '</div>';
-  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+  const archive=S.archive||[];const sorted=archive.slice().sort((a,b)=>b.ts-a.ts);const day=sorted[idx];if(!day)return;
+  const tabs=[{id:'tasks',label:'📋 Tagesplan'},{id:'fitness',label:'💪 Fitness'},{id:'finanzen',label:'💰 Finanzen'},{id:'projekte',label:'🎯 Projekte'},{id:'kalender',label:'📅 Kalender'},{id:'mitspieler',label:'🎮 Mitspieler'},{id:'notizen',label:'📝 Notizen'},{id:'reflex',label:'📋 Reflexion'}];
+  const overlay=document.createElement('div');overlay.className='archiv-detail-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1em;';
+  overlay.innerHTML='<div class="archiv-modal-v2"><div class="archiv-modal-head"><div style="display:flex;justify-content:space-between;align-items:center;"><span class="archiv-modal-head-title">📦 '+escHtml(day.date)+'</span><button onclick="this.closest('.archiv-detail-overlay').remove()" style="background:none;border:none;font-size:1.3em;cursor:pointer;color:var(--t1);">✕</button></div><div class="archiv-modal-tabs">'+tabs.map(t=>'<button class="archiv-tab-btn'+(t.id==='tasks'?' active':'')+'" onclick="_archivTab(this,''+t.id+'','+idx+')">'+t.label+'</button>').join('')+'</div><button onclick="exportArchivPDF('+idx+')" style="margin-top:8px;width:100%;background:var(--acc);border:none;border-radius:8px;padding:7px;font-size:.85em;font-weight:700;cursor:pointer;color:#000;">📄 Vollständiges PDF exportieren</button></div><div class="archiv-modal-body" id="archiv-modal-content"></div></div>';
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove();});
   document.body.appendChild(overlay);
+  _archivRenderTab('tasks',day);
+}
+function _archivTab(btn,tabId,idx){
+  document.querySelectorAll('.archiv-tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  const sorted=(S.archive||[]).slice().sort((a,b)=>b.ts-a.ts);_archivRenderTab(tabId,sorted[idx]);
+}
+function _archivRenderTab(tabId,day){
+  const el=document.getElementById('archiv-modal-content');if(!el||!day)return;
+  const esc=escHtml;let html='';
+  if(tabId==='tasks'){
+    const groups=day.groups||[];
+    if(!groups.some(g=>(g.tasks||[]).length)){html='<div style="color:var(--t2);font-size:.9em;">Keine Aufgaben.</div>';}
+    else groups.forEach(g=>{const tasks=g.tasks||[];if(!tasks.length)return;const dc=tasks.filter(t=>t.done).length;html+='<div class="archiv-section"><div class="archiv-section-title">'+esc(g.title||g.id)+' <span style="opacity:.5;font-weight:400;">'+dc+'/'+tasks.length+'</span></div>';tasks.forEach(t=>{html+='<div class="archiv-task-item" style="'+(t.done?'':'opacity:.55')+'"><span>'+(t.done?'✅':'⬜')+'</span><span>'+esc(t.title)+'</span></div>';(t.subtasks||[]).forEach(st=>{html+='<div class="archiv-task-item" style="padding-left:20px;font-size:.82em;'+(st.done?'':'opacity:.5')+'"><span>'+(st.done?'✅':'⬜')+'</span><span>'+esc(st.text||st)+'</span></div>';});});html+='</div>';});
+  }else if(tabId==='fitness'){
+    const fit=day.fitness||{};const kcal=day.kcal||fit.kcal||0;const weights=fit.weights||[];const training=fit.training||[];const ern=fit.ern||day.ern||{};const supps=day.supps||[];const suppDone=day.suppDone||[];
+    html+='<div class="archiv-section"><div class="archiv-section-title">💪 Körper & Kalorien</div>';
+    if(weights.length)html+='<div style="font-size:.87em;padding:4px 0;">⚖ Gewicht: <b>'+weights[0].val+' kg</b></div>';
+    if(kcal)html+='<div style="font-size:.87em;padding:4px 0;">🔥 Kalorien: <b>'+kcal+' kcal</b></div>';
+    if(!weights.length&&!kcal)html+='<div style="font-size:.85em;color:var(--t2);">Keine Daten.</div>';
+    html+='</div>';
+    if(training.length){html+='<div class="archiv-section"><div class="archiv-section-title">🏋 Training ('+training.length+')</div>';training.forEach(ex=>{html+='<div style="font-size:.85em;padding:3px 0;border-bottom:1px solid var(--bg3);">'+esc(ex.name||ex)+(ex.sets?' · '+ex.sets+' Sätze':'')+(ex.weight?' · '+ex.weight+'kg':'')+'</div>';});html+='</div>';}
+    if(Object.entries(ern).filter(([k,v])=>v).length){html+='<div class="archiv-section"><div class="archiv-section-title">🥗 Ernährung</div>';Object.entries(ern).filter(([k,v])=>v).forEach(([k,v])=>{html+='<div style="font-size:.84em;padding:3px 0;border-bottom:1px solid var(--bg3);"><b>'+esc(k)+':</b> '+esc(String(v))+'</div>';});html+='</div>';}
+    if(supps.length){html+='<div class="archiv-section"><div class="archiv-section-title">💊 Supplemente</div><div style="display:flex;flex-wrap:wrap;gap:6px;">';supps.forEach(s=>{html+='<span style="font-size:.78em;padding:2px 8px;border-radius:6px;background:'+(suppDone.includes(s)?'#4ade80':'var(--bg3)')+';color:'+(suppDone.includes(s)?'#000':'var(--t2)')+';">'+esc(s)+'</span>';});html+='</div></div>';}
+  }else if(tabId==='finanzen'){
+    const fin=day.finanzen||{};const income=fin.income||[];const expense=fin.expense||[];const konten=fin.konten||[];
+    const tI=income.reduce((s,x)=>s+Math.abs(x.amt||0),0);const tE=expense.reduce((s,x)=>s+Math.abs(x.amt||0),0);
+    html+='<div class="archiv-section"><div class="archiv-section-title">💰 Übersicht</div><div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px;"><div style="font-size:.9em;">📥 Einnahmen: <span class="archiv-fin-pos">+'+tI.toFixed(2)+'€</span></div><div style="font-size:.9em;">📤 Ausgaben: <span class="archiv-fin-neg">-'+tE.toFixed(2)+'€</span></div><div style="font-size:.9em;">💼 Bilanz: <span style="font-weight:700;color:'+(tI-tE>=0?'#4ade80':'#f87171')+'">'+(tI-tE>=0?'+':'')+(tI-tE).toFixed(2)+'€</span></div></div></div>';
+    if(konten.length){html+='<div class="archiv-section"><div class="archiv-section-title">🏦 Konten</div>';konten.forEach(k=>{html+='<div class="archiv-fin-row"><span>'+esc(k.name)+'</span><span style="font-weight:700;color:'+(k.val>=0?'#4ade80':'#f87171')+'">'+(k.val>=0?'+':'')+k.val.toFixed(2)+'€</span></div>';});html+='</div>';}
+    if(income.length){html+='<div class="archiv-section"><div class="archiv-section-title">📥 Einnahmen</div>';income.forEach(x=>{html+='<div class="archiv-fin-row"><span>'+esc(x.label)+(x.monthly?' 🔄':'')+(x.dueDate?' · '+esc(x.dueDate):'')+'</span><span class="archiv-fin-pos">+'+Math.abs(x.amt||0).toFixed(2)+'€</span></div>';});html+='</div>';}
+    if(expense.length){html+='<div class="archiv-section"><div class="archiv-section-title">📤 Ausgaben</div>';expense.forEach(x=>{html+='<div class="archiv-fin-row"><span>'+esc(x.label)+(x.monthly?' 🔄':'')+(x.dueDate?' · '+esc(x.dueDate):'')+(x.paid?' ✓':'')+'</span><span class="archiv-fin-neg">-'+Math.abs(x.amt||0).toFixed(2)+'€</span></div>';});html+='</div>';}
+    if(!income.length&&!expense.length&&!konten.length)html='<div style="color:var(--t2);font-size:.9em;">Keine Finanzdaten.</div>';
+  }else if(tabId==='projekte'){
+    const proj=day.projekte||[];
+    if(!proj.length){html='<div style="color:var(--t2);font-size:.9em;">Keine Projekte.</div>';}
+    else proj.forEach(p=>{html+='<div class="archiv-proj-item"><div style="font-weight:700;font-size:.9em;">'+esc(p.name||p.title||'Projekt')+'</div>'+(p.status?'<div style="font-size:.8em;color:var(--t2);">Status: '+esc(p.status)+'</div>':'')+(p.tasks&&p.tasks.length?'<div style="font-size:.78em;color:var(--t2);">Aufgaben: '+p.tasks.filter(t=>t.done).length+'/'+p.tasks.length+'</div>':'')+'</div>';});
+  }else if(tabId==='kalender'){
+    const entries=typeof day.kalender==='object'&&!Array.isArray(day.kalender)?Object.entries(day.kalender||{}):[]; 
+    if(!entries.length){html='<div style="color:var(--t2);font-size:.9em;">Keine Events.</div>';}
+    else{html+='<div class="archiv-section"><div class="archiv-section-title">📅 Events</div>';entries.forEach(([date,evs])=>{(Array.isArray(evs)?evs:[evs]).filter(Boolean).forEach(ev=>{html+='<div style="font-size:.87em;padding:4px 0;border-bottom:1px solid var(--bg3);display:flex;gap:8px;"><span style="color:var(--acc);font-weight:600;">'+esc(date)+'</span><span>'+esc(ev.title||ev)+'</span></div>';});});html+='</div>';}
+  }else if(tabId==='mitspieler'){
+    const players=day.players||day.mitspieler||[];
+    if(!players.length){html='<div style="color:var(--t2);font-size:.9em;">Keine Mitspieler.</div>';}
+    else{html+='<div class="archiv-section"><div class="archiv-section-title">🎮 Mitspieler ('+players.length+')</div>';players.forEach(p=>{html+='<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bg3);"><div style="width:32px;height:32px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9em;">'+(p.name?esc(p.name[0].toUpperCase()):'?')+'</div><div><div style="font-size:.88em;font-weight:700;">'+esc(p.name||'')+'</div><div style="font-size:.76em;color:var(--t2);">'+(p.game?esc(p.game)+' · ':'')+'Level '+(p.level||1)+' · '+(p.rank||'Bronze')+'</div></div></div>';});html+='</div>';}
+  }else if(tabId==='notizen'){
+    const notizen=day.notizen||[];
+    if(!notizen.length){html='<div style="color:var(--t2);font-size:.9em;">Keine Notizen.</div>';}
+    else{html+='<div class="archiv-section"><div class="archiv-section-title">📝 Notizen ('+notizen.length+')</div>';notizen.forEach(n=>{const txt=typeof n==='string'?n:(n.text||n.title||JSON.stringify(n));html+='<div style="font-size:.85em;padding:6px 0;border-bottom:1px solid var(--bg3);line-height:1.4;">'+esc(txt).substring(0,300)+(txt.length>300?'…':'')+'</div>';});html+='</div>';}
+  }else if(tabId==='reflex'){
+    const reflex=day.reflex||{};
+    if(!(reflex.gut||reflex.verb||reflex.ziel1)){html='<div style="color:var(--t2);font-size:.9em;">Keine Reflexion.</div>';}
+    else{html+='<div class="archiv-section"><div class="archiv-section-title">📋 Tagesreflexion</div>';
+    if(reflex.gut)html+='<div style="margin-bottom:10px;"><div style="font-size:.78em;color:var(--t2);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px;">Was lief gut</div><div style="font-size:.9em;line-height:1.5;padding:8px;background:var(--bg2);border-radius:8px;">'+esc(reflex.gut)+'</div></div>';
+    if(reflex.verb)html+='<div style="margin-bottom:10px;"><div style="font-size:.78em;color:var(--t2);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px;">Verbesserung</div><div style="font-size:.9em;line-height:1.5;padding:8px;background:var(--bg2);border-radius:8px;">'+esc(reflex.verb)+'</div></div>';
+    const ziele=[reflex.ziel1,reflex.ziel2,reflex.ziel3].filter(Boolean);
+    if(ziele.length){html+='<div class="archiv-section-title" style="margin-top:8px;">🎯 Ziele für morgen</div>';ziele.forEach(z=>{html+='<div style="font-size:.9em;padding:4px 0;border-bottom:1px solid var(--bg3);">🎯 '+esc(z)+'</div>';});}
+    html+='</div>';}
+  }
+  el.innerHTML=html;
 }
 function exportArchivPDF(idx) {
-  const archive = S.archive || [];
-  const sorted = archive.slice().sort((a,b) => b.date > a.date ? 1 : -1);
-  const day = sorted[idx];
-  if (!day) return;
-  const groups = day.groups || [];
-  let html = '<html><head><meta charset=\"utf-8\"><title>Life OS - ' + day.date + '</title>' +
-    '<style>body{font-family:Arial,sans-serif;padding:20px;color:#333;}' +
-    'h1{font-size:1.3em;border-bottom:2px solid #48c78e;padding-bottom:8px;}' +
-    'h2{font-size:1em;color:#666;margin:12px 0 4px;}' +
-    '.task{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:.9em;}' +
-    '.done{opacity:.6;text-decoration:line-through;}' +
-    '.stat{font-size:.8em;color:#888;margin-top:8px;}</style></head><body>' +
-    '<h1>📋 Life OS — ' + day.date + '</h1>';
-  groups.forEach(g => {
-    const tasks = g.tasks || [];
-    if (tasks.length === 0) return;
-    const done = tasks.filter(t=>t.done).length;
-    html += '<h2>' + (g.title||g.id) + ' (' + done + '/' + tasks.length + ')</h2>';
-    tasks.forEach(t => {
-      html += '<div class=\"task ' + (t.done?'done':'') + '\"><span>' + (t.done?'✅':'⬜') + '</span><span>' + (t.title||'') + '</span></div>';
-      (t.subtasks||[]).forEach(st => {
-        html += '<div class=\"task\" style=\"padding-left:20px;font-size:.82em;\"><span>' + (st.done?'✅':'⬜') + '</span><span>' + (st.text||st) + '</span></div>';
-      });
-    });
-  });
-  html += '<div class=\"stat\">Exportiert: ' + new Date().toLocaleString('de-DE') + '</div></body></html>';
-  const w = window.open('', '_blank');
-  w.document.write(html);
-  w.document.close();
-  setTimeout(() => { w.print(); }, 500);
+  const sorted=(S.archive||[]).slice().sort((a,b)=>b.ts-a.ts);const day=sorted[idx];if(!day)return;
+  const prog=document.createElement('div');prog.className='pdf-progress-overlay';
+  prog.innerHTML='<div class="pdf-progress-box"><div class="pdf-progress-title">📄 PDF wird erstellt…</div><div class="pdf-progress-bar-wrap"><div class="pdf-progress-bar" id="pdf-prog-bar" style="width:0%"></div></div><div class="pdf-progress-label" id="pdf-prog-label">Vorbereitung…</div></div>';
+  document.body.appendChild(prog);
+  const setProgress=(pct,label)=>{const b=document.getElementById('pdf-prog-bar');const l=document.getElementById('pdf-prog-label');if(b)b.style.width=pct+'%';if(l)l.textContent=label;};
+  setTimeout(()=>{try{_buildArchivPDF(day,setProgress,()=>prog.remove());}catch(e){prog.remove();showToast('❌ PDF Fehler: '+e.message);}},100);
 }
-function migrateV16Data() {
-  try {
-    const v16raw = localStorage.getItem('lifeosv16');
-    if (!v16raw) return;
-    const v16 = JSON.parse(v16raw);
-    let changed = false;
-    const groupMap = {morgenTasks:'morgen', fokusTasks:'fokus', haushalTasks:'haus', abendTasks:'abend'};
-    const groupTitles = {morgen:'☀️ Morgenroutine', fokus:'⚡ Fokus-Tasks', haus:'🏠 Haushalt', abend:'🌙 Abendroutine'};
-    if (!S.v16migrated) {
-      Object.keys(groupMap).forEach(v16key => {
-        const gid = groupMap[v16key];
-        const v16tasks = v16[v16key] || [];
-        let g = S.tagesplan.groups.find(x => x.id === gid);
-        if (!g) { g = {id:gid, title:groupTitles[gid], collapsed:false, tasks:[]}; S.tagesplan.groups.push(g); }
-        if (g.tasks.length === 0 || (g.tasks.length === 1 && g.tasks[0].title === 'tstdf')) {
-          g.tasks = v16tasks.map(t => ({id:'t'+Date.now()+Math.random().toString(36).substr(2,5), title:t.text||t.title||'', done:t.status==='done', notRelevant:false, subtasks:[]}));
-          changed = true;
-        }
-      });
-      if (v16.ern && v16.ern.ziggi && !S.fitness.ziggi) { S.fitness.ziggi = '2026-01-01T' + v16.ern.ziggi; changed = true; }
-      if (v16.kcal && !S.fitness.kcal) { S.fitness.kcal = v16.kcal; changed = true; }
-      if (v16.calNotes) {
-        Object.keys(v16.calNotes).forEach(dk => {
-          const note = v16.calNotes[dk];
-          if (!note) return;
-          if (!S.kalender.events[dk]) S.kalender.events[dk] = [];
-          if (!S.kalender.events[dk].some(e => e.title === note)) { S.kalender.events[dk].push({title:note, ts:Date.now(), migratedFromV16:true}); changed = true; }
-        });
-      }
-      S.v16migrated = true;
-      if (changed) save();
-      console.log('v16 migration done');
-    }
-  } catch(e) { console.warn('v16 migration error:', e); }
+function _buildArchivPDF(day,setP,onDone){
+  const groups=day.groups||[];const fit=day.fitness||{};const fin=day.finanzen||{};const reflex=day.reflex||{};
+  const notizen=day.notizen||[];const projekte=day.projekte||[];const players=day.players||day.mitspieler||[];
+  const kal=day.kalender||{};const kcal=day.kcal||fit.kcal||0;const weights=fit.weights||[];const training=fit.training||[];
+  const income=fin.income||[];const expense=fin.expense||[];const konten=fin.konten||[];
+  const tI=income.reduce((s,x)=>s+Math.abs(x.amt||0),0);const tE=expense.reduce((s,x)=>s+Math.abs(x.amt||0),0);
+  const totalT=groups.reduce((s,g)=>s+(g.tasks||[]).length,0);const doneT=groups.reduce((s,g)=>s+(g.tasks||[]).filter(t=>t.done).length,0);
+  const pct=totalT?Math.round(doneT/totalT*100):0;const pctColor=pct>=80?'#4ade80':pct>=50?'#fbbf24':'#f87171';
+  const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const now=new Date().toLocaleString('de-DE');const dateStr=esc(day.date);
+  const css='body{font-family:"Segoe UI",Arial,sans-serif;margin:0;padding:0;background:#0f0f17;color:#e8e8f0;}.page{page-break-before:always;padding:24px 28px;min-height:100vh;box-sizing:border-box;}.page:first-child{page-break-before:avoid;}.ph{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #48c78e;padding-bottom:10px;margin-bottom:16px;}.pt{font-size:1.2em;font-weight:800;color:#48c78e;}.pm{font-size:.75em;color:#666;}.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}.sb{background:#1e1e2e;border-radius:10px;padding:10px;text-align:center;}.sv{font-size:1.2em;font-weight:800;}.sl{font-size:.7em;color:#888;margin-top:2px;}.sec{margin-bottom:14px;}.st{font-size:.78em;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px;border-bottom:1px solid #1e1e2e;padding-bottom:3px;}.tr{display:flex;align-items:center;gap:7px;padding:3px 0;font-size:.86em;border-bottom:1px solid #1e1e2e;}.fr{display:flex;justify-content:space-between;padding:3px 0;font-size:.83em;border-bottom:1px solid #1e1e2e;}.pos{color:#4ade80;font-weight:700;}.neg{color:#f87171;font-weight:700;}.rb{background:#1e1e2e;border-radius:10px;padding:10px;font-size:.86em;line-height:1.6;margin-bottom:8px;}.rl{font-size:.72em;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}';
+  let pages='';
+  setP(10,'Startseite…');
+  pages+='<div class="page"><div class="ph"><span class="pt">🏠 Startseite — '+dateStr+'</span><span class="pm">Life OS · '+now+'</span></div><div class="sg"><div class="sb"><div class="sv" style="color:'+pctColor+'">'+pct+'%</div><div class="sl">Task-Completion</div></div><div class="sb"><div class="sv">'+doneT+'/'+totalT+'</div><div class="sl">Aufgaben</div></div><div class="sb"><div class="sv">'+(kcal||'—')+'</div><div class="sl">Kalorien</div></div><div class="sb"><div class="sv">'+(weights.length?weights[0].val+'kg':'—')+'</div><div class="sl">Gewicht</div></div><div class="sb"><div class="sv">'+(training.length||'—')+'</div><div class="sl">Übungen</div></div><div class="sb"><div class="sv" style="color:'+(tI-tE>=0?'#4ade80':'#f87171')+'">'+(tI-tE>=0?'+':'')+( tI-tE).toFixed(0)+'€</div><div class="sl">Bilanz</div></div></div>'+(reflex.gut?'<div class="sec"><div class="st">📋 Tages-Highlight</div><div class="rb"><div class="rl">Was lief gut</div>'+esc(reflex.gut)+'</div></div>':'')+'</div>';
+  setP(20,'Aufgaben…');
+  let p2='<div class="page"><div class="ph"><span class="pt">📋 Aufgaben — '+dateStr+'</span><span class="pm">'+doneT+'/'+totalT+' · '+pct+'%</span></div>';
+  groups.forEach(g=>{const tasks=g.tasks||[];if(!tasks.length)return;const dc=tasks.filter(t=>t.done).length;p2+='<div class="sec"><div class="st">'+esc(g.title||g.id)+' ('+dc+'/'+tasks.length+')</div>';tasks.forEach(t=>{p2+='<div class="tr" style="'+(t.done?'':'opacity:.5')+'">'+(t.done?'✅':'⬜')+' '+esc(t.title)+'</div>';(t.subtasks||[]).forEach(st=>{p2+='<div class="tr" style="padding-left:16px;font-size:.8em;'+(st.done?'':'opacity:.5')+'">'+(st.done?'✅':'⬜')+' '+esc(st.text||st)+'</div>';});});p2+='</div>';});
+  pages+=p2+'</div>';
+  setP(35,'Fitness…');
+  const supps=day.supps||[];const suppDone=day.suppDone||[];const ern=fit.ern||day.ern||{};
+  pages+='<div class="page"><div class="ph"><span class="pt">💪 Fitness — '+dateStr+'</span><span class="pm">'+training.length+' Übungen · '+kcal+' kcal</span></div><div class="sg"><div class="sb"><div class="sv">'+(weights.length?weights[0].val+'kg':'—')+'</div><div class="sl">Gewicht</div></div><div class="sb"><div class="sv">'+(kcal||'—')+'</div><div class="sl">Kalorien</div></div><div class="sb"><div class="sv">'+training.length+'</div><div class="sl">Übungen</div></div></div>'+(training.length?'<div class="sec"><div class="st">🏋 Training</div>'+training.map(ex=>'<div class="tr">🏋 '+esc(ex.name||ex)+(ex.sets?' · '+ex.sets+' Sätze':'')+(ex.weight?' · '+ex.weight+'kg':'')+'</div>').join('')+'</div>':'')+(Object.entries(ern).filter(([k,v])=>v).length?'<div class="sec"><div class="st">🥗 Ernährung</div>'+Object.entries(ern).filter(([k,v])=>v).map(([k,v])=>'<div class="fr"><b>'+esc(k)+'</b><span>'+esc(String(v))+'</span></div>').join('')+'</div>':'')+(supps.length?'<div class="sec"><div class="st">💊 Supplemente</div><div style="display:flex;flex-wrap:wrap;gap:5px;">'+supps.map(s=>'<span style="padding:2px 7px;border-radius:6px;font-size:.78em;background:'+(suppDone.includes(s)?'#4ade80':'#2a2a3e')+';color:'+(suppDone.includes(s)?'#000':'#aaa')+';">'+esc(s)+'</span>').join('')+'</div></div>':'')+'</div>';
+  setP(48,'Projekte…');
+  pages+='<div class="page"><div class="ph"><span class="pt">🎯 Projekte — '+dateStr+'</span><span class="pm">'+projekte.length+' Projekte</span></div>'+(projekte.length?projekte.map(p=>'<div style="background:#1e1e2e;border-radius:10px;padding:10px;margin-bottom:8px;"><div style="font-weight:700;font-size:.92em;margin-bottom:5px;">'+esc(p.name||p.title||'Projekt')+(p.status?' <span style=\"font-size:.75em;color:#888\">'+esc(p.status)+'</span>':'')+'</div>'+(p.tasks&&p.tasks.length?p.tasks.map(t=>'<div class="tr" style="'+(t.done?'':'opacity:.5')+'">'+(t.done?'✅':'⬜')+' '+esc(t.title||t.text||t)+'</div>').join(''):'<div style="font-size:.8em;color:#888;">Keine Aufgaben.</div>')+'</div>').join(''):'<div style="color:#888;font-size:.88em;">Keine Projekte.</div>')+'</div>';
+  setP(58,'Kalender…');
+  const kalEntries=typeof kal==='object'&&!Array.isArray(kal)?Object.entries(kal):[];
+  pages+='<div class="page"><div class="ph"><span class="pt">📅 Kalender — '+dateStr+'</span><span class="pm">'+kalEntries.reduce((s,[d,e])=>s+(Array.isArray(e)?e.length:1),0)+' Events</span></div>'+(kalEntries.length?'<div class="sec">'+kalEntries.map(([date,evs])=>(Array.isArray(evs)?evs:[evs]).filter(Boolean).map(ev=>'<div class="fr"><span style="color:#48c78e;font-weight:600;">'+esc(date)+'</span><span>'+esc(ev.title||ev)+'</span></div>').join('')).join('')+'</div>':'<div style="color:#888;font-size:.88em;">Keine Events.</div>')+'</div>';
+  setP(68,'Finanzen…');
+  pages+='<div class="page"><div class="ph"><span class="pt">💰 Finanzen — '+dateStr+'</span><span class="pm">Bilanz: '+(tI-tE>=0?'+':'')+( tI-tE).toFixed(2)+'€</span></div><div class="sg"><div class="sb"><div class="sv pos">+'+tI.toFixed(2)+'€</div><div class="sl">Einnahmen</div></div><div class="sb"><div class="sv neg">-'+tE.toFixed(2)+'€</div><div class="sl">Ausgaben</div></div><div class="sb"><div class="sv" style="color:'+(tI-tE>=0?'#4ade80':'#f87171')+'">'+(tI-tE>=0?'+':'')+( tI-tE).toFixed(2)+'€</div><div class="sl">Bilanz</div></div></div>'+(konten.length?'<div class="sec"><div class="st">🏦 Konten</div>'+konten.map(k=>'<div class="fr"><span>'+esc(k.name)+'</span><span class="'+(k.val>=0?'pos':'neg')+'">'+(k.val>=0?'+':'')+k.val.toFixed(2)+'€</span></div>').join('')+'</div>':'')+(income.length?'<div class="sec"><div class="st">📥 Einnahmen</div>'+income.map(x=>'<div class="fr"><span>'+esc(x.label)+(x.monthly?' 🔄':'')+(x.dueDate?' · '+esc(x.dueDate):'')+'</span><span class="pos">+'+Math.abs(x.amt||0).toFixed(2)+'€</span></div>').join('')+'</div>':'')+(expense.length?'<div class="sec"><div class="st">📤 Ausgaben</div>'+expense.map(x=>'<div class="fr"><span>'+esc(x.label)+(x.monthly?' 🔄':'')+(x.dueDate?' · '+esc(x.dueDate):'')+(x.paid?' ✓':'')+'</span><span class="neg">-'+Math.abs(x.amt||0).toFixed(2)+'€</span></div>').join('')+'</div>':'')+'</div>';
+  setP(78,'Mitspieler…');
+  pages+='<div class="page"><div class="ph"><span class="pt">🎮 Mitspieler — '+dateStr+'</span><span class="pm">'+players.length+' Spieler</span></div>'+(players.length?players.map(p=>'<div style="display:flex;align-items:center;gap:12px;padding:6px 0;border-bottom:1px solid #1e1e2e;"><div style="width:32px;height:32px;border-radius:50%;background:#2a2a3e;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9em;flex-shrink:0;">'+(p.name?esc(p.name[0].toUpperCase()):'?')+'</div><div><div style="font-weight:700;font-size:.9em;">'+esc(p.name||'')+'</div><div style="font-size:.76em;color:#888;">'+(p.game?esc(p.game)+' · ':'')+' Level '+(p.level||1)+' · '+(p.rank||'Bronze')+' · XP: '+(p.xp||0)+'/'+(p.xpGoal||1000)+'</div></div></div>').join(''):'<div style="color:#888;font-size:.88em;">Keine Mitspieler.</div>')+'</div>';
+  setP(90,'Notizen…');
+  pages+='<div class="page"><div class="ph"><span class="pt">📝 Notizen — '+dateStr+'</span><span class="pm">'+notizen.length+' Einträge</span></div>'+(notizen.length?notizen.map(n=>{const txt=typeof n==='string'?n:(n.text||n.title||JSON.stringify(n));return'<div class="rb">'+esc(txt)+'</div>';}).join(''):'<div style="color:#888;font-size:.88em;">Keine Notizen.</div>')+(reflex.gut||reflex.verb?'<div class="sec" style="margin-top:14px;"><div class="st">📋 Reflexion</div>'+(reflex.gut?'<div class="rb"><div class="rl">Was lief gut</div>'+esc(reflex.gut)+'</div>':'')+(reflex.verb?'<div class="rb"><div class="rl">Verbesserung</div>'+esc(reflex.verb)+'</div>':'')+'</div>':'')+'<div style="margin-top:18px;font-size:.7em;color:#444;text-align:center;">Life OS · Exportiert am '+now+'</div></div>';
+  setP(98,'Fenster öffnen…');
+  const full='<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><title>Life OS — '+dateStr+'</title><style>'+css+'</style></head><body>'+pages+'</body></html>';
+  setTimeout(()=>{setP(100,'Fertig!');const w=window.open('','_blank');if(w){w.document.write(full);w.document.close();setTimeout(()=>{w.print();onDone();},600);}else{showToast('⚠️ Pop-up blockiert!');onDone();}},300);
 }
-
-
-
-
-
-
-
-
 function archiveToday() {
-  if (!confirm('Heutigen Tag archivieren?')) return;
+  if (!confirm('Heutigen Tag archivieren? Alle aktuellen Daten werden gespeichert.')) return;
   const today = new Date().toLocaleDateString('de-DE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const groups = (S.tagesplan.groups || []).map(g => ({
     id: g.id, title: g.title,
-    tasks: (g.tasks || []).map(t => ({title: t.title, done: t.done, notRelevant: t.notRelevant}))
+    tasks: (g.tasks || []).map(t => ({title: t.title, done: t.done, notRelevant: t.notRelevant, subtasks: (t.subtasks||[]).map(st=>({text:st.text||st,done:st.done||false}))}))
   }));
   const snapshot = {
-    date: today,
-    ts: Date.now(),
-    groups,
+    date: today, ts: Date.now(), groups,
     fitness: JSON.parse(JSON.stringify(S.fitness || {})),
-    kcal: S.kcal || 0,
+    kcal: S.fitness?.kcal || S.kcal || 0,
     reps: JSON.parse(JSON.stringify(S.reps || {})),
     supps: (S.supps || []).slice(),
     suppDone: (S.suppDone || []).slice(),
-    ern: (S.ern || []).slice(),
+    ern: JSON.parse(JSON.stringify(S.fitness?.ern || S.ern || {})),
     reflex: JSON.parse(JSON.stringify(S.reflex || {})),
-    notizen: JSON.parse(JSON.stringify(S.notizen || []))
+    notizen: JSON.parse(JSON.stringify(S.notizen || [])),
+    projekte: JSON.parse(JSON.stringify(S.projekte || [])),
+    finanzen: {
+      income: JSON.parse(JSON.stringify(S.finanzen?.income || [])),
+      expense: JSON.parse(JSON.stringify(S.finanzen?.expense || [])),
+      konten: JSON.parse(JSON.stringify(S.finanzen?.konten || [])),
+      investments: JSON.parse(JSON.stringify(S.finanzen?.investments || []))
+    },
+    kalender: JSON.parse(JSON.stringify(S.kalender?.events || {})),
+    players: JSON.parse(JSON.stringify(S.players || []))
   };
   const existing = S.archive.findIndex(d => d.date === today);
   if (existing >= 0) S.archive[existing] = snapshot;
   else S.archive.push(snapshot);
   if (S.archive.length > 90) S.archive = S.archive.sort((a,b) => b.ts-a.ts).slice(0, 90);
   S.archive = S.archive.sort((a,b) => b.ts-a.ts).slice();
-  save(); showToast('Tag archiviert!'); goPanel('archiv');
+  save(); showToast('✅ Tag vollständig archiviert!'); goPanel('archiv');
 }
 function showToast(msg) {
   let t = document.getElementById('_toast');
