@@ -2,7 +2,7 @@
   "name": "Life OS",
   "short_name": "Life OS",
   "description": "Dein persönliches Life Operating System",
-  "start_url": "./life-os-v16.html",
+  "start_url": "./life-os-v17.html",
   "display": "standalone",
   "background_color": "#0f0f0f",
   "theme_color": "#0f0f0f",
