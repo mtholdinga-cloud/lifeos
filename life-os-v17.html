@@ -964,7 +964,7 @@ const STATE_DEFAULTS = {
   },
   mtholding: {
     companies: [
-      { id: 'c1', name: 'MT Media',       goals: ['2026 Q3: 1000 Views/Monat'] },
+      { id: 'c1', name: 'MT Media', goals: ['2026 Q3: 1000 Views/Monat'], children: [ { id: 'c1-1', name: 'SHH', goals: [], children: [] }, { id: 'c1-2', name: 'Mr.Tingel', goals: [], children: [] } ] },
       { id: 'c2', name: 'MT Tech',        goals: ['2026 Q4: MVP Launch'] },
       { id: 'c3', name: 'MT Consult',     goals: ['2026 Q2: 5 Neukunden'] },
       { id: 'c4', name: 'MT Events',      goals: ['2026 Q3: 3 Events'] },
@@ -2067,37 +2067,73 @@ function renderMTHolding() {
   const panel = document.getElementById('panel-mtholding');
   if (!panel) return;
   if (!S.mtholding || !S.mtholding.companies) S.mtholding = STATE_DEFAULTS.mtholding;
+  function ensureChildren(list){ if(!Array.isArray(list)) return; list.forEach(c=>{ if(!Array.isArray(c.children)) c.children=[]; if(!Array.isArray(c.goals)) c.goals=[]; ensureChildren(c.children); }); }
+  ensureChildren(S.mtholding.companies);
+  if (typeof window._mtEdit === 'undefined') window._mtEdit = false;
+  const edit = window._mtEdit;
   const companies = S.mtholding.companies;
 
-  let html = '<div class="mt-header"><h2>🏢 MT Holding</h2></div>'
-    + '<div class="org-wrap">'
-    + '<div class="org-root-node">🏢 MT Holding</div>'
-    + '<div class="org-line-down"></div>'
-    + '<div class="org-branches-line"></div>'
-    + '<div class="org-companies">';
+  function renderCompany(c, path, depth) {
+    const pathStr = JSON.stringify(path);
+    const indent = depth * 18;
+    const bg = depth===0 ? 'var(--bg2)' : depth===1 ? 'var(--bg1)' : 'transparent';
+    const border = depth===0 ? '1px solid var(--bg3)' : '1px dashed var(--bg3)';
+    let h = '<div class="mt-node" style="margin-left:'+indent+'px;background:'+bg+';border:'+border+';border-radius:10px;padding:10px 12px;margin-bottom:8px;">';
+    h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:'+(c.goals.length||edit?'6px':'0')+';">';
+    const nameSize = depth===0 ? '1em' : depth===1 ? '.92em' : '.85em';
+    const nameColor = depth===0 ? 'var(--acc)' : 'var(--t0)';
+    h += '<div ondblclick="editMTNodeName('+pathStr.replace(/"/g,'&quot;')+')" style="flex:1;font-weight:700;font-size:'+nameSize+';color:'+nameColor+';cursor:text;">'+escHtml(c.name)+'</div>';
+    if (edit) {
+      if (depth < 2) h += '<button class="mt-btn" onclick="addMTChild('+pathStr.replace(/"/g,'&quot;')+')" title="Unterpunkt hinzufügen" style="background:var(--bg3);border:none;border-radius:6px;padding:3px 8px;color:var(--t0);cursor:pointer;font-size:.85em;">➕</button>';
+      h += '<button class="mt-btn" onclick="moveMTNode('+pathStr.replace(/"/g,'&quot;')+',-1)" title="Nach oben" style="background:var(--bg3);border:none;border-radius:6px;padding:3px 8px;color:var(--t0);cursor:pointer;font-size:.85em;">↑</button>';
+      h += '<button class="mt-btn" onclick="moveMTNode('+pathStr.replace(/"/g,'&quot;')+',1)" title="Nach unten" style="background:var(--bg3);border:none;border-radius:6px;padding:3px 8px;color:var(--t0);cursor:pointer;font-size:.85em;">↓</button>';
+      h += '<button class="mt-btn" onclick="deleteMTNode('+pathStr.replace(/"/g,'&quot;')+')" title="Löschen" style="background:#f87171;border:none;border-radius:6px;padding:3px 8px;color:#000;cursor:pointer;font-size:.85em;">🗑</button>';
+    }
+    h += '</div>';
+    if (c.goals.length) {
+      h += '<div class="org-goal-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;">';
+      c.goals.forEach((g,gi)=>{
+        h += '<span class="org-goal" style="background:var(--bg3);padding:3px 8px;border-radius:6px;font-size:.8em;color:var(--t1);display:inline-flex;align-items:center;gap:6px;">'+escHtml(g);
+        if (edit) h += '<button onclick="deleteMTNodeGoal('+pathStr.replace(/"/g,'&quot;')+','+gi+')" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:.9em;padding:0;">✕</button>';
+        h += '</span>';
+      });
+      h += '</div>';
+    }
+    if (edit) {
+      const inpId = 'mt-goal-inp-'+path.join('-');
+      h += '<div style="display:flex;gap:6px;"><input type="text" id="'+inpId+'" placeholder="Neues Ziel…" style="flex:1;background:var(--bg1);border:1px solid var(--bg3);border-radius:6px;padding:5px 8px;color:var(--t0);font-size:.85em;" onkeydown="if(event.key===&quot;Enter&quot;)addMTNodeGoal('+pathStr.replace(/"/g,'&quot;')+',this)"><button onclick="addMTNodeGoal('+pathStr.replace(/"/g,'&quot;')+',document.getElementById(&quot;'+inpId+'&quot;))" style="background:var(--acc);border:none;border-radius:6px;padding:5px 10px;color:#000;cursor:pointer;font-size:.85em;font-weight:700;">+</button></div>';
+    }
+    if (c.children && c.children.length) {
+      h += '<div class="mt-children" style="margin-top:8px;">';
+      c.children.forEach((ch,chi)=>{ h += renderCompany(ch, path.concat([chi]), depth+1); });
+      h += '</div>';
+    }
+    h += '</div>';
+    return h;
+  }
 
-  companies.forEach((c, ci) => {
-    html += '<div class="org-company-col">'
-      + '<div class="org-line-up"></div>'
-      + '<div class="org-company-card">'
-      + '<div class="org-company-name" ondblclick="editMTCompanyName(' + ci + ')">' + escHtml(c.name) + '</div>'
-      + '<div class="org-goals">';
-    (c.goals || []).forEach((g, gi) => {
-      html += '<div class="org-goal-row">'
-        + '<span class="org-goal-text" ondblclick="editMTGoal(' + ci + ',' + gi + ')">' + escHtml(g) + '</span>'
-        + '<button class="org-goal-del" onclick="deleteMTGoal(' + ci + ',' + gi + ')">✕</button>'
-        + '</div>';
-    });
-    html += '</div>'
-      + '<div class="org-goal-add">'
-      + '<input type="text" class="org-goal-inp" id="mt-goal-inp-' + ci + '" placeholder="+ Ziel hinzufügen" onkeydown="if(event.key===&quot;Enter&quot;)addMTGoal(' + ci + ')">'
-      + '<button class="org-goal-btn" onclick="addMTGoal(' + ci + ')">+</button>'
-      + '</div>'
-      + '</div></div>';
-  });
+  let html = '<div class="mt-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">';
+  html += '<div><div class="org-name" style="font-size:1.3em;font-weight:700;">🏢 MT Holding</div><div style="color:var(--t2);font-size:.85em;">Muttergesellschaft</div></div>';
+  html += '<div style="display:flex;gap:8px;">';
+  html += '<button onclick="toggleMTEdit()" style="padding:8px 14px;background:'+(edit?'#fbbf24':'var(--bg2)')+';border:1px solid var(--bg3);border-radius:8px;color:'+(edit?'#000':'var(--t0)')+';cursor:pointer;font-weight:700;font-size:.9em;">'+(edit?'✅ Fertig':'✏️ Bearbeiten')+'</button>';
+  html += '<button onclick="saveMTHolding()" style="padding:8px 14px;background:var(--acc);border:none;border-radius:8px;color:#000;cursor:pointer;font-weight:700;font-size:.9em;">💾 Speichern</button>';
   html += '</div></div>';
+
+  html += '<div class="mt-companies" style="display:flex;flex-direction:column;gap:0;">';
+  companies.forEach((c,ci)=>{ html += renderCompany(c, [ci], 0); });
+  if (edit) html += '<button onclick="addMTCompany()" style="margin-top:8px;padding:10px;background:var(--bg2);border:1px dashed var(--bg3);border-radius:10px;color:var(--t1);cursor:pointer;font-weight:700;">➕ Neue Firma</button>';
+  html += '</div>';
   panel.innerHTML = html;
 }
+function toggleMTEdit(){ window._mtEdit = !window._mtEdit; renderMTHolding(); }
+function _mtGetNode(path){ let list=S.mtholding.companies; let node=null; for(let i=0;i<path.length;i++){ node=list[path[i]]; if(!node) return null; list=node.children||(node.children=[]); } return node; }
+function _mtGetParentList(path){ if(path.length===1) return S.mtholding.companies; let list=S.mtholding.companies; for(let i=0;i<path.length-1;i++){ const n=list[path[i]]; if(!n) return null; if(!Array.isArray(n.children)) n.children=[]; list=n.children; } return list; }
+function editMTNodeName(path){ const node=_mtGetNode(path); if(!node) return; const v=prompt('Name:', node.name); if(v!==null && v.trim()){ node.name=v.trim(); saveState(); renderMTHolding(); } }
+function addMTChild(path){ const node=_mtGetNode(path); if(!node) return; if(!Array.isArray(node.children)) node.children=[]; const v=prompt('Name des neuen Unterpunkts:'); if(!v||!v.trim()) return; node.children.push({ id:'n'+Date.now(), name:v.trim(), goals:[], children:[] }); saveState(); renderMTHolding(); }
+function moveMTNode(path, dir){ const list=_mtGetParentList(path); if(!list) return; const idx=path[path.length-1]; const newIdx=idx+dir; if(newIdx<0||newIdx>=list.length) return; const [item]=list.splice(idx,1); list.splice(newIdx,0,item); saveState(); renderMTHolding(); }
+function deleteMTNode(path){ const list=_mtGetParentList(path); if(!list) return; const idx=path[path.length-1]; const node=list[idx]; if(!node) return; if(!confirm('"'+node.name+'" wirklich löschen?')) return; list.splice(idx,1); saveState(); renderMTHolding(); }
+function addMTNodeGoal(path, inp){ const node=_mtGetNode(path); if(!node||!inp) return; const v=(inp.value||'').trim(); if(!v) return; if(!Array.isArray(node.goals)) node.goals=[]; node.goals.push(v); inp.value=''; saveState(); renderMTHolding(); }
+function deleteMTNodeGoal(path, gi){ const node=_mtGetNode(path); if(!node||!Array.isArray(node.goals)) return; node.goals.splice(gi,1); saveState(); renderMTHolding(); }
 
 function addMTGoal(ci) {
   const inp = document.getElementById('mt-goal-inp-' + ci);
