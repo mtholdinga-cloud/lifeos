@@ -2497,7 +2497,6 @@ async function initApp() {
   }
   await loadAllState();
   normalizeState();
-  migrateV16Data();
   if (window._syncChannel) window._syncChannel.close();
   window._syncChannel = new BroadcastChannel('lifeos_sync');
   window._syncChannel.onmessage = async (ev) => {
