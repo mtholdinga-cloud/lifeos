@@ -388,19 +388,19 @@
             "id": "t1776693275326",
             "title": "5:30 Aufstehen",
             "done": false,
-            "notRelevant": true
+            "notRelevant": false
           },
           {
             "id": "t1776693287905",
             "title": "Kleidung Raussuchen",
             "done": false,
-            "notRelevant": true
+            "notRelevant": false
           },
           {
             "id": "t1776693302657",
             "title": "Tasche Vorbereiten",
             "done": false,
-            "notRelevant": true
+            "notRelevant": false
           },
           {
             "id": "t1776693323528",
@@ -1535,7 +1535,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-08-26T12:25:00.675Z",
+    "updatedAt": "2026-08-26T23:11:29.621Z",
     "updatedBy": "browser",
     "schemaVersion": 1
   },
