@@ -358,15 +358,7 @@
       "ampel": "green"
     }
   ],
-  "notizen": [
-    {
-      "id": 1787737744004,
-      "title": "MT-Sync Test 2",
-      "tag": "MT",
-      "body": "Zweiter Test - Persistenzcheck",
-      "date": "26.8.2026"
-    }
-  ],
+  "notizen": [],
   "ki": {
     "prompts": []
   },
@@ -423,7 +415,7 @@
           {
             "id": "t1776693549598",
             "title": "Pünktlich Los",
-            "done": false,
+            "done": true,
             "notRelevant": false
           }
         ]
@@ -1535,8 +1527,8 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-08-26T09:49:04.959Z",
-    "updatedBy": "mt",
+    "updatedAt": "2026-08-26T09:56:56.039Z",
+    "updatedBy": "browser",
     "schemaVersion": 1
   },
   "reps": {
@@ -1562,15 +1554,7 @@
     "mittags": "",
     "abends": ""
   },
-  "notes": [
-    {
-      "id": 1787737744004,
-      "title": "MT-Sync Test 2",
-      "tag": "MT",
-      "body": "Zweiter Test - Persistenzcheck",
-      "date": "26.8.2026"
-    }
-  ],
+  "notes": [],
   "players": [
     {
       "name": "Mold",
