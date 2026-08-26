@@ -2756,15 +2756,22 @@ async function pushGithubState(){
   if (!token) return;
   try {
     const base = 'https://api.github.com/repos/' + GITHUB_SYNC_REPO + '/contents/sync/state.json';
-    let sha = null;
-    try {
-      const getRes = await fetch(base + '?ref=' + GITHUB_SYNC_BRANCH, { headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' } });
-      if (getRes.ok) { const j = await getRes.json(); sha = j.sha; }
-    } catch(e) {}
+    async function _mtGetSha() {
+      try {
+        const getRes = await fetch(base + '?ref=' + GITHUB_SYNC_BRANCH, { cache: 'no-store', headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' } });
+        if (getRes.ok) { const j = await getRes.json(); return j.sha; }
+      } catch(e) {}
+      return null;
+    }
+    let sha = await _mtGetSha();
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(S, null, 2))));
-    const body = { message: 'MT-Sync: state update ' + new Date().toISOString(), content: content, branch: GITHUB_SYNC_BRANCH };
-    if (sha) body.sha = sha;
-    const putRes = await fetch(base, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    async function _mtDoPut(shaVal) {
+      const body = { message: 'MT-Sync: state update ' + new Date().toISOString(), content: content, branch: GITHUB_SYNC_BRANCH };
+      if (shaVal) body.sha = shaVal;
+      return fetch(base, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    }
+    let putRes = await _mtDoPut(sha);
+    if (putRes.status === 409) { sha = await _mtGetSha(); putRes = await _mtDoPut(sha); }
     if (!putRes.ok) { console.warn('pushGithubState failed', putRes.status, await putRes.text()); _mtSetGithubStatus('❌ Fehler (' + putRes.status + ')', true); return; }
     _mtSetGithubStatus('☁️ ' + new Date().toLocaleTimeString('de-DE'));
   } catch(e) { console.warn('pushGithubState', e); _mtSetGithubStatus('❌ fehlgeschlagen', true); }
