@@ -588,6 +588,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
     <button class="export-btn" id="exportbtn" onclick="exportData()">📤</button>
     <button class="export-btn" id="importbtn" onclick="document.getElementById('import-file').click()">📥</button>
     <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+    <button class="export-btn" id="mtsyncbtn" onclick="openMTSyncSettings()" title="MT-Sync Einstellungen">🤖</button>
     <button class="mode-btn" id="modebtn">🖥️ PC</button>
   </div>
 </div>
@@ -972,8 +973,10 @@ const STATE_DEFAULTS = {
     ]
   },
   archive: [],
-  v16migrated: false
+  v16migrated: false,
+  meta: { updatedAt: null, updatedBy: 'browser', schemaVersion: 1 }
 };
+const STATE_SCHEMA_VERSION = 1;
 
 function _deepMerge(defaults, stored) {
   if (typeof defaults !== 'object' || defaults === null) return stored !== undefined ? stored : defaults;
@@ -1028,6 +1031,12 @@ let _saveTimer = null;
 async function save() {
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(async () => {
+    const _src = window._lifeosSaveSource || 'browser';
+    window._lifeosSaveSource = 'browser';
+    if (!S.meta) S.meta = {};
+    S.meta.updatedAt = new Date().toISOString();
+    S.meta.updatedBy = _src;
+    S.meta.schemaVersion = STATE_SCHEMA_VERSION;
     try {
       await db.state.put({ key: 'main', data: S, ts: Date.now() });
       try { localStorage.setItem('lifeos_v17_state', JSON.stringify(S)); } catch(e3) {}
@@ -1037,8 +1046,11 @@ async function save() {
     if (window._syncChannel) {
       try { window._syncChannel.postMessage({ type: 'STATE_UPDATE', ts: Date.now() }); } catch(e) {}
     }
+    try { scheduleFileSync(); } catch(e) {}
+    try { scheduleGithubSync(); } catch(e) {}
   }, 300);
 }
+function saveState(){ return save(); }
 
 // ==============================
 // SIDEBAR & NAV
@@ -2523,6 +2535,304 @@ function normalizeState(){
   if(!Array.isArray(S.finanzen.expense)) S.finanzen.expense = [];
 }
 
+// ==============================
+// MT-SYNC MODUL (lokaler Ordner-Export + Command-Inbox + GitHub-Handy-Spiegel)
+// ==============================
+let _syncDirHandle = null;
+let _fileSyncTimer = null;
+let _githubSyncTimer = null;
+let _mtSyncBusy = false;
+const MT_SYNC_FILES = { state: 'state.json', inbox: 'mt-inbox.json', outbox: 'mt-outbox.json' };
+const GITHUB_SYNC_REPO = 'mtholdinga-cloud/lifeos';
+const GITHUB_SYNC_BRANCH = 'sync';
+
+function _mtSetStatus(text, isError){
+  const lbl = document.getElementById('mtsync-status');
+  if (lbl) { lbl.textContent = text; lbl.style.color = isError ? 'var(--acc3)' : 'var(--t2)'; }
+}
+async function _mtLoadDirHandle(){
+  try { const h = await dbGet('mtSyncDirHandle'); return h || null; } catch(e){ return null; }
+}
+async function _mtStoreDirHandle(handle){
+  try { await dbSet('mtSyncDirHandle', handle); } catch(e){}
+}
+async function connectSyncFolder(){
+  if (!window.showDirectoryPicker) { showToast('⚠️ Ordner-Sync braucht Chrome/Edge'); return; }
+  try {
+    const handle = await window.showDirectoryPicker({ id: 'mtlifeos-sync', mode: 'readwrite' });
+    _syncDirHandle = handle;
+    await _mtStoreDirHandle(handle);
+    await writeSyncFiles();
+    await pollInbox();
+    _mtSetStatus('🔗 ' + handle.name);
+    showToast('✅ Sync-Ordner verbunden!');
+  } catch(e) {
+    if (e && e.name !== 'AbortError') { console.warn('connectSyncFolder', e); showToast('❌ Ordner-Sync fehlgeschlagen'); }
+  }
+}
+async function initFileSync(){
+  _syncDirHandle = await _mtLoadDirHandle();
+  if (!_syncDirHandle) { _mtSetStatus('🔌 kein Ordner verbunden'); return; }
+  try {
+    const perm = await _syncDirHandle.queryPermission({ mode: 'readwrite' });
+    if (perm !== 'granted') { _mtSetStatus('⚠️ Zugriff erneut bestätigen'); return; }
+    _mtSetStatus('🔗 ' + _syncDirHandle.name);
+    await writeSyncFiles();
+    await pollInbox();
+  } catch(e) { console.warn('initFileSync', e); }
+}
+function scheduleFileSync(){
+  clearTimeout(_fileSyncTimer);
+  _fileSyncTimer = setTimeout(() => { writeSyncFiles(); }, 7000);
+}
+async function _mtGetFileHandle(name, create){
+  if (!_syncDirHandle) return null;
+  try { return await _syncDirHandle.getFileHandle(name, { create: !!create }); }
+  catch(e){ return null; }
+}
+async function _mtReadJSON(name, fallback){
+  const fh = await _mtGetFileHandle(name, false);
+  if (!fh) return fallback;
+  try {
+    const file = await fh.getFile();
+    const text = await file.text();
+    if (!text || !text.trim()) return fallback;
+    return JSON.parse(text);
+  } catch(e){ return fallback; }
+}
+async function _mtWriteJSON(name, data){
+  const fh = await _mtGetFileHandle(name, true);
+  if (!fh) return false;
+  try {
+    const w = await fh.createWritable();
+    await w.write(JSON.stringify(data, null, 2));
+    await w.close();
+    return true;
+  } catch(e){ console.warn('_mtWriteJSON', name, e); return false; }
+}
+async function writeSyncFiles(){
+  if (!_syncDirHandle) return;
+  try {
+    const perm = await _syncDirHandle.queryPermission({ mode: 'readwrite' });
+    if (perm !== 'granted') { _mtSetStatus('⚠️ Zugriff erneut bestätigen'); return; }
+  } catch(e) { return; }
+  await _mtWriteJSON(MT_SYNC_FILES.state, S);
+  _mtSetStatus('🔗 ' + _syncDirHandle.name + ' · ' + new Date().toLocaleTimeString('de-DE'));
+}
+
+// --- Command-Inbox: MT schreibt hierher, App liest/wendet an/leert Inbox ---
+async function pollInbox(){
+  if (!_syncDirHandle || _mtSyncBusy) return;
+  _mtSyncBusy = true;
+  try {
+    const perm = await _syncDirHandle.queryPermission({ mode: 'readwrite' });
+    if (perm !== 'granted') return;
+    const cmds = await _mtReadJSON(MT_SYNC_FILES.inbox, []);
+    if (!Array.isArray(cmds) || !cmds.length) return;
+    const results = [];
+    let didApply = false;
+    for (const cmd of cmds) {
+      const r = _applyInboxAction(cmd);
+      results.push({ id: (cmd && cmd.id) || null, action: cmd && cmd.action, ok: !!(r && r.ok), error: (r && r.error) || null, ts: new Date().toISOString(), echo: cmd });
+      if (r && r.ok) didApply = true;
+    }
+    await _mtWriteJSON(MT_SYNC_FILES.inbox, []);
+    const prevOutbox = await _mtReadJSON(MT_SYNC_FILES.outbox, []);
+    const nextOutbox = (Array.isArray(prevOutbox) ? prevOutbox : []).concat(results).slice(-200);
+    await _mtWriteJSON(MT_SYNC_FILES.outbox, nextOutbox);
+    if (didApply) {
+      window._lifeosSaveSource = 'mt';
+      save();
+      const activeEl = document.querySelector('.nav-item.active');
+      renderPanel(activeEl ? activeEl.dataset.panel : 'heute');
+      showToast('🤖 MT: ' + results.filter(r=>r.ok).length + ' Änderung(en) übernommen');
+    }
+  } catch(e) { console.warn('pollInbox', e); }
+  finally { _mtSyncBusy = false; }
+}
+
+function _mtFindCompanyByName(name){
+  if (!name) return null;
+  const norm = String(name).trim().toLowerCase();
+  let found = null;
+  (function walk(list){
+    if (!Array.isArray(list) || found) return;
+    for (const c of list) {
+      if (found) return;
+      if (c && c.name && String(c.name).trim().toLowerCase() === norm) { found = c; return; }
+      if (c && Array.isArray(c.children)) walk(c.children);
+    }
+  })((S.mtholding && S.mtholding.companies) || []);
+  return found;
+}
+function _mtDateKey(iso){
+  if (!iso) return null;
+  const parts = String(iso).split('-');
+  if (parts.length !== 3) return null;
+  const y = parseInt(parts[0],10), m = parseInt(parts[1],10), d = parseInt(parts[2],10);
+  if (!y || !m || !d) return null;
+  return y + '-' + m + '-' + d;
+}
+function _applyInboxAction(cmd){
+  try {
+    if (!cmd || !cmd.action) return { ok:false, error:'kein action-Feld' };
+    switch (cmd.action) {
+      case 'add_task': {
+        const gid = cmd.group || cmd.gid;
+        const g = S.tagesplan.groups.find(x => x.id === gid);
+        if (!g) return { ok:false, error:'Gruppe "'+gid+'" nicht gefunden (morgen/fokus/haus/abend)' };
+        if (!cmd.text || !String(cmd.text).trim()) return { ok:false, error:'text fehlt' };
+        g.tasks.push({ id: cmd.id || ('mt'+Date.now()+Math.floor(Math.random()*1000)), title: String(cmd.text).trim(), done:false, notRelevant:false });
+        return { ok:true };
+      }
+      case 'complete_task': {
+        const gid = cmd.group || cmd.gid;
+        const groups = gid ? S.tagesplan.groups.filter(x => x.id === gid) : S.tagesplan.groups;
+        for (const g of groups) {
+          const t = (g.tasks||[]).find(x => x.id === cmd.taskId);
+          if (t) { t.done = true; t.notRelevant = false; return { ok:true }; }
+        }
+        return { ok:false, error:'Task "'+cmd.taskId+'" nicht gefunden' };
+      }
+      case 'add_note': {
+        if (!cmd.text || !String(cmd.text).trim()) return { ok:false, error:'text fehlt' };
+        if (!Array.isArray(S.notes)) S.notes = [];
+        S.notes.unshift({ id: Date.now(), title: cmd.title||'', tag: cmd.tag||'MT', body: String(cmd.text).trim(), date: new Date().toLocaleDateString('de-DE') });
+        return { ok:true };
+      }
+      case 'add_calendar_event': {
+        const key = _mtDateKey(cmd.date);
+        if (!key) return { ok:false, error:'date ungültig (YYYY-MM-DD erwartet)' };
+        if (!cmd.text || !String(cmd.text).trim()) return { ok:false, error:'text fehlt' };
+        if (!S.kalender.events) S.kalender.events = {};
+        if (!S.kalender.events[key]) S.kalender.events[key] = [];
+        S.kalender.events[key].push({ title: String(cmd.text).trim(), ts: Date.now() });
+        return { ok:true };
+      }
+      case 'log_finance': {
+        const type = cmd.type === 'income' ? 'income' : 'expense';
+        const amt = parseFloat(cmd.amt);
+        if (!cmd.label || isNaN(amt) || amt <= 0) return { ok:false, error:'label oder amt ungültig' };
+        if (!Array.isArray(S.finanzen[type])) S.finanzen[type] = [];
+        S.finanzen[type].push({ id: 'mt'+Date.now(), label: String(cmd.label).trim(), amt: type==='expense' ? -Math.abs(amt) : Math.abs(amt), paid:false, dueDate: cmd.dueDate||'', monthly: !!cmd.monthly });
+        return { ok:true };
+      }
+      case 'update_okr': {
+        const company = _mtFindCompanyByName(cmd.company);
+        if (!company) return { ok:false, error:'Firma "'+cmd.company+'" nicht gefunden' };
+        if (!Array.isArray(company.goals)) company.goals = [];
+        const wantText = String(cmd.goal||'').trim();
+        let gi = company.goals.findIndex(g => String(g).trim() === wantText);
+        if (gi === -1 && wantText) gi = company.goals.findIndex(g => String(g).toLowerCase().indexOf(wantText.toLowerCase()) === 0);
+        const baseText = wantText || (gi > -1 ? String(company.goals[gi]).replace(/\s*\u2014\s*\d+%\s*$/,'') : '');
+        if (!baseText) return { ok:false, error:'goal-Text fehlt' };
+        let newText = baseText;
+        if (typeof cmd.progress === 'number') {
+          const pct = Math.max(0, Math.min(100, Math.round(cmd.progress <= 1 ? cmd.progress*100 : cmd.progress)));
+          newText = baseText + ' \u2014 ' + pct + '%';
+        }
+        if (gi > -1) company.goals[gi] = newText; else company.goals.push(newText);
+        return { ok:true };
+      }
+      default:
+        return { ok:false, error:'unbekannte action: '+cmd.action };
+    }
+  } catch(e) { return { ok:false, error: String((e && e.message) || e) }; }
+}
+
+// --- GitHub-Mirror: Cross-Device Spiegelung über das öffentliche Repo (Branch "sync") ---
+function _mtGithubToken(){ try { return localStorage.getItem('mtlifeos_gh_token') || ''; } catch(e){ return ''; } }
+function setGithubSyncToken(tok){ try { if (tok) localStorage.setItem('mtlifeos_gh_token', tok); else localStorage.removeItem('mtlifeos_gh_token'); } catch(e){} }
+function scheduleGithubSync(){
+  clearTimeout(_githubSyncTimer);
+  _githubSyncTimer = setTimeout(() => { pushGithubState(); }, 60000);
+}
+function _mtSetGithubStatus(text, isError){
+  const lbl = document.getElementById('mtsync-gh-status');
+  if (lbl) { lbl.textContent = text; lbl.style.color = isError ? 'var(--acc3)' : 'var(--t2)'; }
+}
+async function pushGithubState(){
+  const token = _mtGithubToken();
+  if (!token) return;
+  try {
+    const base = 'https://api.github.com/repos/' + GITHUB_SYNC_REPO + '/contents/sync/state.json';
+    let sha = null;
+    try {
+      const getRes = await fetch(base + '?ref=' + GITHUB_SYNC_BRANCH, { headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' } });
+      if (getRes.ok) { const j = await getRes.json(); sha = j.sha; }
+    } catch(e) {}
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(S, null, 2))));
+    const body = { message: 'MT-Sync: state update ' + new Date().toISOString(), content: content, branch: GITHUB_SYNC_BRANCH };
+    if (sha) body.sha = sha;
+    const putRes = await fetch(base, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (!putRes.ok) { console.warn('pushGithubState failed', putRes.status, await putRes.text()); _mtSetGithubStatus('❌ Fehler (' + putRes.status + ')', true); return; }
+    _mtSetGithubStatus('☁️ ' + new Date().toLocaleTimeString('de-DE'));
+  } catch(e) { console.warn('pushGithubState', e); _mtSetGithubStatus('❌ fehlgeschlagen', true); }
+}
+async function pullGithubState(showFeedback){
+  try {
+    const url = 'https://raw.githubusercontent.com/' + GITHUB_SYNC_REPO + '/' + GITHUB_SYNC_BRANCH + '/state.json?ts=' + Date.now();
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) { if (showFeedback) showToast('ℹ️ Noch kein GitHub-Stand vorhanden'); return; }
+    const remote = await res.json();
+    const remoteTs = (remote && remote.meta && remote.meta.updatedAt) ? new Date(remote.meta.updatedAt).getTime() : 0;
+    const localTs = (S && S.meta && S.meta.updatedAt) ? new Date(S.meta.updatedAt).getTime() : 0;
+    if (remoteTs > localTs) {
+      S = remote;
+      normalizeState();
+      window._lifeosSaveSource = 'browser';
+      save();
+      const activeEl = document.querySelector('.nav-item.active');
+      renderPanel(activeEl ? activeEl.dataset.panel : 'heute');
+      showToast('☁️ Neuer Stand von GitHub geladen');
+    } else if (showFeedback) {
+      showToast('✅ Bereits aktuell');
+    }
+  } catch(e) { console.warn('pullGithubState', e); }
+}
+function initGithubSync(){
+  pullGithubState(false);
+  setInterval(() => pullGithubState(false), 90000);
+}
+
+// --- Settings-UI ---
+function openMTSyncSettings(){
+  const old = document.getElementById('mtsync-modal');
+  if (old) old.remove();
+  const modal = document.createElement('div');
+  modal.id = 'mtsync-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:3000;display:flex;align-items:center;justify-content:center;';
+  const dirName = _syncDirHandle ? _syncDirHandle.name : null;
+  const tokenSet = !!_mtGithubToken();
+  modal.innerHTML =
+    '<div style="background:var(--bg1);border-radius:16px;padding:20px;max-width:380px;width:90%;">' +
+      '<div style="font-weight:800;font-size:16px;margin-bottom:14px;">🤖 MT-Sync Einstellungen</div>' +
+      '<div style="font-size:13px;color:var(--t2);margin-bottom:6px;">Lokaler Ordner (Laptop, für MT-Dateizugriff)</div>' +
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
+        '<button class="modal-btn confirm" style="flex:none;" onclick="connectSyncFolder()">📁 Ordner wählen</button>' +
+        '<span id="mtsync-status" style="font-size:12px;color:var(--t2);">' + (dirName ? '🔗 ' + dirName : '🔌 nicht verbunden') + '</span>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--t3);margin-bottom:16px;">Bitte den Ordner "ifus-sync" wählen (z.B. D:\\Masterdatai\\-AI-memory\\ifus-sync).</div>' +
+      '<div style="font-size:13px;color:var(--t2);margin-bottom:6px;">GitHub-Sync (Handy-Spiegelung, optional)</div>' +
+      '<input class="modal-input" id="mtsync-gh-token" type="password" placeholder="' + (tokenSet ? '•••••••• (gesetzt) — neu eingeben zum Ändern' : 'Fine-grained GitHub Token (Contents R/W)') + '" style="margin-bottom:8px;">' +
+      '<div style="display:flex;gap:8px;margin-bottom:6px;">' +
+        '<button class="modal-btn confirm" onclick="_mtSaveGithubTokenFromUI()">💾 Token speichern</button>' +
+        '<button class="modal-btn cancel" onclick="pullGithubState(true)">⬇️ Jetzt abrufen</button>' +
+      '</div>' +
+      '<span id="mtsync-gh-status" style="font-size:12px;color:var(--t2);">' + (tokenSet ? '☁️ Token gesetzt' : 'ℹ️ nur Lesen ohne Token') + '</span>' +
+      '<div style="font-size:11px;color:var(--t3);margin:10px 0 16px;">Token nur mit Berechtigung "Contents: Read and write" für mtholdinga-cloud/lifeos erstellen. Ohne Token liest dieses Gerät trotzdem den GitHub-Stand.</div>' +
+      '<button class="modal-btn cancel" style="width:100%;" onclick="document.getElementById(\'mtsync-modal\').remove()">Schließen</button>' +
+    '</div>';
+  document.body.appendChild(modal);
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+}
+function _mtSaveGithubTokenFromUI(){
+  const inp = document.getElementById('mtsync-gh-token');
+  if (!inp) return;
+  const v = inp.value.trim();
+  if (v) { setGithubSyncToken(v); showToast('✅ Token gespeichert'); pushGithubState(); }
+}
+
 async function initApp() {
   const dbStatus = document.getElementById('db-status');
   try {
@@ -2545,6 +2855,12 @@ async function initApp() {
   // Init panel
   const active = document.querySelector('.nav-btn.active');
   renderPanel(active ? active.dataset.panel : 'heute');
+  try { await initFileSync(); } catch(e) { console.warn('initFileSync', e); }
+  try { initGithubSync(); } catch(e) { console.warn('initGithubSync', e); }
+  try {
+    setInterval(pollInbox, 45000);
+    window.addEventListener('focus', () => { pollInbox(); pullGithubState(false); });
+  } catch(e) {}
 }
 document.addEventListener('DOMContentLoaded', initApp);
 
