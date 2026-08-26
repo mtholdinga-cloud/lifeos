@@ -734,7 +734,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
         <div class="ern-row-big"><div class="ern-label-big">☀️ Mittags</div><textarea class="ern-textarea" id="ern-mittags" placeholder="z.B. Hähnchen mit Reis, Salat..."></textarea></div>
         <div class="ern-row-big"><div class="ern-label-big">🌙 Abends</div><textarea class="ern-textarea" id="ern-abends" placeholder="z.B. Quark, Gemüse, Proteinriegel..."></textarea></div>
         <div class="log-row"><div class="log-label">🚬 Letzte Zigarette</div><input class="log-inp" type="time" id="ern-ziggi"></div>
-        <button onclick="saveErnährung()" style="margin-top:10px;width:100%;padding:12px;background:var(--acc2);border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;color:#fff;">💾 Ernährung speichern</button>
+        <button onclick="saveErn()" style="margin-top:10px;width:100%;padding:12px;background:var(--acc2);border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;color:#fff;">💾 Ernährung speichern</button>
       </div>
     </div>
 
@@ -1292,6 +1292,7 @@ function renderFitness() {
     '<div class=\"ern-row-big\"><div class=\"ern-label-big\">🌅 Morgens</div><textarea class=\"ern-textarea\" id=\"ern-morgens\" placeholder=\"z.B. Haferflocken, Proteinshake, Obst...\"></textarea></div>' +
     '<div class=\"ern-row-big\"><div class=\"ern-label-big\">☀️ Mittags</div><textarea class=\"ern-textarea\" id=\"ern-mittags\" placeholder=\"z.B. Hähnchen mit Reis, Salat...\"></textarea></div>' +
     '<div class=\"ern-row-big\"><div class=\"ern-label-big\">🌙 Abends</div><textarea class=\"ern-textarea\" id=\"ern-abends\" placeholder=\"z.B. Quark, Gemüse, Proteinriegel...\"></textarea></div>' +
+    '<button onclick=\"saveErn()\" style=\"margin-top:10px;width:100%;padding:12px;background:var(--acc2);border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;color:#fff;\">💾 Ernährung speichern</button>' +
     '</div>';
 
   updateKcal(S.kcal || 0);
@@ -2079,7 +2080,7 @@ function renderMTHolding() {
   const panel = document.getElementById('panel-mtholding');
   if (!panel) return;
   if (!S.mtholding || !S.mtholding.companies) S.mtholding = STATE_DEFAULTS.mtholding;
-  function ensureChildren(list){ if(!Array.isArray(list)) return; list.forEach(c=>{ if(!Array.isArray(c.children)) c.children=[]; if(!Array.isArray(c.goals)) c.goals=[]; ensureChildren(c.children); }); }
+  function ensureChildren(list){ if(!Array.isArray(list)) return; list.forEach(c=>{ if(!Array.isArray(c.children)) c.children=[]; if(!Array.isArray(c.goals)) c.goals=[]; if(!Array.isArray(c.kpis)) c.kpis=[]; ensureChildren(c.children); }); }
   ensureChildren(S.mtholding.companies);
   if (typeof window._mtEdit === 'undefined') window._mtEdit = false;
   const edit = window._mtEdit;
@@ -2115,6 +2116,20 @@ function renderMTHolding() {
       const inpId = 'mt-goal-inp-'+path.join('-');
       h += '<div style="display:flex;gap:6px;"><input type="text" id="'+inpId+'" placeholder="Neues Ziel…" style="flex:1;background:var(--bg1);border:1px solid var(--bg3);border-radius:6px;padding:5px 8px;color:var(--t0);font-size:.85em;" onkeydown="if(event.key===&quot;Enter&quot;)addMTNodeGoal('+pathStr.replace(/"/g,'&quot;')+',this)"><button onclick="addMTNodeGoal('+pathStr.replace(/"/g,'&quot;')+',document.getElementById(&quot;'+inpId+'&quot;))" style="background:var(--acc);border:none;border-radius:6px;padding:5px 10px;color:#000;cursor:pointer;font-size:.85em;font-weight:700;">+</button></div>';
     }
+    if (!Array.isArray(c.kpis)) c.kpis = [];
+    if (c.kpis.length) {
+      h += '<div class="org-kpi-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;">';
+      c.kpis.forEach((k,ki)=>{
+        h += '<span class="org-kpi" style="background:var(--acc2);padding:3px 8px;border-radius:6px;font-size:.8em;color:#fff;display:inline-flex;align-items:center;gap:6px;">📊 '+escHtml(k);
+        if (edit) h += '<button onclick="deleteMTNodeKpi('+pathStr.replace(/"/g,'&quot;')+','+ki+')" style="background:none;border:none;color:#1a1a1a;cursor:pointer;font-size:.9em;padding:0;">✕</button>';
+        h += '</span>';
+      });
+      h += '</div>';
+    }
+    if (edit) {
+      const kpiInpId = 'mt-kpi-inp-'+path.join('-');
+      h += '<div style="display:flex;gap:6px;margin-bottom:6px;"><input type="text" id="'+kpiInpId+'" placeholder="Aktuelle Zahl, z.B. Umsatz: 1.250 €…" style="flex:1;background:var(--bg1);border:1px solid var(--bg3);border-radius:6px;padding:5px 8px;color:var(--t0);font-size:.85em;" onkeydown="if(event.key===&quot;Enter&quot;)addMTNodeKpi('+pathStr.replace(/"/g,'&quot;')+',this)"><button onclick="addMTNodeKpi('+pathStr.replace(/"/g,'&quot;')+',document.getElementById(&quot;'+kpiInpId+'&quot;))" style="background:var(--acc2);border:none;border-radius:6px;padding:5px 10px;color:#fff;cursor:pointer;font-size:.85em;font-weight:700;">+</button></div>';
+    }
     if (c.children && c.children.length) {
       h += '<div class="mt-children" style="margin-top:8px;">';
       c.children.forEach((ch,chi)=>{ h += renderCompany(ch, path.concat([chi]), depth+1); });
@@ -2146,6 +2161,8 @@ function moveMTNode(path, dir){ const list=_mtGetParentList(path); if(!list) ret
 function deleteMTNode(path){ const list=_mtGetParentList(path); if(!list) return; const idx=path[path.length-1]; const node=list[idx]; if(!node) return; if(!confirm('"'+node.name+'" wirklich löschen?')) return; list.splice(idx,1); saveState(); renderMTHolding(); }
 function addMTNodeGoal(path, inp){ const node=_mtGetNode(path); if(!node||!inp) return; const v=(inp.value||'').trim(); if(!v) return; if(!Array.isArray(node.goals)) node.goals=[]; node.goals.push(v); inp.value=''; saveState(); renderMTHolding(); }
 function deleteMTNodeGoal(path, gi){ const node=_mtGetNode(path); if(!node||!Array.isArray(node.goals)) return; node.goals.splice(gi,1); saveState(); renderMTHolding(); }
+function addMTNodeKpi(path, inp){ const node=_mtGetNode(path); if(!node||!inp) return; const v=(inp.value||'').trim(); if(!v) return; if(!Array.isArray(node.kpis)) node.kpis=[]; node.kpis.push(v); inp.value=''; saveState(); renderMTHolding(); }
+function deleteMTNodeKpi(path, ki){ const node=_mtGetNode(path); if(!node||!Array.isArray(node.kpis)) return; node.kpis.splice(ki,1); saveState(); renderMTHolding(); }
 
 function addMTGoal(ci) {
   const inp = document.getElementById('mt-goal-inp-' + ci);
