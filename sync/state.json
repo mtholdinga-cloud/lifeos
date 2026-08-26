@@ -358,7 +358,15 @@
       "ampel": "green"
     }
   ],
-  "notizen": [],
+  "notizen": [
+    {
+      "id": 1787737744004,
+      "title": "MT-Sync Test 2",
+      "tag": "MT",
+      "body": "Zweiter Test - Persistenzcheck",
+      "date": "26.8.2026"
+    }
+  ],
   "ki": {
     "prompts": []
   },
@@ -1527,8 +1535,8 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-08-26T09:46:26.649Z",
-    "updatedBy": "browser",
+    "updatedAt": "2026-08-26T09:49:04.959Z",
+    "updatedBy": "mt",
     "schemaVersion": 1
   },
   "reps": {
@@ -1554,7 +1562,15 @@
     "mittags": "",
     "abends": ""
   },
-  "notes": [],
+  "notes": [
+    {
+      "id": 1787737744004,
+      "title": "MT-Sync Test 2",
+      "tag": "MT",
+      "body": "Zweiter Test - Persistenzcheck",
+      "date": "26.8.2026"
+    }
+  ],
   "players": [
     {
       "name": "Mold",
