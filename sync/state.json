@@ -1,0 +1,218 @@
+{
+  "fitness": {
+    "gewicht": "",
+    "koerper": "",
+    "training": [],
+    "weights": [],
+    "ziggi": "",
+    "kcal": 0,
+    "reps": {
+      "lies": [],
+      "unter": [],
+      "klim": []
+    },
+    "ern": {
+      "morgens": "",
+      "mittags": "",
+      "abends": ""
+    },
+    "supps": [
+      "Multivitamin",
+      "D3/K2",
+      "Magnesium",
+      "Omega-3",
+      "Whey",
+      "Ashwagandha",
+      "Shilajit",
+      "Ecdysteron",
+      "Kreatin"
+    ],
+    "suppDone": []
+  },
+  "finanzen": {
+    "einnahmen": [],
+    "ausgaben": [],
+    "sparziel": "",
+    "investments": [
+      {
+        "name": "🏦 Rücklagen",
+        "val": 1001.65,
+        "goal": 25000
+      },
+      {
+        "name": "🏠 Bausparvertrag",
+        "val": 538.27,
+        "goal": 50000
+      },
+      {
+        "name": "📊 Mintos",
+        "val": 2319.2,
+        "goal": null
+      },
+      {
+        "name": "📈 Trade Republic",
+        "val": 38.35,
+        "goal": null
+      },
+      {
+        "name": "🐦 Robinhood",
+        "val": 56.54,
+        "goal": null
+      },
+      {
+        "name": "📱 N26 Invest",
+        "val": 66.03,
+        "goal": null
+      }
+    ],
+    "konten": [],
+    "income": [],
+    "expense": []
+  },
+  "mitspieler": [],
+  "notizen": [
+    {
+      "id": 1787734627841,
+      "title": "MT-Sync Test",
+      "tag": "MT",
+      "body": "MT-Sync Verbindungstest erfolgreich — diese Notiz kannst du loeschen.",
+      "date": "26.8.2026"
+    }
+  ],
+  "ki": {
+    "prompts": []
+  },
+  "kalender": {
+    "events": []
+  },
+  "kalView": null,
+  "tagesplan": {
+    "groups": [
+      {
+        "id": "morgen",
+        "title": "☀️ Morgenroutine",
+        "collapsed": false,
+        "tasks": []
+      },
+      {
+        "id": "fokus",
+        "title": "⚡ Fokus-Tasks",
+        "collapsed": false,
+        "tasks": []
+      },
+      {
+        "id": "haus",
+        "title": "🏠 Haushalt",
+        "collapsed": false,
+        "tasks": []
+      },
+      {
+        "id": "abend",
+        "title": "🌙 Abendroutine",
+        "collapsed": false,
+        "tasks": []
+      }
+    ]
+  },
+  "mtholding": {
+    "companies": [
+      {
+        "id": "c1",
+        "name": "MT Media",
+        "goals": [
+          "2026 Q3: 1000 Views/Monat"
+        ],
+        "children": [
+          {
+            "id": "c1-1",
+            "name": "SHH",
+            "goals": [],
+            "children": []
+          },
+          {
+            "id": "c1-2",
+            "name": "Mr.Tingel",
+            "goals": [],
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "c2",
+        "name": "MT Tech",
+        "goals": [
+          "2026 Q4: MVP Launch"
+        ]
+      },
+      {
+        "id": "c3",
+        "name": "MT Consult",
+        "goals": [
+          "2026 Q2: 5 Neukunden"
+        ]
+      },
+      {
+        "id": "c4",
+        "name": "MT Events",
+        "goals": [
+          "2026 Q3: 3 Events"
+        ]
+      },
+      {
+        "id": "c5",
+        "name": "MT Properties",
+        "goals": [
+          "2026 Q4: 1. Objekt"
+        ]
+      }
+    ]
+  },
+  "archive": [],
+  "v16migrated": false,
+  "meta": {
+    "updatedAt": "2026-08-26T08:57:08.435Z",
+    "updatedBy": "mt",
+    "schemaVersion": 1
+  },
+  "reps": {
+    "lies": [],
+    "unter": [],
+    "klim": []
+  },
+  "kcal": 0,
+  "supps": [
+    "Multivitamin",
+    "D3/K2",
+    "Magnesium",
+    "Omega-3",
+    "Whey",
+    "Ashwagandha",
+    "Shilajit",
+    "Ecdysteron",
+    "Kreatin"
+  ],
+  "suppDone": [],
+  "ern": {
+    "morgens": "",
+    "mittags": "",
+    "abends": ""
+  },
+  "notes": [
+    {
+      "id": 1787734627841,
+      "title": "MT-Sync Test",
+      "tag": "MT",
+      "body": "MT-Sync Verbindungstest erfolgreich — diese Notiz kannst du loeschen.",
+      "date": "26.8.2026"
+    }
+  ],
+  "players": [],
+  "projekte": [],
+  "reflex": {
+    "gut": "",
+    "verb": "",
+    "ziel1": "",
+    "ziel2": "",
+    "ziel3": ""
+  }
+}
