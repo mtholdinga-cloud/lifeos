@@ -2778,7 +2778,7 @@ async function pushGithubState(){
 }
 async function pullGithubState(showFeedback){
   try {
-    const url = 'https://raw.githubusercontent.com/' + GITHUB_SYNC_REPO + '/' + GITHUB_SYNC_BRANCH + '/state.json?ts=' + Date.now();
+    const url = 'https://raw.githubusercontent.com/' + GITHUB_SYNC_REPO + '/' + GITHUB_SYNC_BRANCH + '/sync/state.json?ts=' + Date.now();
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) { if (showFeedback) showToast('ℹ️ Noch kein GitHub-Stand vorhanden'); return; }
     const remote = await res.json();
@@ -2789,7 +2789,7 @@ async function pullGithubState(showFeedback){
       normalizeState();
       window._lifeosSaveSource = 'browser';
       save();
-      const activeEl = document.querySelector('.nav-item.active');
+      const activeEl = document.querySelector('.nav-btn.active');
       renderPanel(activeEl ? activeEl.dataset.panel : 'heute');
       showToast('☁️ Neuer Stand von GitHub geladen');
     } else if (showFeedback) {
@@ -2797,6 +2797,7 @@ async function pullGithubState(showFeedback){
     }
   } catch(e) { console.warn('pullGithubState', e); }
 }
+
 function initGithubSync(){
   pullGithubState(false);
   setInterval(() => pullGithubState(false), 90000);
