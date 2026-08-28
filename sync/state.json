@@ -113,9 +113,9 @@
       {
         "id": "e1776706304260",
         "label": "Björn",
-        "amt": -400,
-        "paid": true,
-        "dueDate": "2026-04-15",
+        "amt": -1000,
+        "paid": false,
+        "dueDate": "2026-09-15",
         "monthly": false
       },
       {
@@ -1535,7 +1535,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-08-28T09:33:28.939Z",
+    "updatedAt": "2026-08-28T10:17:51.057Z",
     "updatedBy": "browser",
     "schemaVersion": 1
   },
