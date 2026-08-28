@@ -101,11 +101,11 @@
       },
       {
         "name": "Revelute",
-        "val": 2.79
+        "val": 605.92
       },
       {
         "name": "Bargeld",
-        "val": 230
+        "val": 0
       },
       {
         "name": "Tank karte",
@@ -117,7 +117,7 @@
       },
       {
         "name": "paypal",
-        "val": 0
+        "val": 25
       }
     ],
     "income": [],
@@ -1547,7 +1547,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-08-28T10:40:49.775Z",
+    "updatedAt": "2026-08-28T10:43:34.342Z",
     "updatedBy": "browser",
     "schemaVersion": 1
   },
