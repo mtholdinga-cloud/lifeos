@@ -89,15 +89,15 @@
     "konten": [
       {
         "name": "VR- Giro",
-        "val": 135.06
+        "val": 24.32
       },
       {
         "name": "VR-Online",
-        "val": 2.5
+        "val": 1011.07
       },
       {
         "name": "N26",
-        "val": -10.84
+        "val": -2.36
       },
       {
         "name": "Revelute",
@@ -106,6 +106,18 @@
       {
         "name": "Bargeld",
         "val": 230
+      },
+      {
+        "name": "Tank karte",
+        "val": 0
+      },
+      {
+        "name": "Lidl karte",
+        "val": 17
+      },
+      {
+        "name": "paypal",
+        "val": 0
       }
     ],
     "income": [],
@@ -199,14 +211,6 @@
         "monthly": true
       },
       {
-        "id": "e1776708006950",
-        "label": "Maria",
-        "amt": -30,
-        "paid": false,
-        "dueDate": "2026-09-03",
-        "monthly": true
-      },
-      {
         "id": "e1776708204293",
         "label": "GYM",
         "amt": -25,
@@ -218,7 +222,7 @@
         "id": "e1776708277989",
         "label": "Netflix",
         "amt": -20,
-        "paid": false,
+        "paid": true,
         "dueDate": "2026-08-30",
         "monthly": true
       },
@@ -245,6 +249,14 @@
         "paid": false,
         "dueDate": "2026-09-01",
         "monthly": true
+      },
+      {
+        "id": "e1787912335079",
+        "label": "Nachzahlung strom",
+        "amt": -525,
+        "paid": false,
+        "dueDate": "2026-09-15",
+        "monthly": false
       }
     ]
   },
@@ -1535,7 +1547,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-08-28T10:17:51.057Z",
+    "updatedAt": "2026-08-28T10:40:49.775Z",
     "updatedBy": "browser",
     "schemaVersion": 1
   },
