@@ -723,6 +723,727 @@
   },
   "archive": [
     {
+      "date": "Mittwoch, 2. September 2026",
+      "ts": 1788379843430,
+      "groups": [
+        {
+          "id": "morgen",
+          "title": "☀️ Morgenroutine",
+          "tasks": [
+            {
+              "title": "5:30 Aufstehen",
+              "done": false,
+              "notRelevant": true,
+              "subtasks": []
+            },
+            {
+              "title": "Kleidung Raussuchen",
+              "done": true,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Tasche Vorbereiten",
+              "done": true,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Morning Meeting",
+              "done": true,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Frühstück",
+              "done": true,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Zähne putzen",
+              "done": false,
+              "notRelevant": true,
+              "subtasks": []
+            },
+            {
+              "title": "Pünktlich Los",
+              "done": true,
+              "notRelevant": false,
+              "subtasks": []
+            }
+          ]
+        },
+        {
+          "id": "fokus",
+          "title": "⚡ Fokus-Tasks",
+          "tasks": [
+            {
+              "title": "Life OS 10 :00 Uhr",
+              "done": false,
+              "notRelevant": true,
+              "subtasks": []
+            },
+            {
+              "title": "Tik-Tok Dayly",
+              "done": true,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Tik-Tok 7 Day´s",
+              "done": true,
+              "notRelevant": true,
+              "subtasks": []
+            },
+            {
+              "title": "2.Handsell´s Aktuell ?",
+              "done": false,
+              "notRelevant": true,
+              "subtasks": []
+            },
+            {
+              "title": "Warenwirschaft Aktuell ?",
+              "done": false,
+              "notRelevant": true,
+              "subtasks": []
+            },
+            {
+              "title": "Berichtsheft",
+              "done": false,
+              "notRelevant": true,
+              "subtasks": []
+            }
+          ]
+        },
+        {
+          "id": "haus",
+          "title": "🏠 Haushalt",
+          "tasks": [
+            {
+              "title": "Küche wischen",
+              "done": false,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Bad reinigen",
+              "done": false,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Staubsaugen",
+              "done": false,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Wäsche waschen",
+              "done": false,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Einkaufen",
+              "done": false,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Einkaufsliste schreiben",
+              "done": false,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Flur Ordentlich",
+              "done": false,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Schlafzimmer schimmel frei ?",
+              "done": false,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Schlafzimmer ordentlich",
+              "done": false,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Wohnzimmer ordentlich",
+              "done": false,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Pfand rausbringen",
+              "done": false,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Papier Rausbringen",
+              "done": false,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Müll Rausbringen",
+              "done": false,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Trockner Leeren & Befüllen",
+              "done": false,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Wäsche zusammen legen",
+              "done": false,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Kleiderschrank Ordentlich",
+              "done": false,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Keller Sauber ?",
+              "done": false,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Gang Sauber ?",
+              "done": false,
+              "notRelevant": false,
+              "subtasks": []
+            }
+          ]
+        },
+        {
+          "id": "abend",
+          "title": "🌙 Abendroutine",
+          "tasks": [
+            {
+              "title": "Duschen",
+              "done": true,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Rasieren",
+              "done": true,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Körper Rasur",
+              "done": true,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Kopf Rasur",
+              "done": false,
+              "notRelevant": true,
+              "subtasks": []
+            },
+            {
+              "title": "Füße Eincremen",
+              "done": false,
+              "notRelevant": true,
+              "subtasks": []
+            },
+            {
+              "title": "Schuhe Desinfizieren",
+              "done": false,
+              "notRelevant": true,
+              "subtasks": []
+            },
+            {
+              "title": "Zähne Putzen",
+              "done": false,
+              "notRelevant": true,
+              "subtasks": []
+            },
+            {
+              "title": "Life OS Archiv Eintrag",
+              "done": true,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Handy Weglegen",
+              "done": true,
+              "notRelevant": false,
+              "subtasks": []
+            },
+            {
+              "title": "Morgen Vorbereiten",
+              "done": false,
+              "notRelevant": true,
+              "subtasks": []
+            }
+          ]
+        }
+      ],
+      "fitness": {
+        "gewicht": "",
+        "koerper": "",
+        "training": [],
+        "weights": [
+          {
+            "val": 66.7,
+            "date": "10.4.2026",
+            "ts": "2026-04-10T03:17:40.128Z"
+          },
+          {
+            "val": 67.3,
+            "date": "27.4.2026",
+            "ts": "2026-04-27T10:08:15.793Z"
+          },
+          {
+            "val": 64.3,
+            "date": "18.6.2026",
+            "ts": "2026-06-18T05:09:00.812Z"
+          },
+          {
+            "val": 66.3,
+            "date": "30.6.2026",
+            "ts": "2026-06-30T01:17:44.263Z"
+          }
+        ],
+        "ziggi": "2026-09-02 20:06",
+        "kcal": 2982,
+        "reps": {
+          "lies": [],
+          "unter": [],
+          "klim": []
+        },
+        "ern": {
+          "morgens": "mc smart dobble ",
+          "mittags": "latte machiato ",
+          "abends": "DER m bacon , ny smart   dobble"
+        },
+        "supps": [
+          "Multivitamin",
+          "D3/K2",
+          "Magnesium",
+          "Omega-3",
+          "Whey",
+          "Ashwagandha",
+          "Shilajit",
+          "Ecdysteron",
+          "Kreatin"
+        ],
+        "suppDone": []
+      },
+      "kcal": 2982,
+      "reps": {
+        "lies": [],
+        "unter": [],
+        "klim": []
+      },
+      "supps": [
+        "Multivitamin",
+        "D3/K2",
+        "Magnesium",
+        "Omega-3",
+        "Whey",
+        "Ashwagandha",
+        "Shilajit",
+        "Ecdysteron",
+        "Kreatin"
+      ],
+      "suppDone": [],
+      "ern": {
+        "morgens": "mc smart dobble ",
+        "mittags": "latte machiato ",
+        "abends": "DER m bacon , ny smart   dobble"
+      },
+      "reflex": {
+        "gut": "",
+        "verb": "",
+        "ziel1": "",
+        "ziel2": "",
+        "ziel3": ""
+      },
+      "notizen": [
+        {
+          "id": 1787737744004,
+          "title": "MT-Sync Test 2",
+          "tag": "MT",
+          "body": "Zweiter Test - Persistenzcheck",
+          "date": "26.8.2026"
+        }
+      ],
+      "projekte": [
+        {
+          "title": "WOS",
+          "tasks": [
+            {
+              "id": "t1776700902116",
+              "text": "TEO",
+              "done": false
+            },
+            {
+              "id": "t1776700907373",
+              "text": "Strecker",
+              "done": false
+            },
+            {
+              "id": "t1776700924902",
+              "text": "Björn",
+              "done": false
+            }
+          ]
+        },
+        {
+          "title": "IHK",
+          "tasks": [
+            {
+              "id": "t1781759429893",
+              "text": "Praktikum's Vertrag hochladen ",
+              "done": false
+            },
+            {
+              "id": "t1781759490342",
+              "text": "Aktivierung Code Brief ",
+              "done": false
+            }
+          ]
+        }
+      ],
+      "finanzen": {
+        "income": [],
+        "expense": [
+          {
+            "id": "e1776706304260",
+            "label": "Björn",
+            "amt": -1000,
+            "paid": false,
+            "dueDate": "2026-09-15",
+            "monthly": false
+          },
+          {
+            "id": "e1776706336540",
+            "label": "Miete",
+            "amt": -555,
+            "paid": false,
+            "dueDate": "2026-09-03",
+            "monthly": true
+          },
+          {
+            "id": "e1776706357515",
+            "label": "Mintos",
+            "amt": -500,
+            "paid": false,
+            "dueDate": "2026-09-03",
+            "monthly": true
+          },
+          {
+            "id": "e1776706385764",
+            "label": "Unterhalt",
+            "amt": -300,
+            "paid": false,
+            "dueDate": "2026-09-15",
+            "monthly": true
+          },
+          {
+            "id": "e1776706543491",
+            "label": "GP1",
+            "amt": -500,
+            "paid": false,
+            "dueDate": "2026-09-20",
+            "monthly": true
+          },
+          {
+            "id": "e1776706602045",
+            "label": "Essen",
+            "amt": -300,
+            "paid": false,
+            "dueDate": "2026-10-01",
+            "monthly": true
+          },
+          {
+            "id": "e1776706652602",
+            "label": "Sprit",
+            "amt": -250,
+            "paid": false,
+            "dueDate": "2026-10-01",
+            "monthly": true
+          },
+          {
+            "id": "e1776706702660",
+            "label": "Bausparvertrag",
+            "amt": -250,
+            "paid": false,
+            "dueDate": "2026-09-28",
+            "monthly": true
+          },
+          {
+            "id": "e1776706754626",
+            "label": "Strom",
+            "amt": -75,
+            "paid": false,
+            "dueDate": "2026-09-11",
+            "monthly": true
+          },
+          {
+            "id": "e1776706794060",
+            "label": "DB",
+            "amt": -60,
+            "paid": false,
+            "dueDate": "2026-09-30",
+            "monthly": true
+          },
+          {
+            "id": "e1776706898627",
+            "label": "Internet",
+            "amt": -30,
+            "paid": false,
+            "dueDate": "2026-09-16",
+            "monthly": true
+          },
+          {
+            "id": "e1776708204293",
+            "label": "GYM",
+            "amt": -25,
+            "paid": false,
+            "dueDate": "2026-09-02",
+            "monthly": true
+          },
+          {
+            "id": "e1776708277989",
+            "label": "Netflix",
+            "amt": -20,
+            "paid": false,
+            "dueDate": "2026-09-30",
+            "monthly": true
+          },
+          {
+            "id": "e1776708355198",
+            "label": "Amazon Prime",
+            "amt": -10,
+            "paid": false,
+            "dueDate": "2026-10-01",
+            "monthly": true
+          },
+          {
+            "id": "e1776708471508",
+            "label": "Audible",
+            "amt": -9,
+            "paid": false,
+            "dueDate": "2026-09-10",
+            "monthly": true
+          },
+          {
+            "id": "e1776708586519",
+            "label": "AVV Versicherung",
+            "amt": -7,
+            "paid": false,
+            "dueDate": "2026-10-01",
+            "monthly": true
+          },
+          {
+            "id": "e1787912335079",
+            "label": "Nachzahlung strom",
+            "amt": -525,
+            "paid": false,
+            "dueDate": "2026-09-15",
+            "monthly": false
+          }
+        ],
+        "konten": [
+          {
+            "name": "VR- Giro",
+            "val": 24.32
+          },
+          {
+            "name": "VR-Online",
+            "val": 1011.07
+          },
+          {
+            "name": "N26",
+            "val": -2.36
+          },
+          {
+            "name": "Revelute",
+            "val": 605.92
+          },
+          {
+            "name": "Bargeld",
+            "val": 0
+          },
+          {
+            "name": "Tank karte",
+            "val": 0
+          },
+          {
+            "name": "Lidl karte",
+            "val": 17
+          },
+          {
+            "name": "paypal",
+            "val": 25
+          }
+        ],
+        "investments": [
+          {
+            "name": "🏦 Rücklagen",
+            "val": 1001.65,
+            "goal": 25000
+          },
+          {
+            "name": "🏠 Bausparvertrag",
+            "val": 538.27,
+            "goal": 50000
+          },
+          {
+            "name": "📊 Mintos",
+            "val": 2341,
+            "goal": null
+          },
+          {
+            "name": "📈 Trade Republic",
+            "val": 38.35,
+            "goal": null
+          },
+          {
+            "name": "🐦 Robinhood",
+            "val": 56.54,
+            "goal": null
+          },
+          {
+            "name": "📱 N26 Invest",
+            "val": 66.03,
+            "goal": null
+          }
+        ]
+      },
+      "kalender": [],
+      "players": [
+        {
+          "name": "Mold",
+          "level": 2,
+          "game": "Brownie",
+          "xp": 0,
+          "xpGoal": 200,
+          "rank": "Bronze",
+          "ampel": "green"
+        },
+        {
+          "name": "Yetkin",
+          "level": 340,
+          "game": "Citypark",
+          "xp": 0,
+          "xpGoal": 34000,
+          "rank": "Bronze",
+          "ampel": "yellow"
+        },
+        {
+          "name": "Faruk",
+          "level": 100,
+          "game": "Citypark",
+          "xp": 0,
+          "xpGoal": 1000,
+          "rank": "Bronze",
+          "ampel": "green"
+        },
+        {
+          "name": "Leon",
+          "level": 120,
+          "game": "Brownie",
+          "xp": 0,
+          "xpGoal": 12000,
+          "rank": "Bronze",
+          "ampel": "red"
+        },
+        {
+          "name": "Beck",
+          "level": 270,
+          "game": "Brownie",
+          "xp": 0,
+          "xpGoal": 27000,
+          "rank": "Meister",
+          "ampel": "green"
+        },
+        {
+          "name": "N8",
+          "level": 63,
+          "game": "Brownie",
+          "xp": 0,
+          "xpGoal": 6300,
+          "rank": "Silber",
+          "ampel": "red"
+        },
+        {
+          "name": "GP1",
+          "level": 2180,
+          "game": "Brownie",
+          "xp": 0,
+          "xpGoal": 2180,
+          "rank": "Großmeister",
+          "ampel": "green"
+        },
+        {
+          "name": "GP2",
+          "level": 100,
+          "game": "Brownie",
+          "xp": 0,
+          "xpGoal": 10000,
+          "rank": "Meister",
+          "ampel": "green"
+        },
+        {
+          "name": "Nick",
+          "level": 16,
+          "game": "Brownie",
+          "xp": 0,
+          "xpGoal": 1600,
+          "rank": "Bronze",
+          "ampel": "green"
+        },
+        {
+          "name": "LIPP",
+          "level": 2,
+          "game": "Brownie",
+          "xp": 0,
+          "xpGoal": 200,
+          "rank": "Bronze",
+          "ampel": "yellow"
+        },
+        {
+          "name": "Teo",
+          "level": 45,
+          "game": "Brownie",
+          "xp": 0,
+          "xpGoal": 4500,
+          "rank": "Bronze",
+          "ampel": "red"
+        },
+        {
+          "name": "BMW B",
+          "level": 100,
+          "game": "BMW E46 330i ",
+          "xp": 400,
+          "xpGoal": 1630,
+          "rank": "Großmeister",
+          "ampel": "green"
+        }
+      ]
+    },
+    {
       "date": "Montag, 20. April 2026",
       "ts": 1776711726026,
       "groups": [
@@ -1552,7 +2273,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-09-02T20:09:16.935Z",
+    "updatedAt": "2026-09-02T20:10:43.738Z",
     "updatedBy": "browser",
     "schemaVersion": 1
   },
