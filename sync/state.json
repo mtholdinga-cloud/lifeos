@@ -72,12 +72,12 @@
       },
       {
         "name": "📈 Trade Republic",
-        "val": 38.35,
+        "val": 43,
         "goal": null
       },
       {
         "name": "🐦 Robinhood",
-        "val": 56.54,
+        "val": 57,
         "goal": null
       },
       {
@@ -2289,7 +2289,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-09-02T20:53:24.794Z",
+    "updatedAt": "2026-09-02T20:56:51.942Z",
     "updatedBy": "browser",
     "schemaVersion": 1
   },
