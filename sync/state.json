@@ -89,11 +89,11 @@
     "konten": [
       {
         "name": "VR- Giro",
-        "val": 24.32
+        "val": 179.29
       },
       {
         "name": "VR-Online",
-        "val": 300.07
+        "val": 49.47
       },
       {
         "name": "N26",
@@ -101,7 +101,7 @@
       },
       {
         "name": "Revelute",
-        "val": 605.92
+        "val": 44.92
       },
       {
         "name": "Bargeld",
@@ -109,7 +109,7 @@
       },
       {
         "name": "Tank karte",
-        "val": 0
+        "val": 1
       },
       {
         "name": "Lidl karte",
@@ -150,7 +150,7 @@
         "id": "e1776706385764",
         "label": "Unterhalt",
         "amt": -300,
-        "paid": false,
+        "paid": true,
         "dueDate": "2026-09-15",
         "monthly": true
       },
@@ -222,7 +222,7 @@
         "id": "e1776708277989",
         "label": "Netflix",
         "amt": -20,
-        "paid": false,
+        "paid": true,
         "dueDate": "2026-09-30",
         "monthly": true
       },
@@ -230,7 +230,7 @@
         "id": "e1776708355198",
         "label": "Amazon Prime",
         "amt": -10,
-        "paid": false,
+        "paid": true,
         "dueDate": "2026-10-01",
         "monthly": true
       },
@@ -2289,7 +2289,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-09-02T20:26:52.417Z",
+    "updatedAt": "2026-09-02T20:40:51.300Z",
     "updatedBy": "browser",
     "schemaVersion": 1
   },
