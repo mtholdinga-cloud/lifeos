@@ -67,7 +67,7 @@
       },
       {
         "name": "📊 Mintos",
-        "val": 2732,
+        "val": 2733,
         "goal": null
       },
       {
@@ -2289,7 +2289,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-09-02T20:53:13.978Z",
+    "updatedAt": "2026-09-02T20:53:24.794Z",
     "updatedBy": "browser",
     "schemaVersion": 1
   },
