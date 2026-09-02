@@ -780,6 +780,11 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
         <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bg3);">
           <div class="progress-label"><span style="font-size:13px;font-weight:700;color:var(--t1);">Gesamt</span><span class="balance-display" id="fin-balance" style="font-size:20px;"></span></div>
         </div>
+        <div style="margin-top:10px;padding-top:12px;border-top:1px solid var(--bg3);">
+          <div class="progress-label"><span style="font-size:13px;font-weight:700;color:var(--t1);">🔴 Offene Zahlungen (bis Monatsende)</span><span class="balance-display" id="fin-open-total" style="font-size:18px;color:var(--acc3);"></span></div>
+          <div class="progress-label" style="margin-top:2px;"><span style="font-size:13px;font-weight:700;color:var(--t1);">Verfügbar danach</span><span class="balance-display" id="fin-available" style="font-size:18px;"></span></div>
+          <div id="fin-open-list" style="margin-top:6px;"></div>
+        </div>
       </div>
       <div class="card">
         <div class="card-title">📥 Einnahmen</div>
@@ -1482,14 +1487,13 @@ function renderFinanzen(){
   });
   const addCard=document.createElement('div');addCard.className='konto-card';addCard.style.cssText='display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px dashed var(--bg3);min-height:60px;';addCard.innerHTML='<span style="font-size:22px;color:var(--t2);">+<\/span>';addCard.onclick=()=>{const n=prompt('Kontoname:');if(!n)return;const v=parseFloat(prompt('Betrag (€):')||'0')||0;S.finanzen.konten.push({name:n,val:v});save();renderFinanzen();};kg.appendChild(addCard);
   const bal=document.getElementById('fin-balance');bal.textContent=(total>=0?'+':'')+total.toFixed(2)+'€';bal.style.color=total>=0?'var(--acc)':'var(--acc3)';
-  const inc=document.getElementById('fin-income');inc.innerHTML='';S.finanzen.income.forEach(item=>renderFinRow(item,inc,'income'));
   _rollMonthly();
+  renderOpenPayments(total);
+  const inc=document.getElementById('fin-income');inc.innerHTML='';S.finanzen.income.forEach(item=>renderFinRow(item,inc,'income'));
   const exp=document.getElementById('fin-expense');exp.innerHTML='';
   const sb=document.createElement('div');sb.className='expense-sort-bar';
   [{id:'entry',label:'📋 Eintragung'},{id:'date',label:'📅 Fälligkeit'},{id:'amount-asc',label:'💰 Betrag ↑'},{id:'amount-desc',label:'💰 Betrag ↓'}].forEach(s=>{const b=document.createElement('button');b.className='sort-btn'+(_expSortMode===s.id?' active':'');b.textContent=s.label;b.onclick=()=>{_expSortMode=s.id;renderFinanzen();};sb.appendChild(b);});
   exp.appendChild(sb);
-  // Show monthly expense summary banner
-  renderExpenseSummary(exp);
   _getSortedExp().forEach(item=>_renderExpRow(item,exp));
   
   const inv=document.getElementById('fin-investments');inv.innerHTML='';
@@ -2915,16 +2919,35 @@ function toggleTpEditMode() {
   renderTagesplan();
 }
 
-// Expense summary renderer
-function renderExpenseSummary(exps, container) {
-  if (!container) return;
-  if (!Array.isArray(exps)) exps = [];
-  container.innerHTML = exps.map(e =>
-    '<div class="exp-row" style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bg3)">'
-    + '<span>' + (e.label||'') + '</span>'
-    + '<span style="color:var(--acc3)">-' + Math.abs(e.amt||0).toFixed(2) + '€</span>'
-    + '</div>'
-  ).join('') || '<div style="color:var(--t2);font-size:13px;padding:8px 0">Keine Ausgaben</div>';
+// Offene Zahlungen — was diesen Monat (inkl. Ueberfaelligem) noch faellig ist,
+// direkt bei der Kontostand-Uebersicht in der AKTUELL-Karte.
+function renderOpenPayments(total) {
+  const totalEl = document.getElementById('fin-open-total');
+  const availEl = document.getElementById('fin-available');
+  const listEl = document.getElementById('fin-open-list');
+  if (!totalEl || !availEl || !listEl) return;
+  const now = new Date();
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  endOfMonth.setHours(23, 59, 59, 999);
+  const todayISO = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+  const open = S.finanzen.expense
+    .filter(e => !e.paid && e.dueDate && new Date(e.dueDate + 'T00:00:00') <= endOfMonth)
+    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+  const openTotal = open.reduce((s, e) => s + Math.abs(e.amt || 0), 0);
+  totalEl.textContent = (openTotal > 0 ? '−' : '') + openTotal.toFixed(2) + '€';
+  const avail = (typeof total === 'number' ? total : 0) - openTotal;
+  availEl.textContent = (avail >= 0 ? '+' : '') + avail.toFixed(2) + '€';
+  availEl.style.color = avail >= 0 ? 'var(--acc)' : 'var(--acc3)';
+  listEl.innerHTML = open.length ? open.map(e => {
+    const overdue = e.dueDate < todayISO;
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--bg3);font-size:12px;">'
+      + '<span style="color:var(--t1);">' + escHtml(e.label) + (e.monthly ? ' 🔄' : '') + '</span>'
+      + '<span style="display:flex;gap:8px;align-items:center;">'
+        + '<span style="font-family:\'DM Mono\',monospace;color:' + (overdue ? 'var(--acc3)' : 'var(--t2)') + ';font-size:11px;">' + _fmtDate(e.dueDate) + (overdue ? ' ⚠️' : '') + '</span>'
+        + '<span style="font-family:\'DM Mono\',monospace;color:var(--acc3);">-' + Math.abs(e.amt || 0).toFixed(2) + '€</span>'
+      + '</span>'
+    + '</div>';
+  }).join('') : '<div style="color:var(--t2);font-size:13px;padding:6px 0;">✅ Alles bezahlt für diesen Monat</div>';
 }
 
 
