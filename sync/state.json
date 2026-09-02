@@ -93,7 +93,7 @@
       },
       {
         "name": "VR-Online",
-        "val": 1011.07
+        "val": 300.07
       },
       {
         "name": "N26",
@@ -105,7 +105,7 @@
       },
       {
         "name": "Bargeld",
-        "val": 0
+        "val": 650
       },
       {
         "name": "Tank karte",
@@ -134,7 +134,7 @@
         "id": "e1776706336540",
         "label": "Miete",
         "amt": -555,
-        "paid": false,
+        "paid": true,
         "dueDate": "2026-09-03",
         "monthly": true
       },
@@ -166,7 +166,7 @@
         "id": "e1776706602045",
         "label": "Essen",
         "amt": -300,
-        "paid": false,
+        "paid": true,
         "dueDate": "2026-10-01",
         "monthly": true
       },
@@ -174,7 +174,7 @@
         "id": "e1776706652602",
         "label": "Sprit",
         "amt": -250,
-        "paid": false,
+        "paid": true,
         "dueDate": "2026-10-01",
         "monthly": true
       },
@@ -198,7 +198,7 @@
         "id": "e1776706794060",
         "label": "DB",
         "amt": -60,
-        "paid": false,
+        "paid": true,
         "dueDate": "2026-09-30",
         "monthly": true
       },
@@ -238,7 +238,7 @@
         "id": "e1776708471508",
         "label": "Audible",
         "amt": -9,
-        "paid": false,
+        "paid": true,
         "dueDate": "2026-09-10",
         "monthly": true
       },
@@ -246,7 +246,7 @@
         "id": "e1776708586519",
         "label": "AVV Versicherung",
         "amt": -7,
-        "paid": false,
+        "paid": true,
         "dueDate": "2026-10-01",
         "monthly": true
       },
@@ -2273,7 +2273,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-09-02T20:10:43.738Z",
+    "updatedAt": "2026-09-02T20:15:43.332Z",
     "updatedBy": "browser",
     "schemaVersion": 1
   },
