@@ -57,7 +57,7 @@
     "investments": [
       {
         "name": "🏦 Rücklagen",
-        "val": 1001.65,
+        "val": 1.65,
         "goal": 25000
       },
       {
@@ -67,7 +67,7 @@
       },
       {
         "name": "📊 Mintos",
-        "val": 2341,
+        "val": 2732,
         "goal": null
       },
       {
@@ -2289,7 +2289,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-09-02T20:40:51.300Z",
+    "updatedAt": "2026-09-02T20:53:13.978Z",
     "updatedBy": "browser",
     "schemaVersion": 1
   },
