@@ -740,7 +740,7 @@
   "archive": [
     {
       "date": "Mittwoch, 2. September 2026",
-      "ts": 1788379843430,
+      "ts": 1788383846569,
       "groups": [
         {
           "id": "morgen",
@@ -1155,7 +1155,7 @@
             "id": "e1776706336540",
             "label": "Miete",
             "amt": -555,
-            "paid": false,
+            "paid": true,
             "dueDate": "2026-09-03",
             "monthly": true
           },
@@ -1171,14 +1171,14 @@
             "id": "e1776706385764",
             "label": "Unterhalt",
             "amt": -300,
-            "paid": false,
+            "paid": true,
             "dueDate": "2026-09-15",
             "monthly": true
           },
           {
             "id": "e1776706543491",
             "label": "GP1",
-            "amt": -500,
+            "amt": -600,
             "paid": false,
             "dueDate": "2026-09-20",
             "monthly": true
@@ -1187,7 +1187,7 @@
             "id": "e1776706602045",
             "label": "Essen",
             "amt": -300,
-            "paid": false,
+            "paid": true,
             "dueDate": "2026-10-01",
             "monthly": true
           },
@@ -1195,7 +1195,7 @@
             "id": "e1776706652602",
             "label": "Sprit",
             "amt": -250,
-            "paid": false,
+            "paid": true,
             "dueDate": "2026-10-01",
             "monthly": true
           },
@@ -1219,7 +1219,7 @@
             "id": "e1776706794060",
             "label": "DB",
             "amt": -60,
-            "paid": false,
+            "paid": true,
             "dueDate": "2026-09-30",
             "monthly": true
           },
@@ -1243,7 +1243,7 @@
             "id": "e1776708277989",
             "label": "Netflix",
             "amt": -20,
-            "paid": false,
+            "paid": true,
             "dueDate": "2026-09-30",
             "monthly": true
           },
@@ -1251,7 +1251,7 @@
             "id": "e1776708355198",
             "label": "Amazon Prime",
             "amt": -10,
-            "paid": false,
+            "paid": true,
             "dueDate": "2026-10-01",
             "monthly": true
           },
@@ -1259,7 +1259,7 @@
             "id": "e1776708471508",
             "label": "Audible",
             "amt": -9,
-            "paid": false,
+            "paid": true,
             "dueDate": "2026-09-10",
             "monthly": true
           },
@@ -1267,7 +1267,7 @@
             "id": "e1776708586519",
             "label": "AVV Versicherung",
             "amt": -7,
-            "paid": false,
+            "paid": true,
             "dueDate": "2026-10-01",
             "monthly": true
           },
@@ -1278,16 +1278,32 @@
             "paid": false,
             "dueDate": "2026-09-15",
             "monthly": false
+          },
+          {
+            "id": "e1788380738813",
+            "label": "BBH",
+            "amt": -300,
+            "paid": false,
+            "dueDate": "2026-09-10",
+            "monthly": false
+          },
+          {
+            "id": "e1788380786944",
+            "label": "mom",
+            "amt": -200,
+            "paid": false,
+            "dueDate": "2026-09-20",
+            "monthly": true
           }
         ],
         "konten": [
           {
             "name": "VR- Giro",
-            "val": 24.32
+            "val": 179.29
           },
           {
             "name": "VR-Online",
-            "val": 1011.07
+            "val": 49.47
           },
           {
             "name": "N26",
@@ -1295,19 +1311,19 @@
           },
           {
             "name": "Revelute",
-            "val": 605.92
+            "val": 44.92
           },
           {
             "name": "Bargeld",
-            "val": 0
+            "val": 650
           },
           {
             "name": "Tank karte",
-            "val": 0
+            "val": 1
           },
           {
             "name": "Lidl karte",
-            "val": 17
+            "val": 180
           },
           {
             "name": "paypal",
@@ -1317,7 +1333,7 @@
         "investments": [
           {
             "name": "🏦 Rücklagen",
-            "val": 1001.65,
+            "val": 1.65,
             "goal": 25000
           },
           {
@@ -1327,22 +1343,22 @@
           },
           {
             "name": "📊 Mintos",
-            "val": 2341,
+            "val": 2733,
             "goal": null
           },
           {
             "name": "📈 Trade Republic",
-            "val": 38.35,
+            "val": 43,
             "goal": null
           },
           {
             "name": "🐦 Robinhood",
-            "val": 56.54,
+            "val": 57,
             "goal": null
           },
           {
             "name": "📱 N26 Invest",
-            "val": 66.03,
+            "val": 67,
             "goal": null
           }
         ]
@@ -2289,7 +2305,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-09-02T21:02:31.979Z",
+    "updatedAt": "2026-09-02T21:17:38.818Z",
     "updatedBy": "browser",
     "schemaVersion": 1
   },
