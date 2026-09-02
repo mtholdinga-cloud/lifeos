@@ -400,42 +400,42 @@
             "id": "t1776693275326",
             "title": "5:30 Aufstehen",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776693287905",
             "title": "Kleidung Raussuchen",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
             "id": "t1776693302657",
             "title": "Tasche Vorbereiten",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
             "id": "t1776693323528",
             "title": "Morning Meeting",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
             "id": "t1776693343714",
             "title": "Frühstück",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
             "id": "t1776693480469",
             "title": "Zähne putzen",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776693549598",
             "title": "Pünktlich Los",
-            "done": false,
+            "done": true,
             "notRelevant": false
           }
         ]
@@ -449,37 +449,37 @@
             "id": "t1776696845642",
             "title": "Life OS 10 :00 Uhr",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776696892553",
             "title": "Tik-Tok Dayly",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
             "id": "t1776696980282",
             "title": "Tik-Tok 7 Day´s",
-            "done": false,
-            "notRelevant": false
+            "done": true,
+            "notRelevant": true
           },
           {
             "id": "t1776697194353",
             "title": "2.Handsell´s Aktuell ?",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776697247690",
             "title": "Warenwirschaft Aktuell ?",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776697266808",
             "title": "Berichtsheft",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           }
         ]
       },
@@ -611,55 +611,55 @@
           {
             "id": "t1776699393918",
             "title": "Duschen",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
             "id": "t1776699407391",
             "title": "Rasieren",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
             "id": "t1776699425358",
             "title": "Körper Rasur",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
             "id": "t1776699434638",
             "title": "Kopf Rasur",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776699470398",
             "title": "Füße Eincremen",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776699540510",
             "title": "Schuhe Desinfizieren",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776699589021",
             "title": "Zähne Putzen",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776700345692",
             "title": "Life OS Archiv Eintrag",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
             "id": "t1776700385452",
             "title": "Handy Weglegen",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
@@ -1547,7 +1547,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-08-28T11:35:56.002Z",
+    "updatedAt": "2026-09-02T19:59:11.902Z",
     "updatedBy": "browser",
     "schemaVersion": 1
   },
