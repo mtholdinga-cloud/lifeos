@@ -257,6 +257,22 @@
         "paid": false,
         "dueDate": "2026-09-15",
         "monthly": false
+      },
+      {
+        "id": "e1788380738813",
+        "label": "BBH",
+        "amt": -300,
+        "paid": false,
+        "dueDate": "2026-09-10",
+        "monthly": false
+      },
+      {
+        "id": "e1788380786944",
+        "label": "mom",
+        "amt": -200,
+        "paid": false,
+        "dueDate": "2026-09-20",
+        "monthly": true
       }
     ]
   },
@@ -2273,7 +2289,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-09-02T20:21:59.829Z",
+    "updatedAt": "2026-09-02T20:26:52.417Z",
     "updatedBy": "browser",
     "schemaVersion": 1
   },
