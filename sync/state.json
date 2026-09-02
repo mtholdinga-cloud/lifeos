@@ -25,17 +25,17 @@
         "ts": "2026-06-30T01:17:44.263Z"
       }
     ],
-    "ziggi": "2026-08-25 23:12",
-    "kcal": 3051,
+    "ziggi": "2026-09-02 20:06",
+    "kcal": 2982,
     "reps": {
       "lies": [],
       "unter": [],
       "klim": []
     },
     "ern": {
-      "morgens": "",
-      "mittags": "",
-      "abends": ""
+      "morgens": "mc smart dobble ",
+      "mittags": "latte machiato ",
+      "abends": "DER m bacon , ny smart   dobble"
     },
     "supps": [
       "Multivitamin",
@@ -167,7 +167,7 @@
         "label": "Essen",
         "amt": -300,
         "paid": false,
-        "dueDate": "2026-09-01",
+        "dueDate": "2026-10-01",
         "monthly": true
       },
       {
@@ -175,7 +175,7 @@
         "label": "Sprit",
         "amt": -250,
         "paid": false,
-        "dueDate": "2026-09-01",
+        "dueDate": "2026-10-01",
         "monthly": true
       },
       {
@@ -183,7 +183,7 @@
         "label": "Bausparvertrag",
         "amt": -250,
         "paid": false,
-        "dueDate": "2026-08-28",
+        "dueDate": "2026-09-28",
         "monthly": true
       },
       {
@@ -199,7 +199,7 @@
         "label": "DB",
         "amt": -60,
         "paid": false,
-        "dueDate": "2026-08-30",
+        "dueDate": "2026-09-30",
         "monthly": true
       },
       {
@@ -222,8 +222,8 @@
         "id": "e1776708277989",
         "label": "Netflix",
         "amt": -20,
-        "paid": true,
-        "dueDate": "2026-08-30",
+        "paid": false,
+        "dueDate": "2026-09-30",
         "monthly": true
       },
       {
@@ -231,7 +231,7 @@
         "label": "Amazon Prime",
         "amt": -10,
         "paid": false,
-        "dueDate": "2026-09-01",
+        "dueDate": "2026-10-01",
         "monthly": true
       },
       {
@@ -247,7 +247,7 @@
         "label": "AVV Versicherung",
         "amt": -7,
         "paid": false,
-        "dueDate": "2026-09-01",
+        "dueDate": "2026-10-01",
         "monthly": true
       },
       {
@@ -666,7 +666,7 @@
             "id": "t1776700438868",
             "title": "Morgen Vorbereiten",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           }
         ]
       }
@@ -680,7 +680,8 @@
         "goals": [
           "2026 Q3: 1000 Views/Monat"
         ],
-        "children": []
+        "children": [],
+        "kpis": []
       },
       {
         "id": "c2",
@@ -688,7 +689,8 @@
         "goals": [
           "2026 Q4: MVP Launch"
         ],
-        "children": []
+        "children": [],
+        "kpis": []
       },
       {
         "id": "c3",
@@ -696,7 +698,8 @@
         "goals": [
           "2026 Q2: 5 Neukunden"
         ],
-        "children": []
+        "children": [],
+        "kpis": []
       },
       {
         "id": "c4",
@@ -704,7 +707,8 @@
         "goals": [
           "2026 Q3: 3 Events"
         ],
-        "children": []
+        "children": [],
+        "kpis": []
       },
       {
         "id": "c5",
@@ -712,7 +716,8 @@
         "goals": [
           "2026 Q4: 1. Objekt"
         ],
-        "children": []
+        "children": [],
+        "kpis": []
       }
     ]
   },
@@ -1547,7 +1552,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-09-02T19:59:11.902Z",
+    "updatedAt": "2026-09-02T20:09:16.935Z",
     "updatedBy": "browser",
     "schemaVersion": 1
   },
@@ -1556,7 +1561,7 @@
     "unter": [],
     "klim": []
   },
-  "kcal": 3051,
+  "kcal": 2982,
   "supps": [
     "Multivitamin",
     "D3/K2",
@@ -1570,9 +1575,9 @@
   ],
   "suppDone": [],
   "ern": {
-    "morgens": "",
-    "mittags": "",
-    "abends": ""
+    "morgens": "mc smart dobble ",
+    "mittags": "latte machiato ",
+    "abends": "DER m bacon , ny smart   dobble"
   },
   "notes": [
     {
@@ -1713,10 +1718,6 @@
           "done": false
         }
       ]
-    },
-    {
-      "title": "IHK code",
-      "tasks": []
     },
     {
       "title": "IHK",
