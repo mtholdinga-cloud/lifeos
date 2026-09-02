@@ -113,7 +113,7 @@
       },
       {
         "name": "Lidl karte",
-        "val": 17
+        "val": 180
       },
       {
         "name": "paypal",
@@ -2273,7 +2273,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-09-02T20:15:43.332Z",
+    "updatedAt": "2026-09-02T20:21:59.829Z",
     "updatedBy": "browser",
     "schemaVersion": 1
   },
