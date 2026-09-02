@@ -82,7 +82,7 @@
       },
       {
         "name": "📱 N26 Invest",
-        "val": 66.03,
+        "val": 67,
         "goal": null
       }
     ],
@@ -157,7 +157,7 @@
       {
         "id": "e1776706543491",
         "label": "GP1",
-        "amt": -500,
+        "amt": -600,
         "paid": false,
         "dueDate": "2026-09-20",
         "monthly": true
@@ -2289,7 +2289,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-09-02T20:56:51.942Z",
+    "updatedAt": "2026-09-02T21:00:27.136Z",
     "updatedBy": "browser",
     "schemaVersion": 1
   },
