@@ -25,8 +25,8 @@
         "ts": "2026-06-30T01:17:44.263Z"
       }
     ],
-    "ziggi": "2026-09-02 20:06",
-    "kcal": 2982,
+    "ziggi": "2026-09-09 19:25",
+    "kcal": 0,
     "reps": {
       "lies": [],
       "unter": [],
@@ -89,11 +89,11 @@
     "konten": [
       {
         "name": "VR- Giro",
-        "val": 179.29
+        "val": 0
       },
       {
         "name": "VR-Online",
-        "val": 49.47
+        "val": 2.67
       },
       {
         "name": "N26",
@@ -101,19 +101,19 @@
       },
       {
         "name": "Revelute",
-        "val": 44.92
+        "val": 0.69
       },
       {
         "name": "Bargeld",
-        "val": 650
+        "val": 400
       },
       {
         "name": "Tank karte",
-        "val": 1
+        "val": 200
       },
       {
         "name": "Lidl karte",
-        "val": 180
+        "val": 100
       },
       {
         "name": "paypal",
@@ -135,7 +135,7 @@
         "label": "Miete",
         "amt": -555,
         "paid": true,
-        "dueDate": "2026-09-03",
+        "dueDate": "2026-10-03",
         "monthly": true
       },
       {
@@ -143,7 +143,7 @@
         "label": "Mintos",
         "amt": -500,
         "paid": false,
-        "dueDate": "2026-09-03",
+        "dueDate": "2026-10-03",
         "monthly": true
       },
       {
@@ -158,7 +158,7 @@
         "id": "e1776706543491",
         "label": "GP1",
         "amt": -600,
-        "paid": false,
+        "paid": true,
         "dueDate": "2026-09-20",
         "monthly": true
       },
@@ -183,14 +183,14 @@
         "label": "Bausparvertrag",
         "amt": -250,
         "paid": false,
-        "dueDate": "2026-09-28",
+        "dueDate": "2026-10-28",
         "monthly": true
       },
       {
         "id": "e1776706754626",
         "label": "Strom",
         "amt": -75,
-        "paid": false,
+        "paid": true,
         "dueDate": "2026-09-11",
         "monthly": true
       },
@@ -206,17 +206,17 @@
         "id": "e1776706898627",
         "label": "Internet",
         "amt": -30,
-        "paid": false,
+        "paid": true,
         "dueDate": "2026-09-16",
         "monthly": true
       },
       {
         "id": "e1776708204293",
         "label": "GYM",
-        "amt": -25,
+        "amt": -150,
         "paid": false,
-        "dueDate": "2026-09-02",
-        "monthly": true
+        "dueDate": "2026-10-02",
+        "monthly": false
       },
       {
         "id": "e1776708277989",
@@ -254,7 +254,7 @@
         "id": "e1787912335079",
         "label": "Nachzahlung strom",
         "amt": -525,
-        "paid": false,
+        "paid": true,
         "dueDate": "2026-09-15",
         "monthly": false
       },
@@ -262,7 +262,7 @@
         "id": "e1788380738813",
         "label": "BBH",
         "amt": -300,
-        "paid": false,
+        "paid": true,
         "dueDate": "2026-09-10",
         "monthly": false
       },
@@ -273,6 +273,30 @@
         "paid": false,
         "dueDate": "2026-09-20",
         "monthly": true
+      },
+      {
+        "id": "e1788980977187",
+        "label": "Logan",
+        "amt": -600,
+        "paid": false,
+        "dueDate": "2026-10-10",
+        "monthly": false
+      },
+      {
+        "id": "e1788981027668",
+        "label": "Milan",
+        "amt": -150,
+        "paid": false,
+        "dueDate": "2026-09-19",
+        "monthly": false
+      },
+      {
+        "id": "e1788981049834",
+        "label": "Bofebo",
+        "amt": -200,
+        "paid": false,
+        "dueDate": "2026-10-03",
+        "monthly": false
       }
     ]
   },
@@ -403,7 +427,7 @@
   },
   "kalView": {
     "year": 2026,
-    "month": 7
+    "month": 8
   },
   "tagesplan": {
     "groups": [
@@ -416,18 +440,18 @@
             "id": "t1776693275326",
             "title": "5:30 Aufstehen",
             "done": false,
-            "notRelevant": true
+            "notRelevant": false
           },
           {
             "id": "t1776693287905",
             "title": "Kleidung Raussuchen",
-            "done": true,
+            "done": false,
             "notRelevant": false
           },
           {
             "id": "t1776693302657",
             "title": "Tasche Vorbereiten",
-            "done": true,
+            "done": false,
             "notRelevant": false
           },
           {
@@ -2305,7 +2329,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-09-02T21:19:41.836Z",
+    "updatedAt": "2026-09-09T19:55:40.379Z",
     "updatedBy": "browser",
     "schemaVersion": 1
   },
@@ -2314,7 +2338,7 @@
     "unter": [],
     "klim": []
   },
-  "kcal": 2982,
+  "kcal": 0,
   "supps": [
     "Multivitamin",
     "D3/K2",
