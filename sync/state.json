@@ -30,8 +30,8 @@
         "ts": "2026-09-15T07:07:34.884Z"
       }
     ],
-    "ziggi": "2026-09-15 07:07",
-    "kcal": 286,
+    "ziggi": "2026-09-15 23:37",
+    "kcal": 4150,
     "reps": {
       "lies": [],
       "unter": [],
@@ -505,31 +505,31 @@
           {
             "id": "t1776696845642",
             "title": "Life OS 10 :00 Uhr",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
             "id": "t1776696892553",
             "title": "Tik-Tok Dayly",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
             "id": "t1776696980282",
             "title": "Tik-Tok 7 Day´s",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
             "id": "t1776697194353",
             "title": "2.Handsell´s Aktuell ?",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776697247690",
             "title": "Warenwirschaft Aktuell ?",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
@@ -548,14 +548,14 @@
           {
             "id": "t1775789061677g1f0l",
             "title": "Küche wischen",
-            "done": false,
+            "done": true,
             "notRelevant": false,
             "subtasks": []
           },
           {
             "id": "t17757890616777wsmf",
             "title": "Bad reinigen",
-            "done": false,
+            "done": true,
             "notRelevant": false,
             "subtasks": []
           },
@@ -563,13 +563,13 @@
             "id": "t1775789061677m14yv",
             "title": "Staubsaugen",
             "done": false,
-            "notRelevant": false,
+            "notRelevant": true,
             "subtasks": []
           },
           {
             "id": "t17757890616776khui",
             "title": "Wäsche waschen",
-            "done": false,
+            "done": true,
             "notRelevant": false,
             "subtasks": []
           },
@@ -577,86 +577,86 @@
             "id": "t17757890616770l6ma",
             "title": "Einkaufen",
             "done": false,
-            "notRelevant": false,
+            "notRelevant": true,
             "subtasks": []
           },
           {
             "id": "t1776697553160",
             "title": "Einkaufsliste schreiben",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776698456728",
             "title": "Flur Ordentlich",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776698480369",
             "title": "Schlafzimmer schimmel frei ?",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776698494881",
             "title": "Schlafzimmer ordentlich",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776698540769",
             "title": "Wohnzimmer ordentlich",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
             "id": "t1776698562920",
             "title": "Pfand rausbringen",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
             "id": "t1776698792391",
             "title": "Papier Rausbringen",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
             "id": "t1776698807080",
             "title": "Müll Rausbringen",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
             "id": "t1776698893927",
             "title": "Trockner Leeren & Befüllen",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
             "id": "t1776698923039",
             "title": "Wäsche zusammen legen",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776698968416",
             "title": "Kleiderschrank Ordentlich",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776699170215",
             "title": "Keller Sauber ?",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776699188135",
             "title": "Gang Sauber ?",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           }
         ]
       },
@@ -669,60 +669,60 @@
             "id": "t1776699393918",
             "title": "Duschen",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776699407391",
             "title": "Rasieren",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776699425358",
             "title": "Körper Rasur",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776699434638",
             "title": "Kopf Rasur",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776699470398",
             "title": "Füße Eincremen",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776699540510",
             "title": "Schuhe Desinfizieren",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776699589021",
             "title": "Zähne Putzen",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776700345692",
             "title": "Life OS Archiv Eintrag",
             "done": false,
-            "notRelevant": false
+            "notRelevant": true
           },
           {
             "id": "t1776700385452",
             "title": "Handy Weglegen",
-            "done": false,
+            "done": true,
             "notRelevant": false
           },
           {
             "id": "t1776700438868",
             "title": "Morgen Vorbereiten",
-            "done": false,
+            "done": true,
             "notRelevant": false
           }
         ]
@@ -781,7 +781,7 @@
   "archive": [
     {
       "date": "Dienstag, 15. September 2026",
-      "ts": 1789456271022,
+      "ts": 1789508249935,
       "groups": [
         {
           "id": "morgen",
@@ -837,31 +837,31 @@
           "tasks": [
             {
               "title": "Life OS 10 :00 Uhr",
-              "done": false,
+              "done": true,
               "notRelevant": false,
               "subtasks": []
             },
             {
               "title": "Tik-Tok Dayly",
-              "done": false,
+              "done": true,
               "notRelevant": false,
               "subtasks": []
             },
             {
               "title": "Tik-Tok 7 Day´s",
-              "done": false,
+              "done": true,
               "notRelevant": false,
               "subtasks": []
             },
             {
               "title": "2.Handsell´s Aktuell ?",
               "done": false,
-              "notRelevant": false,
+              "notRelevant": true,
               "subtasks": []
             },
             {
               "title": "Warenwirschaft Aktuell ?",
-              "done": false,
+              "done": true,
               "notRelevant": false,
               "subtasks": []
             },
@@ -879,110 +879,110 @@
           "tasks": [
             {
               "title": "Küche wischen",
-              "done": false,
+              "done": true,
               "notRelevant": false,
               "subtasks": []
             },
             {
               "title": "Bad reinigen",
-              "done": false,
+              "done": true,
               "notRelevant": false,
               "subtasks": []
             },
             {
               "title": "Staubsaugen",
               "done": false,
-              "notRelevant": false,
+              "notRelevant": true,
               "subtasks": []
             },
             {
               "title": "Wäsche waschen",
-              "done": false,
+              "done": true,
               "notRelevant": false,
               "subtasks": []
             },
             {
               "title": "Einkaufen",
               "done": false,
-              "notRelevant": false,
+              "notRelevant": true,
               "subtasks": []
             },
             {
               "title": "Einkaufsliste schreiben",
               "done": false,
-              "notRelevant": false,
+              "notRelevant": true,
               "subtasks": []
             },
             {
               "title": "Flur Ordentlich",
               "done": false,
-              "notRelevant": false,
+              "notRelevant": true,
               "subtasks": []
             },
             {
               "title": "Schlafzimmer schimmel frei ?",
               "done": false,
-              "notRelevant": false,
+              "notRelevant": true,
               "subtasks": []
             },
             {
               "title": "Schlafzimmer ordentlich",
               "done": false,
-              "notRelevant": false,
+              "notRelevant": true,
               "subtasks": []
             },
             {
               "title": "Wohnzimmer ordentlich",
-              "done": false,
+              "done": true,
               "notRelevant": false,
               "subtasks": []
             },
             {
               "title": "Pfand rausbringen",
-              "done": false,
+              "done": true,
               "notRelevant": false,
               "subtasks": []
             },
             {
               "title": "Papier Rausbringen",
-              "done": false,
+              "done": true,
               "notRelevant": false,
               "subtasks": []
             },
             {
               "title": "Müll Rausbringen",
-              "done": false,
+              "done": true,
               "notRelevant": false,
               "subtasks": []
             },
             {
               "title": "Trockner Leeren & Befüllen",
-              "done": false,
+              "done": true,
               "notRelevant": false,
               "subtasks": []
             },
             {
               "title": "Wäsche zusammen legen",
               "done": false,
-              "notRelevant": false,
+              "notRelevant": true,
               "subtasks": []
             },
             {
               "title": "Kleiderschrank Ordentlich",
               "done": false,
-              "notRelevant": false,
+              "notRelevant": true,
               "subtasks": []
             },
             {
               "title": "Keller Sauber ?",
               "done": false,
-              "notRelevant": false,
+              "notRelevant": true,
               "subtasks": []
             },
             {
               "title": "Gang Sauber ?",
               "done": false,
-              "notRelevant": false,
+              "notRelevant": true,
               "subtasks": []
             }
           ]
@@ -994,60 +994,60 @@
             {
               "title": "Duschen",
               "done": false,
-              "notRelevant": false,
+              "notRelevant": true,
               "subtasks": []
             },
             {
               "title": "Rasieren",
               "done": false,
-              "notRelevant": false,
+              "notRelevant": true,
               "subtasks": []
             },
             {
               "title": "Körper Rasur",
               "done": false,
-              "notRelevant": false,
+              "notRelevant": true,
               "subtasks": []
             },
             {
               "title": "Kopf Rasur",
               "done": false,
-              "notRelevant": false,
+              "notRelevant": true,
               "subtasks": []
             },
             {
               "title": "Füße Eincremen",
               "done": false,
-              "notRelevant": false,
+              "notRelevant": true,
               "subtasks": []
             },
             {
               "title": "Schuhe Desinfizieren",
               "done": false,
-              "notRelevant": false,
+              "notRelevant": true,
               "subtasks": []
             },
             {
               "title": "Zähne Putzen",
               "done": false,
-              "notRelevant": false,
+              "notRelevant": true,
               "subtasks": []
             },
             {
               "title": "Life OS Archiv Eintrag",
               "done": false,
-              "notRelevant": false,
+              "notRelevant": true,
               "subtasks": []
             },
             {
               "title": "Handy Weglegen",
-              "done": false,
+              "done": true,
               "notRelevant": false,
               "subtasks": []
             },
             {
               "title": "Morgen Vorbereiten",
-              "done": false,
+              "done": true,
               "notRelevant": false,
               "subtasks": []
             }
@@ -1085,8 +1085,8 @@
             "ts": "2026-09-15T07:07:34.884Z"
           }
         ],
-        "ziggi": "2026-09-15 07:07",
-        "kcal": 286,
+        "ziggi": "2026-09-15 23:37",
+        "kcal": 4150,
         "reps": {
           "lies": [],
           "unter": [],
@@ -1113,7 +1113,7 @@
           5
         ]
       },
-      "kcal": 286,
+      "kcal": 4150,
       "reps": {
         "lies": [],
         "unter": [],
@@ -6208,7 +6208,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-09-15T07:11:11.021Z",
+    "updatedAt": "2026-09-15T21:37:29.933Z",
     "updatedBy": "browser",
     "schemaVersion": 1,
     "activeDate": "2026-09-15"
@@ -6218,7 +6218,7 @@
     "unter": [],
     "klim": []
   },
-  "kcal": 286,
+  "kcal": 4150,
   "supps": [
     "Multivitamin",
     "D3/K2",
