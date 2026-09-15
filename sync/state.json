@@ -786,7 +786,7 @@
   "archive": [
     {
       "date": "Dienstag, 15. September 2026",
-      "ts": 1789508488274,
+      "ts": 1789508584844,
       "groups": [
         {
           "id": "morgen",
@@ -6218,7 +6218,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-09-15T21:41:28.272Z",
+    "updatedAt": "2026-09-15T21:43:04.778Z",
     "updatedBy": "browser",
     "schemaVersion": 1,
     "activeDate": "2026-09-15"
