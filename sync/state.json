@@ -28,19 +28,24 @@
         "val": 69.2,
         "date": "15.9.2026",
         "ts": "2026-09-15T07:07:34.884Z"
+      },
+      {
+        "val": 69.2,
+        "date": "15.9.2026",
+        "ts": "2026-09-15T21:38:41.698Z"
       }
     ],
     "ziggi": "2026-09-15 23:37",
-    "kcal": 4150,
+    "kcal": 4127,
     "reps": {
       "lies": [],
       "unter": [],
       "klim": []
     },
     "ern": {
-      "morgens": "",
-      "mittags": "",
-      "abends": ""
+      "morgens": "Ein Kaffee, ein Orangensaft, 1 Liter. ",
+      "mittags": "2 Bacon Jam Cheeseburger\nTrüffel- Mayo- Pommes\nFanta Berry",
+      "abends": "Ein Liter Kaba"
     },
     "supps": [
       "Multivitamin",
@@ -781,7 +786,7 @@
   "archive": [
     {
       "date": "Dienstag, 15. September 2026",
-      "ts": 1789508249935,
+      "ts": 1789508488274,
       "groups": [
         {
           "id": "morgen",
@@ -1083,19 +1088,24 @@
             "val": 69.2,
             "date": "15.9.2026",
             "ts": "2026-09-15T07:07:34.884Z"
+          },
+          {
+            "val": 69.2,
+            "date": "15.9.2026",
+            "ts": "2026-09-15T21:38:41.698Z"
           }
         ],
         "ziggi": "2026-09-15 23:37",
-        "kcal": 4150,
+        "kcal": 4127,
         "reps": {
           "lies": [],
           "unter": [],
           "klim": []
         },
         "ern": {
-          "morgens": "",
-          "mittags": "",
-          "abends": ""
+          "morgens": "Ein Kaffee, ein Orangensaft, 1 Liter. ",
+          "mittags": "2 Bacon Jam Cheeseburger\nTrüffel- Mayo- Pommes\nFanta Berry",
+          "abends": "Ein Liter Kaba"
         },
         "supps": [
           "Multivitamin",
@@ -1113,7 +1123,7 @@
           5
         ]
       },
-      "kcal": 4150,
+      "kcal": 4127,
       "reps": {
         "lies": [],
         "unter": [],
@@ -1135,9 +1145,9 @@
         5
       ],
       "ern": {
-        "morgens": "",
-        "mittags": "",
-        "abends": ""
+        "morgens": "Ein Kaffee, ein Orangensaft, 1 Liter. ",
+        "mittags": "2 Bacon Jam Cheeseburger\nTrüffel- Mayo- Pommes\nFanta Berry",
+        "abends": "Ein Liter Kaba"
       },
       "reflex": {
         "gut": "",
@@ -6208,7 +6218,7 @@
   ],
   "v16migrated": true,
   "meta": {
-    "updatedAt": "2026-09-15T21:37:29.933Z",
+    "updatedAt": "2026-09-15T21:41:28.272Z",
     "updatedBy": "browser",
     "schemaVersion": 1,
     "activeDate": "2026-09-15"
@@ -6218,7 +6228,7 @@
     "unter": [],
     "klim": []
   },
-  "kcal": 4150,
+  "kcal": 4127,
   "supps": [
     "Multivitamin",
     "D3/K2",
@@ -6235,9 +6245,9 @@
     5
   ],
   "ern": {
-    "morgens": "",
-    "mittags": "",
-    "abends": ""
+    "morgens": "Ein Kaffee, ein Orangensaft, 1 Liter. ",
+    "mittags": "2 Bacon Jam Cheeseburger\nTrüffel- Mayo- Pommes\nFanta Berry",
+    "abends": "Ein Liter Kaba"
   },
   "notes": [
     {
