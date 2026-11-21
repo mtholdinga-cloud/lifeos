@@ -596,6 +596,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
     <button class="export-btn" id="importbtn" onclick="document.getElementById('import-file').click()">📥</button>
     <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
     <button class="export-btn" id="mtsyncbtn" onclick="openMTSyncSettings()" title="MT-Sync Einstellungen">🤖</button>
+    <button class="export-btn" id="cloudbtn" onclick="cloudConnect()" title="Cloud-Sync: mit E-Mail anmelden, damit PC und Handy synchron bleiben">☁️ Verbinden</button>
     <button class="mode-btn" id="modebtn">🖥️ PC</button>
   </div>
 </div>
@@ -2837,6 +2838,47 @@ function _applyInboxAction(cmd){
 }
 
 // --- Settings-UI ---
+/* ☁️ Cloud-Verbindung (Dexie Cloud): Anmeldung per E-Mail + Code, danach Sync zwischen PC und Handy */
+async function cloudConnect(){
+  try{
+    if(typeof db==='undefined'||!db.cloud){ showToast('Cloud nicht verfügbar'); return; }
+    var u=db.cloud.currentUser.value;
+    if(u&&u.isLoggedIn){
+      showToast('Cloud verbunden – synchronisiere …');
+      await db.cloud.sync({purpose:'push'});
+      await db.cloud.sync({purpose:'pull'});
+      showToast('Sync fertig ✓ ('+(u.email||'angemeldet')+')');
+      updateCloudBtn();
+      return;
+    }
+    await db.cloud.login();
+    updateCloudBtn();
+  }catch(e){ showToast('Cloud-Fehler: '+((e&&e.message)||e)); }
+}
+function updateCloudBtn(){
+  try{
+    var b=document.getElementById('cloudbtn'); if(!b) return;
+    if(typeof db==='undefined'||!db.cloud||!db.cloud.currentUser){ return; }
+    var u=db.cloud.currentUser.value;
+    if(u&&u.isLoggedIn){ b.textContent='☁️ ✓'; b.title='Cloud verbunden als '+(u.email||'')+' – antippen zum Synchronisieren'; }
+    else { b.textContent='☁️ Verbinden'; b.title='Cloud-Sync: mit E-Mail anmelden, damit PC und Handy synchron bleiben'; }
+  }catch(e){}
+}
+window.cloudConnect=cloudConnect; window.updateCloudBtn=updateCloudBtn;
+(function(){
+  var tries=0;
+  function hook(){
+    try{
+      if(typeof db!=='undefined'&&db.cloud&&db.cloud.currentUser&&db.cloud.currentUser.subscribe){
+        db.cloud.currentUser.subscribe(function(){ updateCloudBtn(); });
+        updateCloudBtn(); return;
+      }
+    }catch(e){}
+    if(++tries<20) setTimeout(hook,1000);
+  }
+  setTimeout(hook,1500);
+})();
+
 function openMTSyncSettings(){
   const old = document.getElementById('mtsync-modal');
   if (old) old.remove();
