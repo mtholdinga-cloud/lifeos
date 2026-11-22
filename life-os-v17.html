@@ -318,6 +318,12 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
   .tp-day { min-width:34px; padding:5px 8px; border-radius:8px; border:1px solid var(--bg3); background:var(--bg2); color:var(--t2); font-size:12px; font-weight:700; cursor:pointer; }
   .tp-day.on { background:var(--acc); color:#000; border-color:var(--acc); }
   .tp-day.quick { background:transparent; border-style:dashed; }
+  /* === MT-AI POSTFACH === */
+  .mtai-modebar { display:flex; gap:6px; margin:8px 0; }
+  .mtai-mode { flex:1; padding:7px 8px; border-radius:8px; border:1px solid var(--bg3); background:var(--bg2); color:var(--t2); font-size:12px; font-weight:700; cursor:pointer; }
+  .mtai-mode.on { background:var(--acc); color:#000; border-color:var(--acc); }
+  .mtai-status { font-size:10px; color:var(--t2); margin:-4px 4px 10px; opacity:.8; }
+  .ai-msg.user + .mtai-status { text-align:right; }
   /* === ARCHIV MODAL === */
 #archive-modal { z-index:2000 !important; }
 .arch-detail { animation: fadeIn .2s ease; }
@@ -1827,6 +1833,7 @@ function initAIKeyStatus(){
   if(status) status.textContent = key ? '✅ API-Key aktiv' : '🔑 Kein API-Key';
 }
 async function sendAI(){
+  if (_mtMode() === 'postfach') { return sendPostfach(); }
   const key = localStorage.getItem('lifeos_ai_key') || '';
   if(!key){
     const sec = document.getElementById('ai-key-section');
@@ -1894,6 +1901,92 @@ document.getElementById('ai-inp').addEventListener('keydown',e=>{if(e.key==='Ent
 
 
 // === PANEL RENDERER ===
+/* ===== MT-AI Postfach-Chat =====
+   Nachrichten laufen ueber die synchronisierte Tabelle calNotes (Schluessel 'mtchat:<zeit>-<zufall>').
+   role 'user' = Mr.T schreibt im MT-AI-Tab, role 'mt' = Antwort von Agent MT.
+   status 'offen' = MT hat noch nicht gelesen, 'gelesen' = MT hat die Nachricht gesehen.
+   Agent MT liest/antwortet ueber die Tabelle (siehe InfoSync/mt-ai-postfach.md); Sync zeigt es auf allen Geraeten. */
+var MTCHAT_PREFIX = 'mtchat:';
+function _mtMode() { try { return localStorage.getItem('lifeos_mtai_mode') || 'postfach'; } catch(e) { return 'postfach'; } }
+function setMtMode(m) {
+  try { localStorage.setItem('lifeos_mtai_mode', m); } catch(e) {}
+  var chat = document.getElementById('ai-chat'); if (chat) chat.innerHTML = '';
+  renderMtModeBar();
+  if (m === 'postfach') renderPostfach(window._mtChatMsgs || []);
+}
+function renderMtModeBar() {
+  var chat = document.getElementById('ai-chat'); if (!chat) return;
+  var bar = document.getElementById('mtai-modebar');
+  if (!bar) {
+    bar = document.createElement('div'); bar.id = 'mtai-modebar'; bar.className = 'mtai-modebar';
+    bar.innerHTML = '<button class="mtai-mode" id="mtai-m-postfach" onclick="setMtMode(\'postfach\')">📬 Postfach (MT)</button>'
+      + '<button class="mtai-mode" id="mtai-m-api" onclick="setMtMode(\'api\')">⚡ Sofort (API)</button>';
+    chat.parentNode.insertBefore(bar, chat);
+  }
+  var pf = _mtMode() === 'postfach';
+  document.getElementById('mtai-m-postfach').classList.toggle('on', pf);
+  document.getElementById('mtai-m-api').classList.toggle('on', !pf);
+  var keyStatus = document.getElementById('ai-key-status');
+  if (keyStatus && keyStatus.parentElement) keyStatus.parentElement.style.display = pf ? 'none' : 'flex';
+  var keySec = document.getElementById('ai-key-section'); if (keySec && pf) keySec.style.display = 'none';
+  var inp = document.getElementById('ai-inp');
+  if (inp) inp.placeholder = pf ? 'Nachricht an MT … (Agent MT antwortet, sobald er läuft)' : 'Frag mich alles – ich bin dein Mentor & Berater...';
+}
+function _mtTime(ts) { try { return new Date(ts).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }); } catch(e) { return ''; } }
+function renderPostfach(list) {
+  var chat = document.getElementById('ai-chat');
+  if (!chat || _mtMode() !== 'postfach') return;
+  var stick = chat.scrollTop + chat.clientHeight >= chat.scrollHeight - 40;
+  chat.innerHTML = '';
+  if (!list.length) {
+    var hint = document.createElement('div'); hint.className = 'ai-msg ai';
+    hint.textContent = '📬 Postfach: Schreib mir hier. Agent MT liest mit, sobald sein Chat läuft, und antwortet hier. Dein Verlauf ist auf allen Geräten gleich.';
+    chat.appendChild(hint);
+  }
+  list.forEach(function(m) {
+    var d = document.createElement('div'); d.className = 'ai-msg ' + (m.role === 'user' ? 'user' : 'ai'); d.textContent = m.text || ''; chat.appendChild(d);
+    var s = document.createElement('div'); s.className = 'mtai-status';
+    s.textContent = (m.role === 'user' ? (m.status === 'gelesen' ? '📬 von MT gelesen' : '🕓 wartet auf MT') + ' · ' : 'MT · ') + _mtTime(m.ts);
+    chat.appendChild(s);
+  });
+  if (stick) chat.scrollTop = chat.scrollHeight;
+}
+async function sendPostfach() {
+  var inp = document.getElementById('ai-inp'); if (!inp) return;
+  var text = (inp.value || '').trim(); if (!text) return;
+  var ts = Date.now();
+  var key = MTCHAT_PREFIX + String(ts).padStart(14, '0') + '-' + Math.random().toString(36).slice(2, 6);
+  try {
+    await db.calNotes.put({ key: key, role: 'user', text: text, ts: ts, status: 'offen', from: 'life-os' });
+    inp.value = '';
+  } catch(e) { try { showToast('Nachricht konnte nicht gespeichert werden'); } catch(e2) {} }
+}
+(function() {
+  var tries = 0, firstLoad = true, lastMtTs = 0;
+  function start() {
+    try {
+      if (typeof Dexie === 'undefined' || !Dexie.liveQuery || typeof db === 'undefined' || !db.calNotes) { if (++tries < 30) setTimeout(start, 1000); return; }
+      renderMtModeBar();
+      Dexie.liveQuery(function() { return db.calNotes.where('key').startsWith(MTCHAT_PREFIX).toArray(); }).subscribe({
+        next: function(rows) {
+          rows = (rows || []).sort(function(a, b) { return (a.ts || 0) - (b.ts || 0); });
+          window._mtChatMsgs = rows;
+          var newestMt = 0; rows.forEach(function(m) { if (m.role === 'mt' && (m.ts || 0) > newestMt) newestMt = m.ts; });
+          if (!firstLoad && newestMt > lastMtTs) {
+            var panel = document.getElementById('panel-ki');
+            if (!(panel && panel.classList.contains('active'))) { try { showToast('📬 MT hat geantwortet'); } catch(e) {} }
+          }
+          if (newestMt > lastMtTs) lastMtTs = newestMt;
+          firstLoad = false;
+          renderPostfach(rows);
+        },
+        error: function(e) { console.warn('postfach', e); }
+      });
+    } catch(e) { console.warn('postfach', e); }
+  }
+  setTimeout(start, 2500);
+})();
+
 function renderPanel(id){
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   const panel = document.getElementById('panel-' + id);
@@ -1908,7 +2001,7 @@ function renderPanel(id){
   else if(id==='kalender') renderKalender();
   else if(id==='finanzen') renderFinanzen();
   else if(id==='notizen') renderNotizen();
-  else if(id==='ki') { initAIKeyStatus(); }
+  else if(id==='ki') { initAIKeyStatus(); try { renderMtModeBar(); renderPostfach(window._mtChatMsgs || []); } catch(e) {} }
   else if(id==='mitspieler') renderPlayers();
   else if(id==='mtholding') renderMTHolding();
   else if(id==='archiv') renderArchiv();
