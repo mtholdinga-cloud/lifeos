@@ -648,6 +648,13 @@ body.hc button,body.hc input,body.hc select,body.hc textarea{border-color:var(--
 @media (max-width:700px){
   #settings{top:auto;bottom:0;left:0;right:0;width:auto;max-width:none;max-height:88vh;border-radius:18px 18px 0 0;}
 }
+.grp-count{color:var(--t2);}
+:root{--t3:#8c8c8c;--on-acc2:#0b1220;}
+.pc-mode{--t3:#6b6b6b;--on-acc2:#ffffff;}
+[onclick="saveErn()"]{color:var(--on-acc2)!important;}
+body.big-tap button{min-height:40px;min-width:36px;}
+body.big-tap select,body.big-tap textarea,body.big-tap input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=hidden]):not([type=file]){min-height:40px;}
+body.big-tap input[type=checkbox],body.big-tap input[type=radio]{width:22px;height:22px;}
 </style>
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
 <div id="dim-overlay" aria-hidden="true"></div>
@@ -675,6 +682,7 @@ body.hc button,body.hc input,body.hc select,body.hc textarea{border-color:var(--
     <button type="button" class="st-btn" id="modebtn">🖥️ PC</button>
     <label class="st-check"><input type="checkbox" id="pref-hc"><span>Hoher Kontrast</span></label>
     <label class="st-check"><input type="checkbox" id="pref-calm"><span>Weniger Animationen</span></label>
+    <label class="st-check"><input type="checkbox" id="pref-tap"><span>Größere Tippflächen</span></label>
     <button type="button" class="st-btn st-quiet" id="pref-reset">↺ Anzeige zurücksetzen</button>
     <h3 class="st-h">Daten &amp; Sync</h3>
     <button type="button" class="st-btn" id="exportbtn" onclick="exportData()">📤 Daten exportieren (Sicherung)</button>
@@ -3539,6 +3547,11 @@ function shMergeWeights(existing, list){
   try{ prefs=JSON.parse(localStorage.getItem(PK)||'{}')||{}; }catch(e){ prefs={}; }
   function $(id){ return document.getElementById(id); }
   function sp(){ try{ localStorage.setItem(PK,JSON.stringify(prefs)); }catch(e){} }
+  function fitSettings(){
+    var s=$('settings'); if(!s) return;
+    var z=parseFloat(document.body.style.zoom)||100;
+    s.style.zoom=String(100/z);
+  }
   function applyPrefs(){
     var d=(typeof prefs.dim==='number')?prefs.dim:100, ov=$('dim-overlay');
     if(ov) ov.style.opacity=String(Math.max(0,Math.min(0.6,(100-d)/100)));
@@ -3546,11 +3559,17 @@ function shMergeWeights(existing, list){
     var dl=$('dim-label'); if(dl) dl.textContent=d+'%';
     document.body.classList.toggle('hc',!!prefs.hc);
     document.body.classList.toggle('calm',!!prefs.calm);
+    var coarse=false; try{ coarse=window.matchMedia('(pointer:coarse)').matches; }catch(e){}
+    var tap=(typeof prefs.tap==='boolean')?prefs.tap:coarse;
+    document.body.classList.toggle('big-tap',tap);
+    var tp=$('pref-tap'); if(tp) tp.checked=tap;
+    fitSettings();
     var a=$('pref-hc'); if(a) a.checked=!!prefs.hc;
     var b=$('pref-calm'); if(b) b.checked=!!prefs.calm;
   }
   window.openSettings=function(){
     var s=$('settings'), b=$('settings-backdrop'); if(!s) return;
+    fitSettings();
     opener=document.activeElement; s.hidden=false; if(b) b.hidden=false;
     var g=$('settingsbtn'); if(g) g.setAttribute('aria-expanded','true');
     setTimeout(function(){ var c=$('settings-close'); if(c) c.focus(); },0);
@@ -3583,6 +3602,8 @@ function shMergeWeights(existing, list){
     var g=$('settingsbtn'); if(g) g.addEventListener('click',window.openSettings);
     var ds=$('dim-slider'); if(ds) ds.addEventListener('input',function(){ prefs.dim=+this.value; sp(); applyPrefs(); });
     var hc=$('pref-hc'); if(hc) hc.addEventListener('change',function(){ prefs.hc=this.checked; sp(); applyPrefs(); });
+    var tp=$('pref-tap'); if(tp) tp.addEventListener('change',function(){ prefs.tap=this.checked; sp(); applyPrefs(); });
+    var zs=$('zoom-slider'); if(zs) zs.addEventListener('input',fitSettings);
     var ca=$('pref-calm'); if(ca) ca.addEventListener('change',function(){ prefs.calm=this.checked; sp(); applyPrefs(); });
     var rs=$('pref-reset'); if(rs) rs.addEventListener('click',function(){
       prefs={}; sp(); applyPrefs();
