@@ -41,6 +41,8 @@ jobs:
           EOF
           npx cap add android
           npx cap sync android
+      - name: ImageMagick installieren
+        run: sudo apt-get update && sudo apt-get install -y imagemagick
       - name: Manifest und Icons anpassen
         run: |
           cd app
