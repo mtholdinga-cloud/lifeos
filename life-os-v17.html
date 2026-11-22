@@ -2879,6 +2879,37 @@ window.cloudConnect=cloudConnect; window.updateCloudBtn=updateCloudBtn;
   setTimeout(hook,1500);
 })();
 
+/* ☁️ Neuer Stand aus der Cloud: Wenn der Sync einen neueren Stand in die lokale Datenbank geschrieben hat (neuester Zeitstempel gewinnt), übernimmt die App ihn und zeichnet neu. */
+(function(){
+  var busy=false;
+  async function adoptCloudState(){
+    if(busy) return; busy=true;
+    try{
+      var rec=await db.state.get('main'); var d=rec&&rec.data;
+      var mine=(S&&S.meta&&S.meta.updatedAt)||'';
+      if(d&&d.meta&&d.meta.updatedAt&&d.meta.updatedAt>mine){
+        await loadAllState();
+        var active=document.querySelector('.nav-btn.active');
+        renderPanel(active?active.dataset.panel:'heute');
+        showToast('☁️ Neuer Stand aus der Cloud übernommen');
+      }
+    }catch(e){ console.warn('adoptCloudState',e); }
+    busy=false;
+  }
+  window.adoptCloudState=adoptCloudState;
+  var tries=0;
+  function hook(){
+    try{
+      if(typeof Dexie!=='undefined'&&Dexie.liveQuery&&typeof db!=='undefined'){
+        Dexie.liveQuery(function(){ return db.state.get('main'); }).subscribe({next:function(){ adoptCloudState(); },error:function(){}});
+        setTimeout(adoptCloudState,4000); return;
+      }
+    }catch(e){}
+    if(++tries<20) setTimeout(hook,1000);
+  }
+  setTimeout(hook,2500);
+})();
+
 function openMTSyncSettings(){
   const old = document.getElementById('mtsync-modal');
   if (old) old.remove();
