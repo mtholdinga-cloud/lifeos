@@ -4262,12 +4262,42 @@ window.shImport=async function(ev){
       '.kal-scope label{display:flex;align-items:center;gap:6px;min-height:32px}'+
       '#ios-hint{position:fixed;left:12px;right:12px;bottom:12px;z-index:3500;background:var(--bg1);border:1px solid var(--acc);border-radius:14px;padding:12px 14px;font-size:.85em;line-height:1.45;display:flex;gap:10px;align-items:flex-start;box-shadow:0 6px 24px rgba(0,0,0,.4)}'+
       '#ios-hint button{min-height:44px;min-width:44px;background:none;border:none;color:var(--t1);font-size:1.1em;cursor:pointer}';
+    st.textContent+=
+      '.kal-month-grid{grid-template-columns:repeat(7,minmax(0,1fr))!important;gap:3px!important}'+
+      '.kal-day-header{padding:4px 0!important;min-width:0}'+
+      '.kal-day-cell{min-width:0;overflow:hidden;min-height:58px;padding:3px 3px 4px!important;display:flex;flex-direction:column;gap:2px}'+
+      '.kal-day-cell.today{background:rgba(22,163,74,.2)!important}'+
+      '.kal-day-cell.has-event::after{display:none!important}'+
+      '.kal-day-num{margin:0!important;font-size:.75em}'+
+      '.kal-dots{display:flex;flex-wrap:wrap;gap:3px;align-items:center;margin-top:auto}'+
+      '.kal-dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none;vertical-align:middle}'+
+      '.kal-dot.m{background:var(--acc)}.kal-dot.s{background:#60a5fa}'+
+      '.kal-more{font-size:.62em;color:var(--t2);line-height:1}'+
+      '.kal-txt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.58em;line-height:1.15;overflow-wrap:anywhere;word-break:break-word;hyphens:auto;border-left:2px solid var(--acc);padding-left:3px}'+
+      '.kal-txt.s{border-left-color:#60a5fa;color:#60a5fa}.kal-txt.m{color:var(--t0)}'+
+      '.kal-cnt{display:inline-block;min-width:1.5em;margin-left:4px;padding:0 5px;border-radius:9px;background:rgba(127,127,127,.25);font-size:.8em;line-height:1.5}'+
+      '.kal-switch button[aria-checked="true"] .kal-cnt{background:rgba(0,0,0,.18)}'+
+      '.kal-bar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 8px;font-size:.78em;color:var(--t1)}'+
+      '.kal-legend{display:flex;gap:12px;flex-wrap:wrap}.kal-legend span{display:inline-flex;align-items:center;gap:5px}'+
+      '.kal-view{display:inline-flex;border:1px solid var(--bg3);border-radius:10px;overflow:hidden}'+
+      '.kal-view button{min-height:36px;padding:4px 12px;background:var(--bg2);color:var(--t1);border:none;font:inherit;cursor:pointer}'+
+      '.kal-view button[aria-pressed="true"]{background:var(--acc);color:#000;font-weight:700}'+
+      '.kal-agenda{margin-top:14px}.kal-agenda h4{margin:0 0 6px;font-size:.85em;color:var(--t1)}'+
+      '.kal-ag{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:6px 10px;margin-bottom:4px;background:var(--bg2);border:1px solid transparent;border-radius:10px;color:var(--t0);font:inherit;font-size:.85em;text-align:left;cursor:pointer}'+
+      '.kal-ag:hover,.kal-ag:focus-visible{border-color:var(--acc)}'+
+      '.kal-ag-d{flex:0 0 3.6em;color:var(--t1);font-variant-numeric:tabular-nums}.kal-ag-t{flex:1;min-width:0;overflow-wrap:anywhere}'+
+      '.kal-scope-t{font-weight:700;color:var(--t1)}.kal-scope-h{color:var(--t2)}'+
+      '.kal-event-del.mv{width:auto;min-width:44px;padding:0 8px;font-size:.8em;font-weight:700}'+
+      '.kal-event-del{min-height:40px}';
     document.head.appendChild(st);
   })();
 
   /* Kalender-Ansicht */
   var MODES=[['mine','Mein'],['shared','Gemeinsam'],['both','Beide']];
+  var calView=lsGet('lifeos-calview'); if(calView!=='dots'&&calView!=='text') calView=(window.innerWidth<700?'dots':'text');
   window.calSetMode=function(m){ calMode=m; lsSet('lifeos-calmode',m); window.renderKalender(); };
+  window.calSetView=function(v){ calView=v; lsSet('lifeos-calview',v); window.renderKalender(); };
+  function fmtT(e){ return (e.time?e.time+' ':'')+e.title; }
   window.renderKalender=function(){
     var panel=$('panel-kalender'); if(!panel) return;
     var now=new Date();
@@ -4277,28 +4307,49 @@ window.shImport=async function(ev){
     var daysInMonth=new Date(vy,vm+1,0).getDate();
     var firstDay=(new Date(vy,vm,1).getDay()+6)%7;
     var monthNames=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-    var dayNames=['Mo','Di','Mi','Do','Fr','Sa','So'];
+    var dayNames=['Mo','Di','Mi','Do','Fr','Sa','So'], wd=['So','Mo','Di','Mi','Do','Fr','Sa'];
     var cells=dayNames.map(function(d){ return '<div class="kal-day-header">'+d+'</div>'; }).join('');
     for(var i=0;i<firstDay;i++) cells+='<div class="kal-day-cell other-month"></div>';
+    var cnt={m:0,s:0}, agenda=[];
     for(var d=1; d<=daysInMonth; d++){
       var key=vy+'-'+(vm+1)+'-'+d;
       var isToday=(d===now.getDate()&&vm===now.getMonth()&&vy===now.getFullYear());
+      var mine=mineOn(key), sh=sharedOn(key);
+      cnt.m+=mine.length; cnt.s+=sh.length;
       var items=[];
-      if(showMine) mineOn(key).forEach(function(e){ items.push({s:false,t:(e.time?e.time+' ':'')+e.title}); });
-      if(showShared) sharedOn(key).forEach(function(e){ items.push({s:true,t:(e.time?e.time+' ':'')+e.title}); });
-      var prev=items.slice(0,2).map(function(x){ return '<span class="kal-ev '+(x.s?'s':'m')+'">'+(x.s?'👥 ':'')+esc(x.t)+'</span>'; }).join('');
-      if(items.length>2) prev+='<span class="kal-ev">+'+(items.length-2)+'</span>';
-      cells+='<div class="kal-day-cell'+(isToday?' today':'')+(items.length?' has-event':'')+'" role="button" tabindex="0" aria-label="'+d+'. '+monthNames[vm]+(items.length?', '+items.length+' Termine':'')+'" onclick="openKalDay('+d+','+(vm+1)+','+vy+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();openKalDay('+d+','+(vm+1)+','+vy+')}">'+
-        '<div class="kal-day-num">'+d+'</div><div class="kal-day-events">'+prev+'</div></div>';
+      if(showMine) mine.forEach(function(e){ items.push({s:false,t:fmtT(e)}); });
+      if(showShared) sh.forEach(function(e){ items.push({s:true,t:fmtT(e)}); });
+      var nS=items.filter(function(x){ return x.s; }).length, nM=items.length-nS;
+      items.forEach(function(x){ agenda.push({d:d,s:x.s,t:x.t}); });
+      var body='';
+      if(calView==='dots'){
+        var dots=items.slice(0,6).map(function(x){ return '<span class="kal-dot '+(x.s?'s':'m')+'"></span>'; }).join('');
+        if(items.length>6) dots+='<span class="kal-more">+'+(items.length-6)+'</span>';
+        if(dots) body='<div class="kal-dots">'+dots+'</div>';
+      } else {
+        body=items.slice(0,2).map(function(x){ return '<span class="kal-txt '+(x.s?'s':'m')+'">'+esc(x.t)+'</span>'; }).join('');
+        if(items.length>2) body+='<span class="kal-more">+'+(items.length-2)+'</span>';
+      }
+      var lab=d+'. '+monthNames[vm]+(items.length?(': '+(nM?nM+' eigene':'')+(nM&&nS?', ':'')+(nS?nS+' gemeinsame':'')+' Termine'):'');
+      cells+='<div class="kal-day-cell'+(isToday?' today':'')+(items.length?' has-event':'')+'" role="button" tabindex="0" aria-label="'+lab+'" onclick="openKalDay('+d+','+(vm+1)+','+vy+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();openKalDay('+d+','+(vm+1)+','+vy+')}">'+
+        '<div class="kal-day-num">'+d+'</div>'+body+'</div>';
     }
     var idx=0; MODES.forEach(function(m,i){ if(m[0]===calMode) idx=i; });
+    var counts={mine:cnt.m,shared:SH.realmId?cnt.s:null,both:cnt.m+(SH.realmId?cnt.s:0)};
     var sw='<div class="kal-switch" role="radiogroup" aria-label="Kalenderansicht"><div class="thumb" style="transform:translateX('+(idx*100)+'%)"></div>'+
-      MODES.map(function(m){ return '<button type="button" role="radio" aria-checked="'+(m[0]===calMode)+'" onclick="calSetMode(\''+m[0]+'\')">'+m[1]+'</button>'; }).join('')+'</div>';
-    panel.innerHTML='<div class="card">'+sw+'<div class="kal-month-nav">'+
+      MODES.map(function(m){ var c=counts[m[0]]; return '<button type="button" role="radio" aria-checked="'+(m[0]===calMode)+'" onclick="calSetMode(\''+m[0]+'\')">'+m[1]+(c===null?'':'<span class="kal-cnt">'+c+'</span>')+'</button>'; }).join('')+'</div>';
+    var bar='<div class="kal-bar"><div class="kal-legend"><span><i class="kal-dot m"></i> Mein</span>'+(SH.realmId?'<span><i class="kal-dot s"></i> Gemeinsam</span>':'')+'</div>'+
+      '<div class="kal-view" role="group" aria-label="Darstellung"><button type="button" aria-pressed="'+(calView==='dots')+'" onclick="calSetView(\'dots\')">● Punkte</button><button type="button" aria-pressed="'+(calView==='text')+'" onclick="calSetView(\'text\')">Aa Text</button></div></div>';
+    var ag='';
+    if(agenda.length) ag='<div class="kal-agenda"><h4>Termine im '+monthNames[vm]+'</h4>'+agenda.map(function(a){
+      var dt=new Date(vy,vm,a.d);
+      return '<button type="button" class="kal-ag" onclick="openKalDay('+a.d+','+(vm+1)+','+vy+')"><span class="kal-ag-d">'+wd[dt.getDay()]+' '+a.d+'.</span><i class="kal-dot '+(a.s?'s':'m')+'"></i><span class="kal-ag-t">'+esc(a.t)+'</span></button>';
+    }).join('')+'</div>';
+    panel.innerHTML='<div class="card">'+sw+bar+'<div class="kal-month-nav">'+
       '<button class="kal-nav-btn" aria-label="Vorheriger Monat" onclick="kalNavMonth(-1)">◀</button>'+
       '<span class="kal-month-title">'+monthNames[vm]+' '+vy+'</span>'+
       '<button class="kal-nav-btn" aria-label="Nächster Monat" onclick="kalNavMonth(1)">▶</button></div>'+
-      '<div class="kal-month-grid">'+cells+'</div>'+shareCard()+'</div>';
+      '<div class="kal-month-grid">'+cells+'</div>'+ag+shareCard()+'</div>';
   };
 
   function shareCard(){
@@ -4325,19 +4376,19 @@ window.shImport=async function(ev){
 
   /* Tagesansicht */
   window.openKalDay=function(d,m,y){
-    var key=y+'-'+m+'-'+d, showMine=calMode!=='shared', showShared=calMode!=='mine'&&!!SH.realmId, me=cloudUser();
+    var key=y+'-'+m+'-'+d, showMine=calMode!=='shared', showShared=calMode!=='mine'&&!!SH.realmId, me=cloudUser(), canShare=!!SH.realmId;
     var list='';
     if(showMine) mineOn(key).forEach(function(e){
-      list+='<div class="kal-event-chip"><span class="kal-event-chip-text">🙋 '+(e.time?esc(e.time)+' ':'')+esc(e.title)+'</span><button class="kal-event-del" aria-label="Termin löschen" onclick="delKalEvent(\''+key+'\','+e.i+')">🗑️</button></div>';
+      list+='<div class="kal-event-chip"><span class="kal-event-chip-text">🙋 '+(e.time?esc(e.time)+' ':'')+esc(e.title)+'</span>'+(canShare?'<button class="kal-event-del mv" aria-label="In den gemeinsamen Kalender verschieben" title="In Gemeinsam verschieben" onclick="moveKalEvent(\''+key+'\','+e.i+',false)">→ 👥</button>':'')+'<button class="kal-event-del" aria-label="Termin löschen" onclick="delKalEvent(\''+key+'\','+e.i+')">🗑️</button></div>';
     });
     if(showShared) sharedOn(key).forEach(function(e){
       var who=e.by&&String(e.by).toLowerCase()!==me?(e.name||String(e.by).split('@')[0]):'';
-      list+='<div class="kal-event-chip"><span class="kal-event-chip-text">👥 '+(e.time?esc(e.time)+' ':'')+esc(e.title)+(who?'<span class="kal-chip-tag">von '+esc(who)+'</span>':'')+'</span><button class="kal-event-del" aria-label="Gemeinsamen Termin löschen" onclick="delKalEvent(\''+key+'\',\''+esc(e.key)+'\',true)">🗑️</button></div>';
+      list+='<div class="kal-event-chip"><span class="kal-event-chip-text">👥 '+(e.time?esc(e.time)+' ':'')+esc(e.title)+(who?'<span class="kal-chip-tag">von '+esc(who)+'</span>':'')+'</span><button class="kal-event-del mv" aria-label="In meinen Kalender verschieben" title="In Mein verschieben" onclick="moveKalEvent(\''+key+'\',\''+esc(e.key)+'\',true)">→ 🙋</button><button class="kal-event-del" aria-label="Gemeinsamen Termin löschen" onclick="delKalEvent(\''+key+'\',\''+esc(e.key)+'\',true)">🗑️</button></div>';
     });
-    var canShare=!!SH.realmId, defShared=(calMode==='shared'&&canShare);
-    var scope='<div class="kal-scope" role="radiogroup" aria-label="Für wen?">'+
+    var defShared=canShare&&(calMode==='shared'||(calMode==='both'&&lsGet('lifeos-lastscope')==='shared'));
+    var scope='<div class="kal-scope" role="radiogroup" aria-label="Speichern in"><span class="kal-scope-t">Speichern in:</span>'+
       '<label><input type="radio" name="kalScope" value="mine" '+(defShared?'':'checked')+'> 🙋 Nur für mich</label>'+
-      (canShare?'<label><input type="radio" name="kalScope" value="shared" '+(defShared?'checked':'')+'> 👥 Gemeinsam</label>':'')+'</div>';
+      (canShare?'<label><input type="radio" name="kalScope" value="shared" '+(defShared?'checked':'')+'> 👥 Gemeinsam</label>':'<span class="kal-scope-h">(gemeinsamer Kalender nicht eingerichtet)</span>')+'</div>';
     var old=document.querySelector('.kal-day-modal'); if(old) old.remove();
     var modal=document.createElement('div'); modal.className='kal-day-modal'; modal.setAttribute('role','dialog'); modal.setAttribute('aria-modal','true'); modal.setAttribute('aria-label','Termine am '+d+'.'+m+'.'+y);
     modal.innerHTML='<div class="kal-day-modal-inner"><h3>📅 '+d+'.'+m+'.'+y+'</h3>'+
@@ -4353,7 +4404,7 @@ window.shImport=async function(ev){
   window.addKalEvent=async function(key){
     var inp=$('kalEvTitle'); if(!inp||!inp.value.trim()) return;
     var title=inp.value.trim(), time=($('kalEvTime')||{}).value||'';
-    var sc=document.querySelector('input[name="kalScope"]:checked'); var shared=!!(sc&&sc.value==='shared'&&SH.realmId);
+    var sc=document.querySelector('input[name="kalScope"]:checked'); var shared=!!(sc&&sc.value==='shared'&&SH.realmId); lsSet('lifeos-lastscope',shared?'shared':'mine');
     try{
       if(shared){
         await db.calNotes.put({key:PFX+Date.now().toString(36)+Math.random().toString(36).slice(2,7),realmId:SH.realmId,type:'event',date:key,title:title,time:time,by:cloudUser(),name:myName(),ts:Date.now()});
@@ -4367,6 +4418,27 @@ window.shImport=async function(ev){
       }
     }catch(e){ toast('Termin nicht gespeichert: '+((e&&e.message)||e)); return; }
     reopen(key);
+  };
+  window.moveKalEvent=async function(key,ref,fromShared){
+    if(!SH.realmId){ toast('Gemeinsamer Kalender nicht eingerichtet'); return; }
+    try{
+      if(!fromShared){
+        var ev=S.kalender&&S.kalender.events; var e=ev&&ev[key]&&ev[key][ref]; if(!e) return;
+        await db.calNotes.put({key:PFX+Date.now().toString(36)+Math.random().toString(36).slice(2,7),realmId:SH.realmId,type:'event',date:key,title:e.title||String(e),time:e.time||'',by:cloudUser(),name:myName(),ts:Date.now()});
+        ev[key].splice(ref,1); if(!ev[key].length) delete ev[key]; save();
+      } else {
+        var row=SH.events.filter(function(x){ return x.key===ref; })[0]; if(!row) return;
+        if(!S.kalender) S.kalender={};
+        if(!S.kalender.events||Array.isArray(S.kalender.events)) S.kalender.events={};
+        if(!S.kalender.events[key]) S.kalender.events[key]=[];
+        S.kalender.events[key].push({title:row.title,time:row.time||'',ts:Date.now()});
+        await db.calNotes.delete(ref); save();
+      }
+      try{ db.cloud.sync({purpose:'push'}); }catch(e2){}
+      toast(fromShared?'In „Mein“ verschoben':'In „Gemeinsam“ verschoben');
+    }catch(err){ toast('Verschieben fehlgeschlagen: '+((err&&err.message)||err)); return; }
+    var mo=document.querySelector('.kal-day-modal'); if(mo) mo.remove();
+    setTimeout(function(){ reopen(key); },60);
   };
   window.delKalEvent=async function(key,ref,shared){
     try{
