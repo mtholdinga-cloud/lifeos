@@ -67,6 +67,10 @@ jobs:
           done
           mkdir -p $RES/values
           printf '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">#23272B</color>\n</resources>\n' > $RES/values/ic_launcher_background.xml
+      - name: minSdk auf 26 setzen (Health-Plugin)
+        run: |
+          sed -i "s/minSdkVersion = [0-9]*/minSdkVersion = 26/" app/android/variables.gradle
+          grep -n minSdk app/android/variables.gradle
       - name: APK bauen
         run: |
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
