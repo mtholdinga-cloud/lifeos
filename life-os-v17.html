@@ -1447,8 +1447,8 @@ function renderFitness() {
     '</div>';
 
   updateKcal(S.kcal || 0);
-  document.getElementById('kcal-slider').oninput = e => updateKcal(+e.target.value);
-  document.getElementById('kcal-direct').oninput = e => updateKcal(Math.max(0, Math.min(5500, +e.target.value || 0)));
+  document.getElementById('kcal-slider').oninput = e => { S.fitness.kcalDay = _dateISO(); updateKcal(+e.target.value); };
+  document.getElementById('kcal-direct').oninput = e => { S.fitness.kcalDay = _dateISO(); updateKcal(Math.max(0, Math.min(5500, +e.target.value || 0))); };
   renderReps(S.reps.lies, 'reps-lies', 10, 100);
   renderReps(S.reps.unter, 'reps-unter', 10, 100);
   renderReps(S.reps.klim, 'reps-klim', 5, 50);
@@ -3958,10 +3958,10 @@ window.shImport=async function(ev){
     }catch(e){ setMsg('⚠️ Test fehlgeschlagen: '+(e&&e.message||e)); }
   };
   function hcPad(n){ return (n<10?'0':'')+n; }
-  function hcToday(t,iso){
+  function hcToday(t,iso,force){
     if(!S.fitness) S.fitness={};
     var f=S.fitness, hc=f.kcalHc, changed=false, kc=Math.min(5500,t.kcal);
-    var fresh=!f.kcal || (hc && hc.d===iso && hc.v===f.kcal);
+    var fresh=force || !f.kcal || !(f.kcalDay===iso && !(hc && hc.v===f.kcal));
     if(fresh){
       if(f.kcal!==kc){ f.kcal=kc; S.kcal=kc; changed=true; }
       f.kcalHc={d:iso,v:kc};
@@ -4007,7 +4007,7 @@ window.shImport=async function(ev){
         var todayISO=_dateISO(), t=days[todayISO]; delete days[todayISO];
         var fi=shApplyFood(S,days,todayISO);
         if(fi.past) changed=true;
-        if(t){ todayKcal=t.kcal; if(hcToday(t,todayISO)) changed=true; }
+        if(t){ todayKcal=t.kcal; if(hcToday(t,todayISO,!silent)) changed=true; }
       }catch(e){ foodErr=String(e&&e.message||e); }
       if(changed){ save(); try{ if(typeof renderFitness==='function') renderFitness(); }catch(e){} try{ if(typeof renderArchiv==='function') renderArchiv(); }catch(e){} }
       try{ localStorage.setItem('lifeos-hc-ts',String(Date.now())); localStorage.setItem('lifeos-hc-ok','1'); }catch(e){}
