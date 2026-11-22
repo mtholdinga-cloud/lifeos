@@ -1090,7 +1090,7 @@ const STATE_DEFAULTS = {
   mitspieler: [],
   notizen: '',
   ki: { prompts: [] },
-  kalender: { events: [] },
+  kalender: { events: {} },
   kalView: null,
   tagesplan: {
     groups: [
@@ -1130,9 +1130,12 @@ function _deepMerge(defaults, stored) {
 
 async function loadAllState() {
   let stored = {};
+  const _sk = (typeof stateKey === 'function') ? stateKey() : 'main';
+  window._loadedKey = _sk;
+  let _hadRec = false;
   try {
-    const rec = await db.state.get('main');
-    if (rec && rec.data) stored = rec.data;
+    const rec = await db.state.get(_sk);
+    if (rec && rec.data) { stored = rec.data; _hadRec = true; }
   } catch(e) {
     try { const raw = localStorage.getItem('lifeos_v17_state'); if (raw) stored = JSON.parse(raw); } catch(e2) {}
   }
@@ -1151,7 +1154,9 @@ async function loadAllState() {
   if (stored.tagesplan && stored.tagesplan.groups) {
     stored.tagesplan.groups.forEach(g => { if (g.collapsed === undefined) g.collapsed = false; });
   }
-  S = _deepMerge(STATE_DEFAULTS, stored);
+  S = _deepMerge(JSON.parse(JSON.stringify(STATE_DEFAULTS)), stored);
+  window._lifeosStarter = (_sk !== 'main');
+  if (!_hadRec && _sk !== 'main') { S.mtholding = { companies: [] }; }
 }
 
 function _getMorgenTasks() {
@@ -1176,7 +1181,8 @@ async function save() {
     S.meta.schemaVersion = STATE_SCHEMA_VERSION;
     try { autoArchiveCurrentDay(); } catch(e) {}
     try {
-      await db.state.put({ key: 'main', data: S, ts: Date.now() });
+      if (typeof userReady === 'function' && !userReady()) { window._savePending = true; throw new Error('wait-login'); }
+      await db.state.put({ key: (typeof stateKey === 'function' ? stateKey() : 'main'), data: S, ts: Date.now() });
       try { localStorage.setItem('lifeos_v17_state', JSON.stringify(S)); } catch(e3) {}
     } catch(e) {
       try { localStorage.setItem('lifeos_v17_state', JSON.stringify(S)); } catch(e2) {}
@@ -2857,7 +2863,7 @@ function normalizeState(){
   if(!S.finanzen) S.finanzen = {};
   if(!Array.isArray(S.finanzen.ausgaben)) S.finanzen.ausgaben = [];
   if(!Array.isArray(S.finanzen.einnahmen)) S.finanzen.einnahmen = [];
-  if(!Array.isArray(S.finanzen.investments)) S.finanzen.investments = [{name:'🏦 Rücklagen',val:1001.65,goal:25000},{name:'🏠 Bausparvertrag',val:538.27,goal:50000},{name:'📊 Mintos',val:2319.20,goal:null},{name:'📈 Trade Republic',val:38.35,goal:null},{name:'🐦 Robinhood',val:56.54,goal:null},{name:'📱 N26 Invest',val:66.03,goal:null}];
+  if(!Array.isArray(S.finanzen.investments)) S.finanzen.investments = window._lifeosStarter ? [] : [{name:'🏦 Rücklagen',val:1001.65,goal:25000},{name:'🏠 Bausparvertrag',val:538.27,goal:50000},{name:'📊 Mintos',val:2319.20,goal:null},{name:'📈 Trade Republic',val:38.35,goal:null},{name:'🐦 Robinhood',val:56.54,goal:null},{name:'📱 N26 Invest',val:66.03,goal:null}];
   if(!Array.isArray(S.notizen)) S.notizen = [];
   if(!S.tagesplan) S.tagesplan = {};
   if(!Array.isArray(S.tagesplan.groups)) S.tagesplan.groups = [];
@@ -2865,7 +2871,8 @@ function normalizeState(){
   if(!S.mtholding) S.mtholding = {};
   if(!Array.isArray(S.mtholding.companies)) S.mtholding.companies = [];
   if(!S.kalender) S.kalender = {};
-  if(!Array.isArray(S.kalender.events)) S.kalender.events = [];
+  if(!S.kalender.events || typeof S.kalender.events !== 'object') S.kalender.events = {};
+  else if(Array.isArray(S.kalender.events)){ const _o = {}; Object.keys(S.kalender.events).forEach(k => { if(isNaN(+k)) _o[k] = S.kalender.events[k]; }); S.kalender.events = _o; }
   if(!S.fitness) S.fitness = {};
   if(!S.fitness.reps || typeof S.fitness.reps !== 'object') S.fitness.reps = {};
   if(!Array.isArray(S.fitness.reps.lies)) S.fitness.reps.lies = [];
@@ -2874,7 +2881,7 @@ function normalizeState(){
   S.reps = S.fitness.reps;
   if(!Array.isArray(S.fitness.weights)) S.fitness.weights = [];
   if(!S.fitness.ern) S.fitness.ern = {morgens:'',mittags:'',abends:''};
-  if(!Array.isArray(S.fitness.supps)) S.fitness.supps = ['Multivitamin','D3/K2','Magnesium','Omega-3','Whey','Ashwagandha','Shilajit','Ecdysteron','Kreatin'];
+  if(!Array.isArray(S.fitness.supps)) S.fitness.supps = window._lifeosStarter ? [] : ['Multivitamin','D3/K2','Magnesium','Omega-3','Whey','Ashwagandha','Shilajit','Ecdysteron','Kreatin'];
   if(!Array.isArray(S.fitness.suppDone)) S.fitness.suppDone = [];
   // Aliases for V16 compatibility
   S.kcal = S.fitness.kcal || 0;
@@ -3154,7 +3161,7 @@ window.cloudConnect=cloudConnect; window.updateCloudBtn=updateCloudBtn;
   async function adoptCloudState(){
     if(busy) return; busy=true;
     try{
-      var rec=await db.state.get('main'); var d=rec&&rec.data;
+      var rec=await db.state.get(stateKey()); var d=rec&&rec.data;
       var mine=(S&&S.meta&&S.meta.updatedAt)||'';
       if(d&&d.meta&&d.meta.updatedAt&&d.meta.updatedAt>mine){
         await loadAllState();
@@ -3170,7 +3177,7 @@ window.cloudConnect=cloudConnect; window.updateCloudBtn=updateCloudBtn;
   function hook(){
     try{
       if(typeof Dexie!=='undefined'&&Dexie.liveQuery&&typeof db!=='undefined'){
-        Dexie.liveQuery(function(){ return db.state.get('main'); }).subscribe({next:function(){ adoptCloudState(); },error:function(){}});
+        Dexie.liveQuery(function(){ return db.state.get(stateKey()); }).subscribe({next:function(){ adoptCloudState(); },error:function(){}});
         setTimeout(adoptCloudState,4000); return;
       }
     }catch(e){}
@@ -3807,9 +3814,11 @@ window.shImport=async function(ev){
     return out;
   }
   function eventsFor(d){
-    var ev=S.kalender&&S.kalender.events; if(!ev||Array.isArray(ev)) return [];
+    var ev=S.kalender&&S.kalender.events; if(!ev||Array.isArray(ev)) ev={};
     var arr=ev[d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()]||[];
-    return arr.map(function(e){ return String((e&&e.title)||e); });
+    var own=arr.map(function(e){ return ((e&&e.time)?e.time+' ':'')+String((e&&e.title)||e); });
+    var sh=[]; try{ if(window.lifeosSharedFor) sh=window.lifeosSharedFor(d); }catch(e){}
+    return own.concat(sh);
   }
   function bullets(list,max){
     var s=list.slice(0,max).map(function(x){ return '• '+x; }).join('\n');
@@ -4114,6 +4123,342 @@ window.shImport=async function(ev){
     if(opener&&opener.focus){ try{ opener.focus(); }catch(e){} }
   };
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',wire); else wire();
+})();
+
+</script>
+<script>
+// ===== Mehrbenutzer: eigener Stand pro Nutzer, gemeinsamer Kalender, iPhone-Hinweis =====
+(function(){
+  'use strict';
+  var REALM_TAG='lifeos-shared-calendar';
+  var PFX='cev:';                        // Schluessel-Praefix gemeinsamer Termine in der Tabelle calNotes
+  function $(id){ return document.getElementById(id); }
+  function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function cloudUser(){
+    try{ var u=db.cloud&&db.cloud.currentUser&&db.cloud.currentUser.value; return (u&&u.isLoggedIn&&u.email)?String(u.email).toLowerCase():null; }catch(e){ return null; }
+  }
+  function hasCloud(){ try{ return typeof db!=='undefined' && !!db.cloud; }catch(e){ return false; } }
+  function toast(m){ try{ showToast(m); }catch(e){} }
+  function myName(){
+    var e=cloudUser()||'';
+    return (S&&S.profile&&S.profile.name)||String(e).split('@')[0]||'Ich';
+  }
+
+  /* ---------- Eigener Stand pro Nutzer ----------
+     Bestandsnutzer behalten ihre Zeile "main". Alle anderen bekommen "u:<E-Mail>".
+     Erkennung ohne feste Adresse: Gehoert die vorhandene Zeile "main" der angemeldeten Person, bleibt es "main". */
+  window.stateKey=function(){ return window._uKey||lsGet('lifeos-ukey')||'main'; };
+  window.userReady=function(){ if(!hasCloud()) return true; return !!(window._uKey||lsGet('lifeos-ukey')); };
+  async function decideKey(em){
+    if(lsGet('lifeos-ukey-for')===em && lsGet('lifeos-ukey')) return lsGet('lifeos-ukey');
+    var done=false;
+    try{
+      await Promise.race([db.cloud.sync({purpose:'pull',wait:true}).then(function(){ done=true; }),new Promise(function(r){ setTimeout(r,8000); })]);
+    }catch(e){}
+    var row=null; try{ row=await db.state.get('main'); }catch(e){}
+    if(row){ return (row.owner===em||row.realmId===em)?'main':'u:'+em; }
+    if(!done) return null;            // Server nicht erreicht: spaeter nochmal versuchen
+    return 'u:'+em;
+  }
+  var switching=false;
+  async function onUser(u){
+    if(!u||!u.isLoggedIn||!u.email||switching) return;
+    var em=String(u.email).toLowerCase();
+    switching=true;
+    try{
+      var key=await decideKey(em);
+      if(!key){ switching=false; setTimeout(function(){ onUser(db.cloud.currentUser.value); },15000); return; }
+      window._uKey=key; lsSet('lifeos-ukey',key); lsSet('lifeos-ukey-for',em);
+      if(window._loadedKey && window._loadedKey!==key){
+        await loadAllState(); normalizeState();
+        var a=document.querySelector('.nav-item.active'); renderPanel(a?a.dataset.panel:'heute');
+        toast('Angemeldet als '+em);
+      } else if(window._savePending){ window._savePending=false; try{ save(); }catch(e){} }
+      startShared();
+      try{ if(typeof updateCloudBtn==='function') updateCloudBtn(); }catch(e){}
+    }catch(e){ console.warn('Nutzerwechsel',e); }
+    switching=false;
+  }
+  (function hookUser(){
+    var tries=0;
+    function go(){
+      try{
+        if(hasCloud() && db.cloud.currentUser && db.cloud.currentUser.subscribe){
+          db.cloud.currentUser.subscribe(function(u){ onUser(u); });
+          return;
+        }
+      }catch(e){}
+      if(++tries<30) setTimeout(go,500);
+    }
+    go();
+  })();
+
+  /* ---------- Gemeinsamer Kalender ---------- */
+  var SH={started:false,realm:null,realmId:null,events:[],invites:[],members:[]};
+  var calMode=lsGet('lifeos-calmode'); if(calMode!=='mine'&&calMode!=='shared'&&calMode!=='both') calMode='both';
+  function isOwner(){ return !!(SH.realm && SH.realm.owner && SH.realm.owner===cloudUser()); }
+  function kalActive(){ var p=$('panel-kalender'); return !!(p && p.classList.contains('active')); }
+  function refresh(){ try{ if(kalActive()) window.renderKalender(); }catch(e){} }
+  function startShared(){
+    if(SH.started) return;
+    if(!hasCloud() || typeof Dexie==='undefined' || !Dexie.liveQuery) return;
+    SH.started=true;
+    try{
+      Dexie.liveQuery(function(){ return db.realms.toArray(); }).subscribe({
+        next:function(rs){
+          var r=(rs||[]).filter(function(x){ return x.represents===REALM_TAG; })[0]||null;
+          SH.realm=r; SH.realmId=r?r.realmId:null; refresh();
+        }, error:function(){}
+      });
+      Dexie.liveQuery(function(){ return db.calNotes.where('key').startsWith(PFX).toArray(); }).subscribe({
+        next:function(rows){ SH.events=(rows||[]).filter(function(x){ return x && x.type==='event'; }); refresh(); }, error:function(){}
+      });
+      Dexie.liveQuery(function(){ return db.members.toArray(); }).subscribe({
+        next:function(ms){ SH.members=ms||[]; refresh(); }, error:function(){}
+      });
+      if(db.cloud.invites && db.cloud.invites.subscribe){
+        db.cloud.invites.subscribe(function(list){
+          SH.invites=(list||[]).filter(function(i){ return i && i.realm && i.realm.represents===REALM_TAG; }); refresh();
+        });
+      }
+    }catch(e){ console.warn('Gemeinsamer Kalender',e); }
+  }
+
+  function sharedOn(key){
+    if(!SH.realmId) return [];
+    return SH.events.filter(function(e){ return e.realmId===SH.realmId && e.date===key; })
+      .sort(function(a,b){ return String(a.time||'99:99').localeCompare(String(b.time||'99:99')) || (a.ts||0)-(b.ts||0); });
+  }
+  function mineOn(key){
+    var ev=S&&S.kalender&&S.kalender.events; if(!ev||Array.isArray(ev)) return [];
+    return (ev[key]||[]).map(function(e,i){ return {title:(e&&e.title)||String(e),time:(e&&e.time)||'',i:i}; });
+  }
+  window.lifeosSharedFor=function(d){
+    var key=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+    return sharedOn(key).map(function(e){ return '👥 '+(e.time?e.time+' ':'')+e.title; });
+  };
+
+  /* Styles */
+  (function css(){
+    if($('multi-css')) return;
+    var st=document.createElement('style'); st.id='multi-css';
+    st.textContent=
+      '.kal-switch{position:relative;display:grid;grid-template-columns:repeat(3,1fr);background:var(--bg2);border:1px solid var(--bg3);border-radius:12px;padding:4px;margin:0 0 12px}'+
+      '.kal-switch .thumb{position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px)/3);background:var(--acc);border-radius:9px;transition:transform .25s ease}'+
+      '.kal-switch button{position:relative;z-index:1;min-height:44px;background:none;border:none;color:var(--t1);font:inherit;font-weight:700;font-size:.85em;cursor:pointer;border-radius:9px}'+
+      '.kal-switch button[aria-checked="true"]{color:#000}'+
+      '@media (prefers-reduced-motion:reduce){.kal-switch .thumb{transition:none}}'+
+      '.kal-ev{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'+
+      '.kal-ev.s{color:#60a5fa}.kal-ev.m{color:var(--acc)}'+
+      '.kal-chip-tag{font-size:.7em;opacity:.8;margin-left:4px}'+
+      '.kal-share{margin-top:12px;padding:12px;border:1px solid var(--bg3);border-radius:12px;background:var(--bg2);font-size:.85em;line-height:1.5}'+
+      '.kal-share b{color:var(--t0)}'+
+      '.kal-share .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}'+
+      '.kal-share button{min-height:44px;padding:8px 14px;border-radius:10px;border:1px solid var(--bg3);background:var(--bg1);color:var(--t0);font:inherit;font-weight:700;cursor:pointer}'+
+      '.kal-share button.pri{background:var(--acc);color:#000;border:none}'+
+      '.kal-scope{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0;font-size:.85em}'+
+      '.kal-scope label{display:flex;align-items:center;gap:6px;min-height:32px}'+
+      '#ios-hint{position:fixed;left:12px;right:12px;bottom:12px;z-index:3500;background:var(--bg1);border:1px solid var(--acc);border-radius:14px;padding:12px 14px;font-size:.85em;line-height:1.45;display:flex;gap:10px;align-items:flex-start;box-shadow:0 6px 24px rgba(0,0,0,.4)}'+
+      '#ios-hint button{min-height:44px;min-width:44px;background:none;border:none;color:var(--t1);font-size:1.1em;cursor:pointer}';
+    document.head.appendChild(st);
+  })();
+
+  /* Kalender-Ansicht */
+  var MODES=[['mine','Mein'],['shared','Gemeinsam'],['both','Beide']];
+  window.calSetMode=function(m){ calMode=m; lsSet('lifeos-calmode',m); window.renderKalender(); };
+  window.renderKalender=function(){
+    var panel=$('panel-kalender'); if(!panel) return;
+    var now=new Date();
+    var vy=(S.kalView||{}).year||now.getFullYear();
+    var vm=((S.kalView||{}).month!==undefined)?S.kalView.month:now.getMonth();
+    var showMine=calMode!=='shared', showShared=calMode!=='mine'&&!!SH.realmId;
+    var daysInMonth=new Date(vy,vm+1,0).getDate();
+    var firstDay=(new Date(vy,vm,1).getDay()+6)%7;
+    var monthNames=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+    var dayNames=['Mo','Di','Mi','Do','Fr','Sa','So'];
+    var cells=dayNames.map(function(d){ return '<div class="kal-day-header">'+d+'</div>'; }).join('');
+    for(var i=0;i<firstDay;i++) cells+='<div class="kal-day-cell other-month"></div>';
+    for(var d=1; d<=daysInMonth; d++){
+      var key=vy+'-'+(vm+1)+'-'+d;
+      var isToday=(d===now.getDate()&&vm===now.getMonth()&&vy===now.getFullYear());
+      var items=[];
+      if(showMine) mineOn(key).forEach(function(e){ items.push({s:false,t:(e.time?e.time+' ':'')+e.title}); });
+      if(showShared) sharedOn(key).forEach(function(e){ items.push({s:true,t:(e.time?e.time+' ':'')+e.title}); });
+      var prev=items.slice(0,2).map(function(x){ return '<span class="kal-ev '+(x.s?'s':'m')+'">'+(x.s?'👥 ':'')+esc(x.t)+'</span>'; }).join('');
+      if(items.length>2) prev+='<span class="kal-ev">+'+(items.length-2)+'</span>';
+      cells+='<div class="kal-day-cell'+(isToday?' today':'')+(items.length?' has-event':'')+'" role="button" tabindex="0" aria-label="'+d+'. '+monthNames[vm]+(items.length?', '+items.length+' Termine':'')+'" onclick="openKalDay('+d+','+(vm+1)+','+vy+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();openKalDay('+d+','+(vm+1)+','+vy+')}">'+
+        '<div class="kal-day-num">'+d+'</div><div class="kal-day-events">'+prev+'</div></div>';
+    }
+    var idx=0; MODES.forEach(function(m,i){ if(m[0]===calMode) idx=i; });
+    var sw='<div class="kal-switch" role="radiogroup" aria-label="Kalenderansicht"><div class="thumb" style="transform:translateX('+(idx*100)+'%)"></div>'+
+      MODES.map(function(m){ return '<button type="button" role="radio" aria-checked="'+(m[0]===calMode)+'" onclick="calSetMode(\''+m[0]+'\')">'+m[1]+'</button>'; }).join('')+'</div>';
+    panel.innerHTML='<div class="card">'+sw+'<div class="kal-month-nav">'+
+      '<button class="kal-nav-btn" aria-label="Vorheriger Monat" onclick="kalNavMonth(-1)">◀</button>'+
+      '<span class="kal-month-title">'+monthNames[vm]+' '+vy+'</span>'+
+      '<button class="kal-nav-btn" aria-label="Nächster Monat" onclick="kalNavMonth(1)">▶</button></div>'+
+      '<div class="kal-month-grid">'+cells+'</div>'+shareCard()+'</div>';
+  };
+
+  function shareCard(){
+    var me=cloudUser(), h='';
+    if(!hasCloud()) return '';
+    if(!me) return '<div class="kal-share">☁️ Melde dich oben über „☁️ Verbinden“ an, dann kannst du einen gemeinsamen Kalender nutzen.</div>';
+    SH.invites.forEach(function(inv,i){
+      var who=(inv.invitedBy&&(inv.invitedBy.name||inv.invitedBy.email))||'Jemand';
+      h+='<div class="kal-share" role="group" aria-label="Einladung"><b>👥 '+esc(who)+' lädt dich zum gemeinsamen Kalender ein.</b><br>Deine anderen Daten bleiben privat. Geteilt werden nur die Termine, die ihr dort eintragt.'+
+        '<div class="row"><button type="button" class="pri" onclick="calAcceptInvite('+i+')">Annehmen</button><button type="button" onclick="calRejectInvite('+i+')">Ablehnen</button></div></div>';
+    });
+    if(SH.realmId){
+      var others=SH.members.filter(function(m){ return m.realmId===SH.realmId && m.email && String(m.email).toLowerCase()!==me; });
+      h+='<div class="kal-share"><b>👥 Gemeinsamer Kalender</b> – '+(others.length?('mit '+others.map(function(m){ return esc(m.name||m.email)+(m.accepted?'':' (Einladung offen)'); }).join(', ')):'noch niemand eingeladen')+
+        '<br><span style="color:var(--t2)">Angemeldet als '+esc(me)+'. Alles außerhalb des Kalenders bleibt privat.</span>';
+      if(isOwner()) h+='<div class="row"><button type="button" onclick="calInvite()">Person einladen</button>'+(others.length?'<button type="button" onclick="calRemoveMember()">Zugriff entziehen</button>':'')+'</div>';
+      h+='</div>';
+    } else if(!SH.invites.length){
+      if(window.stateKey()==='main') h+='<div class="kal-share"><b>👥 Gemeinsamer Kalender</b><br>Noch nicht eingerichtet. Du lädst eine Person per E-Mail ein; ihr seht dann gemeinsame Termine, alles andere bleibt getrennt.<div class="row"><button type="button" class="pri" onclick="calSetup()">Einrichten und Person einladen</button></div></div>';
+      else h+='<div class="kal-share"><b>👥 Gemeinsamer Kalender</b><br>Noch nichts geteilt. Sobald dich jemand einlädt, erscheint die Einladung hier.<br><span style="color:var(--t2)">Angemeldet als '+esc(me)+'.</span></div>';
+    }
+    return h;
+  }
+
+  /* Tagesansicht */
+  window.openKalDay=function(d,m,y){
+    var key=y+'-'+m+'-'+d, showMine=calMode!=='shared', showShared=calMode!=='mine'&&!!SH.realmId, me=cloudUser();
+    var list='';
+    if(showMine) mineOn(key).forEach(function(e){
+      list+='<div class="kal-event-chip"><span class="kal-event-chip-text">🙋 '+(e.time?esc(e.time)+' ':'')+esc(e.title)+'</span><button class="kal-event-del" aria-label="Termin löschen" onclick="delKalEvent(\''+key+'\','+e.i+')">🗑️</button></div>';
+    });
+    if(showShared) sharedOn(key).forEach(function(e){
+      var who=e.by&&String(e.by).toLowerCase()!==me?(e.name||String(e.by).split('@')[0]):'';
+      list+='<div class="kal-event-chip"><span class="kal-event-chip-text">👥 '+(e.time?esc(e.time)+' ':'')+esc(e.title)+(who?'<span class="kal-chip-tag">von '+esc(who)+'</span>':'')+'</span><button class="kal-event-del" aria-label="Gemeinsamen Termin löschen" onclick="delKalEvent(\''+key+'\',\''+esc(e.key)+'\',true)">🗑️</button></div>';
+    });
+    var canShare=!!SH.realmId, defShared=(calMode==='shared'&&canShare);
+    var scope='<div class="kal-scope" role="radiogroup" aria-label="Für wen?">'+
+      '<label><input type="radio" name="kalScope" value="mine" '+(defShared?'':'checked')+'> 🙋 Nur für mich</label>'+
+      (canShare?'<label><input type="radio" name="kalScope" value="shared" '+(defShared?'checked':'')+'> 👥 Gemeinsam</label>':'')+'</div>';
+    var old=document.querySelector('.kal-day-modal'); if(old) old.remove();
+    var modal=document.createElement('div'); modal.className='kal-day-modal'; modal.setAttribute('role','dialog'); modal.setAttribute('aria-modal','true'); modal.setAttribute('aria-label','Termine am '+d+'.'+m+'.'+y);
+    modal.innerHTML='<div class="kal-day-modal-inner"><h3>📅 '+d+'.'+m+'.'+y+'</h3>'+
+      '<div class="kal-day-modal-events">'+(list||'<em style="color:var(--t2)">Keine Termine</em>')+'</div>'+scope+
+      '<div class="kal-day-add-form"><input id="kalEvTime" type="time" aria-label="Uhrzeit (optional)" style="flex:0 0 110px;min-width:0"><input id="kalEvTitle" placeholder="Titel..." aria-label="Titel" onkeydown="if(event.key===\'Enter\')addKalEvent(\''+key+'\')"><button aria-label="Termin hinzufügen" onclick="addKalEvent(\''+key+'\')">＋</button></div>'+
+      '<button onclick="this.parentElement.parentElement.remove()" style="margin-top:12px;min-height:44px;background:none;border:none;color:var(--t2);cursor:pointer;font-size:.85em;">✕ Schließen</button></div>';
+    modal.addEventListener('click',function(e){ if(e.target===modal) modal.remove(); });
+    modal.addEventListener('keydown',function(e){ if(e.key==='Escape') modal.remove(); });
+    document.body.appendChild(modal);
+    var inp=$('kalEvTitle'); if(inp) inp.focus();
+  };
+  function reopen(key){ var p=key.split('-'); window.openKalDay(parseInt(p[2],10),parseInt(p[1],10),parseInt(p[0],10)); window.renderKalender(); }
+  window.addKalEvent=async function(key){
+    var inp=$('kalEvTitle'); if(!inp||!inp.value.trim()) return;
+    var title=inp.value.trim(), time=($('kalEvTime')||{}).value||'';
+    var sc=document.querySelector('input[name="kalScope"]:checked'); var shared=!!(sc&&sc.value==='shared'&&SH.realmId);
+    try{
+      if(shared){
+        await db.calNotes.put({key:PFX+Date.now().toString(36)+Math.random().toString(36).slice(2,7),realmId:SH.realmId,type:'event',date:key,title:title,time:time,by:cloudUser(),name:myName(),ts:Date.now()});
+        try{ db.cloud.sync({purpose:'push'}); }catch(e){}
+      } else {
+        if(!S.kalender) S.kalender={};
+        if(!S.kalender.events||Array.isArray(S.kalender.events)) S.kalender.events={};
+        if(!S.kalender.events[key]) S.kalender.events[key]=[];
+        S.kalender.events[key].push({title:title,time:time,ts:Date.now()});
+        save();
+      }
+    }catch(e){ toast('Termin nicht gespeichert: '+((e&&e.message)||e)); return; }
+    reopen(key);
+  };
+  window.delKalEvent=async function(key,ref,shared){
+    try{
+      if(shared){ await db.calNotes.delete(ref); try{ db.cloud.sync({purpose:'push'}); }catch(e){} }
+      else {
+        var ev=S.kalender&&S.kalender.events; if(!ev||!ev[key]) return;
+        ev[key].splice(ref,1); if(!ev[key].length) delete ev[key]; save();
+      }
+    }catch(e){ toast('Termin nicht gelöscht: '+((e&&e.message)||e)); return; }
+    var m=document.querySelector('.kal-day-modal'); if(m) m.remove();
+    reopen(key);
+  };
+
+  /* Einrichten / Einladen / Annehmen */
+  function askEmail(title,cb){
+    var old=$('cal-ask'); if(old) old.remove();
+    var m=document.createElement('div'); m.id='cal-ask'; m.className='kal-day-modal'; m.setAttribute('role','dialog'); m.setAttribute('aria-modal','true'); m.setAttribute('aria-label',title);
+    m.innerHTML='<div class="kal-day-modal-inner"><h3>'+esc(title)+'</h3><div style="font-size:.85em;color:var(--t2);margin-bottom:10px">Die Person bekommt eine E-Mail mit einem Annehmen-Link und meldet sich in Life OS mit genau dieser E-Mail an.</div>'+
+      '<div class="kal-day-add-form"><input id="cal-ask-email" type="email" inputmode="email" autocomplete="off" placeholder="E-Mail-Adresse" aria-label="E-Mail-Adresse" style="flex:1 1 100%"><input id="cal-ask-name" placeholder="Name (optional)" aria-label="Name (optional)" style="flex:1 1 100%"></div>'+
+      '<div class="kal-day-add-form" style="margin-top:10px"><button id="cal-ask-ok" style="flex:1;min-height:44px">Einladung senden</button><button id="cal-ask-no" style="flex:1;min-height:44px;background:var(--bg3);color:var(--t0)">Abbrechen</button></div></div>';
+    document.body.appendChild(m);
+    $('cal-ask-email').focus();
+    $('cal-ask-no').onclick=function(){ m.remove(); };
+    $('cal-ask-ok').onclick=function(){
+      var em=$('cal-ask-email').value.trim().toLowerCase(), nm=$('cal-ask-name').value.trim();
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){ toast('Bitte eine gültige E-Mail eingeben'); return; }
+      m.remove(); cb(em,nm);
+    };
+  }
+  async function sendInvite(rid,email,name){
+    var exist=0; try{ exist=await db.members.where('[email+realmId]').equals([email,rid]).count(); }catch(e){}
+    if(exist){ toast('Diese Person ist schon eingeladen'); return; }
+    await db.members.add({realmId:rid,email:email,name:name||email.split('@')[0],invite:true,permissions:{manage:'*'}});
+    try{ db.cloud.sync({purpose:'push'}); }catch(e){}
+    toast('Einladung an '+email+' wird gesendet');
+  }
+  window.calSetup=function(){
+    var me=cloudUser(); if(!me){ toast('Bitte zuerst anmelden'); return; }
+    askEmail('Gemeinsamen Kalender einrichten',async function(email,name){
+      try{
+        if(email===me){ toast('Das ist deine eigene E-Mail'); return; }
+        var rid=SH.realmId;
+        if(!rid){
+          rid=await db.realms.add({name:'Gemeinsamer Kalender',represents:REALM_TAG});
+          await db.members.add({realmId:rid,userId:db.cloud.currentUserId,name:myName(),email:me,accepted:new Date(),permissions:{manage:'*'}});
+        }
+        await sendInvite(rid,email,name);
+        startShared(); refresh();
+      }catch(e){ toast('Einrichten fehlgeschlagen: '+((e&&e.message)||e)); }
+    });
+  };
+  window.calInvite=function(){
+    if(!SH.realmId) return;
+    askEmail('Person zum Kalender einladen',async function(email,name){
+      try{ await sendInvite(SH.realmId,email,name); refresh(); }catch(e){ toast('Einladung fehlgeschlagen: '+((e&&e.message)||e)); }
+    });
+  };
+  window.calRemoveMember=async function(){
+    if(!SH.realmId) return;
+    var me=cloudUser();
+    var others=SH.members.filter(function(m){ return m.realmId===SH.realmId && m.email && String(m.email).toLowerCase()!==me; });
+    if(!others.length) return;
+    var names=others.map(function(m){ return m.name||m.email; }).join(', ');
+    if(!confirm('Zugriff auf den gemeinsamen Kalender entziehen für: '+names+'?\n\nDie gemeinsamen Termine bleiben bei dir. Private Daten sind nie betroffen.')) return;
+    try{
+      for(var i=0;i<others.length;i++) await db.members.delete(others[i].id);
+      try{ db.cloud.sync({purpose:'push'}); }catch(e){}
+      toast('Zugriff entzogen');
+    }catch(e){ toast('Fehler: '+((e&&e.message)||e)); }
+  };
+  window.calAcceptInvite=async function(i){
+    var inv=SH.invites[i]; if(!inv) return;
+    try{ await inv.accept(); toast('Gemeinsamer Kalender verbunden ✓'); startShared(); }catch(e){ toast('Annehmen fehlgeschlagen: '+((e&&e.message)||e)); }
+  };
+  window.calRejectInvite=async function(i){
+    var inv=SH.invites[i]; if(!inv) return;
+    if(!confirm('Einladung ablehnen?')) return;
+    try{ await inv.reject(); toast('Einladung abgelehnt'); }catch(e){ toast('Fehler: '+((e&&e.message)||e)); }
+  };
+
+  /* ---------- iPhone: Hinweis "Zum Home-Bildschirm" ---------- */
+  setTimeout(function(){
+    try{
+      var ua=navigator.userAgent||'', ios=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+      var standalone=window.navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);
+      if(!ios||standalone||lsGet('lifeos-ioshint')==='1'||(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform())) return;
+      var h=document.createElement('div'); h.id='ios-hint'; h.setAttribute('role','region'); h.setAttribute('aria-label','Hinweis zur Installation');
+      h.innerHTML='<div style="flex:1"><b>Als App auf dem iPhone nutzen:</b> in Safari unten auf <b>Teilen</b> tippen (Quadrat mit Pfeil), dann <b>„Zum Home-Bildschirm“</b>. Danach öffnest du Life OS wie eine App.</div><button type="button" aria-label="Hinweis schließen">✕</button>';
+      h.querySelector('button').onclick=function(){ lsSet('lifeos-ioshint','1'); h.remove(); };
+      document.body.appendChild(h);
+    }catch(e){}
+  },4000);
 })();
 
 </script>
