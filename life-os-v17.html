@@ -3773,7 +3773,7 @@ window.shImport=async function(ev){
   var timer=null, busy=false, lastMsg='';
   function $(id){ return document.getElementById(id); }
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
-  function icon(k){ return 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/'+(ICON[k]||ICON.custom)+'.png'; }
+  function icon(k){ return 'https://mtholdinga-cloud.github.io/lifeos/icon-192.png'; }
   function genTopic(){
     var a=new Uint8Array(14), s='';
     try{ crypto.getRandomValues(a); }catch(e){ for(var i=0;i<a.length;i++) a[i]=Math.floor(Math.random()*256); }
@@ -3856,11 +3856,56 @@ window.shImport=async function(ev){
     return r.json();
   }
   function setMsg(t){ lastMsg=t; var el=$('nt-status'); if(el) el.textContent=t; }
+  function isNative(){ try{ return !!(window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform() && Capacitor.Plugins && Capacitor.Plugins.LocalNotifications); }catch(e){ return false; } }
+  function plain(m){ return String(m).replace(/\*\*/g,'').replace(/(^|\s)_([^_]+)_/g,'$1$2'); }
+  function nid(key){ return (hash(key)%2000000000)+1; }
+  function allJobs(n,days){
+    var jobs=[];
+    for(var off=0;off<days;off++){
+      var d=new Date(); d.setDate(d.getDate()+off);
+      var wd=_isoWeekday(d), di=iso(d);
+      if(n.morgen&&n.morgen.on) jobs.push({key:di+'|morgen|'+n.morgen.time,kind:'morgen',d:d,time:n.morgen.time});
+      if(n.abend&&n.abend.on) jobs.push({key:di+'|abend|'+n.abend.time,kind:'abend',d:d,time:n.abend.time});
+      if(n.termine&&n.termine.on) jobs.push({key:di+'|termin|'+n.termine.time,kind:'termin',d:new Date(d.getTime()+864e5),time:n.termine.time,at:d});
+      (n.items||[]).forEach(function(it){ if(it.on && dueOn(it,wd)) jobs.push({key:di+'|item|'+it.id+'|'+it.time,kind:'item',d:d,time:it.time,it:it}); });
+    }
+    return jobs;
+  }
+  async function nativePlan(force){
+    var LN=Capacitor.Plugins.LocalNotifications, n=ntState();
+    if(n.channel!=='app'){ n.channel='app'; save(); }
+    var perm=await LN.checkPermissions();
+    if(perm.display!=='granted' && n.enabled) perm=await LN.requestPermissions();
+    if(perm.display!=='granted' && n.enabled){ setMsg('⚠️ Benachrichtigungen sind für Life OS in den Android-Einstellungen ausgeschaltet. Dort einschalten.'); return; }
+    try{ await LN.createChannel({id:'lifeos',name:'Life OS',description:'Tägliche Hinweise von Life OS',importance:4,visibility:1,vibration:true}); }catch(e){}
+    var now=Date.now(), list=[];
+    if(n.enabled){
+      allJobs(n,14).forEach(function(j){
+        var when=at(j.at||j.d,j.time).getTime();
+        if(when<now+30*1000) return;
+        var msg=build(j.kind,j.d,j.it,n); if(!msg) return;
+        var full=plain(msg.message), first=full.split('\n').filter(function(x){ return x.trim(); })[0]||'';
+        list.push({id:nid(j.key),title:msg.title,body:first,largeBody:full,summaryText:'Life OS',schedule:{at:new Date(when),allowWhileIdle:true},channelId:'lifeos',smallIcon:'ic_stat_lifeos',iconColor:'#4ade80',extra:{k:j.key}});
+      });
+    }
+    var sig=String(hash(JSON.stringify(list.map(function(x){ return [x.id,x.title,x.largeBody,+x.schedule.at]; }))));
+    var old=''; try{ old=localStorage.getItem('lifeos-nt-sig')||''; }catch(e){}
+    if(!force && old===sig){ setMsg('✓ Aktiv. '+list.length+' Nachrichten sind direkt in der App geplant (14 Tage).'); return; }
+    var pend=await LN.getPending();
+    if(pend.notifications && pend.notifications.length) await LN.cancel({notifications:pend.notifications.map(function(x){ return {id:x.id}; })});
+    if(list.length) await LN.schedule({notifications:list});
+    try{ localStorage.setItem('lifeos-nt-sig',sig); }catch(e){}
+    var msg2=n.enabled?'✓ Aktiv. '+list.length+' Nachrichten sind direkt in der App geplant (14 Tage).':'Aus – keine Nachrichten geplant.';
+    try{ var ex=await LN.checkExactNotificationSetting(); if(n.enabled && ex && ex.exact_alarm && ex.exact_alarm!=='granted') msg2+=' Tipp: In den Android-Einstellungen für Life OS „Alarme & Erinnerungen“ erlauben, damit die Uhrzeit auf die Minute stimmt.'; }catch(e){}
+    setMsg(msg2);
+  }
   async function plan(){
     if(busy) return; if(typeof S==='undefined'||!S||!S.tagesplan) return;
     busy=true;
     try{
+      if(isNative()){ await nativePlan(false); return; }
       var n=ntState(), changed=false;
+      if(n.channel==='app'){ setMsg('Die Benachrichtigungen kommen jetzt direkt aus der Life-OS-Android-App (kein ntfy mehr nötig).'); return; }
       if(!n.enabled){ setMsg('Aus – es werden keine neuen Nachrichten geplant (schon geplante der nächsten Stunden kommen noch).'); return; }
       var now=Date.now(), max=now+28*3600*1000, made=0;
       Object.keys(n.sched).forEach(function(k){ if(n.sched[k].ts*1000<now-864e5){ delete n.sched[k]; changed=true; } });
@@ -3891,14 +3936,39 @@ window.shImport=async function(ev){
     }finally{ busy=false; }
   }
   function planSoon(ms){ clearTimeout(timer); timer=setTimeout(plan,ms||1500); }
-  window.ntPlanNow=function(){ ntState(); plan(); };
+  window.ntPlanNow=function(){ ntState(); if(isNative()){ if(busy) return; busy=true; nativePlan(true).catch(function(e){ setMsg('⚠️ '+(e&&e.message||e)); }).then(function(){ busy=false; }); } else plan(); };
   window.ntTest=async function(){
     var n=ntState();
+    if(isNative()){
+      try{ var LN=Capacitor.Plugins.LocalNotifications; var p=await LN.requestPermissions(); await LN.createChannel({id:'lifeos',name:'Life OS',description:'Tägliche Hinweise von Life OS',importance:4,visibility:1,vibration:true}); await LN.schedule({notifications:[{id:1,title:'🔔 Life OS: Test',body:'Es funktioniert! ✅',largeBody:'Es funktioniert! ✅\nSo sehen deine Nachrichten aus.',summaryText:'Life OS',schedule:{at:new Date(Date.now()+3000),allowWhileIdle:true},channelId:'lifeos',smallIcon:'ic_stat_lifeos',iconColor:'#4ade80'}]}); setMsg('Test kommt in 3 Sekunden.'); }catch(e){ setMsg('⚠️ Test fehlgeschlagen: '+(e&&e.message||e)); }
+      return;
+    }
     try{
       await post(n,payload(n,{title:'🔔 Life OS: Test',message:'**Es funktioniert!** ✅\nSo sehen deine Nachrichten aus: Titel, Symbol, Text und ein Knopf zum Öffnen.',priority:3,tags:['white_check_mark'],icon:icon('test')},0));
       setMsg('Test gesendet. Kommt nichts an? In der ntfy-App das Thema unten abonnieren.');
     }catch(e){ setMsg('⚠️ Test fehlgeschlagen: '+(e&&e.message||e)); }
   };
+  window.hcSync=async function(silent){
+    var H=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Health;
+    if(!H){ if(!silent) alert('Health Connect gibt es nur in der Life-OS-Android-App.'); return; }
+    try{
+      await H.requestAuthorization({read:['weight','bodyFat'],write:[]});
+      var res=await H.readSamples({dataType:'weight',startDate:new Date(Date.now()-30*864e5).toISOString(),endDate:new Date().toISOString(),limit:200,ascending:true});
+      var list=((res&&res.samples)||[]).map(function(x){ var v=Math.round(parseFloat(x.value)*10)/10; var d=new Date(x.startDate); return {val:v,date:d.toLocaleDateString('de-DE'),ts:d.toISOString()}; }).filter(function(x){ return x.val>20&&x.val<300; });
+      if(!S.fitness) S.fitness={};
+      var m=shMergeWeights(S.fitness.weights,list);
+      if(m.added){ S.fitness.weights=m.arr; save(); try{ if(typeof renderFitness==='function') renderFitness(); }catch(e){} }
+      try{ localStorage.setItem('lifeos-hc-ts',String(Date.now())); localStorage.setItem('lifeos-hc-ok','1'); }catch(e){}
+      if(typeof showToast==='function') showToast('⌚ Samsung Health: '+m.added+' neue Gewichtswerte ('+list.length+' gefunden)');
+    }catch(e){ if(!silent) alert('Health Connect: '+(e&&e.message||e)+'\n\nPrüfe in Samsung Health: Einstellungen > Health Connect, und erlaube dort Life OS das Lesen von Gewicht.'); }
+  };
+  function hcAuto(){
+    try{ if(!(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Health)) return;
+      if(localStorage.getItem('lifeos-hc-ok')!=='1') return;
+      var last=+(localStorage.getItem('lifeos-hc-ts')||0); if(Date.now()-last<6*3600*1000) return;
+      window.hcSync(true);
+    }catch(e){}
+  }
   // ---------- Oberfläche ----------
   function dayChips(it,i){
     var h='<div class="nt-days" role="group" aria-label="Wochentage">';
@@ -3913,7 +3983,7 @@ window.shImport=async function(ev){
     var h='';
     h+='<label class="st-check"><input type="checkbox" data-f="enabled"'+(n.enabled?' checked':'')+'><span>Push-Benachrichtigungen aktiv</span></label>';
     h+='<div class="nt-status" id="nt-status" role="status" aria-live="polite">'+esc(lastMsg||(n.enabled?'Wird beim Öffnen geplant …':'Aus – schalte oben ein, wenn die ntfy-App eingerichtet ist.'))+'</div>';
-    h+='<h3 class="st-h">1 · Handy einrichten</h3><div class="nt-card"><div class="st-note">Installiere die kostenlose App <b>ntfy</b> (Play Store oder F-Droid), tippe „+“ und gib dieses Thema ein. Das Thema ist wie ein Passwort – gib es nicht weiter.</div><div class="nt-code" id="nt-topic">'+esc(n.topic)+'</div><div class="nt-row"><button type="button" class="nt-small" data-act="copy">📋 Kopieren</button><a class="nt-small" style="text-decoration:none;display:inline-flex;align-items:center" href="ntfy://ntfy.sh/'+encodeURIComponent(n.topic)+'">In ntfy öffnen</a><button type="button" class="nt-small" data-act="newtopic">↻ Neues Thema</button></div></div>';
+    if(isNative()||n.channel==='app'){ h+='<h3 class="st-h">1 · Handy</h3><div class="nt-card"><div class="st-note">✓ Die Nachrichten kommen direkt aus der Life-OS-App (Name „Life OS“, dein App-Symbol). ntfy brauchst du nicht mehr – du kannst das Thema dort abbestellen.</div></div>'; } else h+='<h3 class="st-h">1 · Handy einrichten</h3><div class="nt-card"><div class="st-note">Installiere die kostenlose App <b>ntfy</b> (Play Store oder F-Droid), tippe „+“ und gib dieses Thema ein. Das Thema ist wie ein Passwort – gib es nicht weiter.</div><div class="nt-code" id="nt-topic">'+esc(n.topic)+'</div><div class="nt-row"><button type="button" class="nt-small" data-act="copy">📋 Kopieren</button><a class="nt-small" style="text-decoration:none;display:inline-flex;align-items:center" href="ntfy://ntfy.sh/'+encodeURIComponent(n.topic)+'">In ntfy öffnen</a><button type="button" class="nt-small" data-act="newtopic">↻ Neues Thema</button></div></div>';
     h+='<h3 class="st-h">2 · Tägliche Nachrichten</h3>';
     h+='<div class="nt-card"><div class="nt-row"><label class="st-check nt-grow"><input type="checkbox" data-f="morgen.on"'+(n.morgen.on?' checked':'')+'><span>🌅 Morgen-Briefing</span></label><input class="nt-inp" type="time" data-f="morgen.time" value="'+esc(n.morgen.time)+'" aria-label="Uhrzeit Morgen-Briefing"></div><div class="st-note">Heutige Aufgaben (nach Wochentag) und Termine.</div></div>';
     h+='<div class="nt-card"><div class="nt-row"><label class="st-check nt-grow"><input type="checkbox" data-f="abend.on"'+(n.abend.on?' checked':'')+'><span>🌙 Abend-Rückblick</span></label><input class="nt-inp" type="time" data-f="abend.time" value="'+esc(n.abend.time)+'" aria-label="Uhrzeit Abend-Rückblick"></div><div class="st-note">Erinnert ans Abhaken, Gewicht und Essen; Ausblick auf morgen.</div></div>';
@@ -3937,6 +4007,9 @@ window.shImport=async function(ev){
     sheet.innerHTML='<div id="nt-backdrop" hidden></div><section id="nt" role="dialog" aria-modal="true" aria-labelledby="nt-title" hidden><div class="st-head"><h2 id="nt-title">🔔 Benachrichtigungen</h2><button type="button" class="st-close" id="nt-close" aria-label="Schließen">✕</button></div><div class="st-body" id="nt-body"></div></section>';
     while(sheet.firstChild) document.body.appendChild(sheet.firstChild);
     var btn=$('ntbtn'); if(btn) btn.addEventListener('click',window.openNotify);
+    var shb=$('shbtn'); if(shb&&shb.parentNode){ var hb=document.createElement('button'); hb.type='button'; hb.className='st-btn'; hb.id='hcbtn'; hb.textContent='⌚ Gewicht aus Samsung Health abgleichen (App)'; hb.addEventListener('click',function(){ window.hcSync(false); }); shb.parentNode.insertBefore(hb,shb); }
+    setTimeout(hcAuto,9000);
+    window.addEventListener('focus',function(){ setTimeout(hcAuto,3000); });
     $('nt-close').addEventListener('click',window.closeNotify);
     $('nt-backdrop').addEventListener('click',window.closeNotify);
     var body=$('nt-body');
