@@ -655,6 +655,22 @@ body.hc button,body.hc input,body.hc select,body.hc textarea{border-color:var(--
 body.big-tap button{min-height:40px;min-width:36px;}
 body.big-tap select,body.big-tap textarea,body.big-tap input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=hidden]):not([type=file]){min-height:40px;}
 body.big-tap input[type=checkbox],body.big-tap input[type=radio]{width:22px;height:22px;}
+/* ===== Benachrichtigungen (ntfy) ===== */
+#nt[hidden],#nt-backdrop[hidden]{display:none;}
+#nt-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1090;}
+#nt{position:fixed;z-index:1100;background:var(--bg1);color:var(--t1);border:1px solid var(--bg3);display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.45);top:60px;right:12px;width:420px;max-width:calc(100vw - 24px);max-height:calc(100vh - 80px);border-radius:16px;}
+@media (max-width:700px){#nt{top:auto;bottom:0;left:0;right:0;width:auto;max-width:none;max-height:90vh;border-radius:18px 18px 0 0;}}
+.nt-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.nt-row .nt-grow{flex:1;min-width:120px;}
+.nt-inp{background:var(--bg2);border:1px solid var(--bg3);border-radius:10px;color:var(--t0);padding:8px 10px;font-size:14px;min-height:44px;font-family:inherit;}
+.nt-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;}
+.nt-days{display:flex;gap:4px;flex-wrap:wrap;}
+.nt-days button{min-width:38px;min-height:38px;border-radius:8px;border:1px solid var(--bg3);background:var(--bg1);color:var(--t1);font-size:12px;font-weight:700;cursor:pointer;}
+.nt-days button.on{background:var(--acc);color:#000;border-color:var(--acc);}
+.nt-code{font-family:'DM Mono',monospace;font-size:13px;background:var(--bg0);border:1px dashed var(--bg3);border-radius:10px;padding:10px 12px;word-break:break-all;color:var(--t0);user-select:all;}
+.nt-status{font-size:13px;color:var(--t1);line-height:1.45;}
+.nt-small{min-height:40px;padding:8px 12px;border-radius:10px;border:1px solid var(--bg3);background:var(--bg2);color:var(--t0);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+.nt-small.pri{background:var(--acc);color:#000;border-color:var(--acc);}
 </style>
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
 <div id="dim-overlay" aria-hidden="true"></div>
@@ -668,6 +684,7 @@ body.big-tap input[type=checkbox],body.big-tap input[type=radio]{width:22px;heig
   <div class="topbar-right">
     <button class="save-btn" id="savebtn" onclick="saveData()" aria-label="Speichern">💾<span class="lbl"> Speichern</span></button>
     <button class="export-btn" id="cloudbtn" onclick="cloudConnect()" title="Cloud-Sync: mit E-Mail anmelden, damit PC und Handy synchron bleiben">☁️ Verbinden</button>
+    <button class="export-btn" id="ntbtn" aria-label="Benachrichtigungen" aria-haspopup="dialog" title="Push-Benachrichtigungen">🔔</button>
     <button class="export-btn" id="settingsbtn" aria-label="Einstellungen" aria-haspopup="dialog" aria-expanded="false" title="Einstellungen">⚙️</button>
   </div>
 </div>
@@ -3745,6 +3762,247 @@ window.shImport=async function(ev){
     if(typeof showToast==='function') showToast('✅ Samsung Health: '+merged.added+' Gewichte, '+(fi.today+fi.past)+' Ernährungstage');
   }catch(e){ alert('❌ Import fehlgeschlagen: '+(e&&e.message||e)); }
 };
+
+// ===== Push-Benachrichtigungen via ntfy (Planung im Voraus) =====
+(function(){
+  var APP='https://mtholdinga-cloud.github.io/lifeos/life-os-v17.html';
+  var WD=['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
+  var WDS=['Mo','Di','Mi','Do','Fr','Sa','So'];
+  var MOTTO=['Neue Woche, frischer Start.','Ein Schritt nach dem anderen.','Halbzeit naht – bleib dran.','Fokus auf das, was zählt.','Fast geschafft, dann Wochenende.','Zeit für dich und deine Ziele.','Ruhig starten, klug planen.'];
+  var ICON={morgen:'1f305',abend:'1f319',termin:'1f4c5',gewicht:'2696',essen:'1f37d',supp:'1f48a',test:'1f514',custom:'1f514'};
+  var timer=null, busy=false, lastMsg='';
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function icon(k){ return 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/'+(ICON[k]||ICON.custom)+'.png'; }
+  function genTopic(){
+    var a=new Uint8Array(14), s='';
+    try{ crypto.getRandomValues(a); }catch(e){ for(var i=0;i<a.length;i++) a[i]=Math.floor(Math.random()*256); }
+    for(var j=0;j<a.length;j++) s+=(a[j]%36).toString(36);
+    return 'lifeos-'+s;
+  }
+  function ntState(){
+    if(!S.notify) S.notify={};
+    var n=S.notify;
+    if(!n.server) n.server='https://ntfy.sh';
+    if(!n.topic) n.topic=genTopic();
+    if(typeof n.enabled!=='boolean') n.enabled=false;
+    if(typeof n.detail!=='boolean') n.detail=true;
+    if(!n.morgen) n.morgen={on:true,time:'07:30'};
+    if(!n.abend) n.abend={on:true,time:'20:30'};
+    if(!n.termine) n.termine={on:true,time:'18:00'};
+    if(!Array.isArray(n.items)) n.items=[
+      {id:'gewicht',kind:'gewicht',emoji:'⚖️',title:'Gewicht eintragen',time:'07:45',days:[],on:true},
+      {id:'essen',kind:'essen',emoji:'🍽️',title:'Essen eintragen',time:'13:30',days:[],on:false},
+      {id:'supp',kind:'supp',emoji:'💊',title:'Supplements nehmen',time:'08:00',days:[],on:false}
+    ];
+    if(!n.sched) n.sched={};
+    return n;
+  }
+  function iso(d){ return d.getFullYear()+'-'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1)+'-'+(d.getDate()<10?'0':'')+d.getDate(); }
+  function at(d,hhmm){ var p=String(hhmm||'08:00').split(':'); var x=new Date(d.getFullYear(),d.getMonth(),d.getDate(),+p[0]||0,+p[1]||0,0,0); return x; }
+  function dueOn(t,wd){ return !t || !Array.isArray(t.days) || !t.days.length || t.days.indexOf(wd)>=0; }
+  function tasksFor(d){
+    var wd=_isoWeekday(d), out=[];
+    ((S.tagesplan&&S.tagesplan.groups)||[]).forEach(function(g){ (g.tasks||[]).forEach(function(t){ if(t && t.title && !t.notRelevant && dueOn(t,wd)) out.push(String(t.title)); }); });
+    return out;
+  }
+  function eventsFor(d){
+    var ev=S.kalender&&S.kalender.events; if(!ev||Array.isArray(ev)) return [];
+    var arr=ev[d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()]||[];
+    return arr.map(function(e){ return String((e&&e.title)||e); });
+  }
+  function bullets(list,max){
+    var s=list.slice(0,max).map(function(x){ return '• '+x; }).join('\n');
+    if(list.length>max) s+='\n… und '+(list.length-max)+' weitere';
+    return s;
+  }
+  function build(kind,d,it,n){
+    var wd=_isoWeekday(d), name=WD[wd-1], m;
+    if(kind==='morgen'){
+      var ts=tasksFor(d), ev=eventsFor(d);
+      m='**'+ts.length+' Aufgabe'+(ts.length===1?'':'n')+'** stehen heute an.';
+      if(n.detail && ts.length) m+='\n\n'+bullets(ts,6);
+      if(ev.length) m+='\n\n📅 **Termine heute**\n'+bullets(ev,4);
+      m+='\n\n_'+MOTTO[wd-1]+'_';
+      return {title:'🌅 Guten Morgen – '+name, message:m, priority:3, tags:['sunrise'], icon:icon('morgen')};
+    }
+    if(kind==='abend'){
+      var nx=new Date(d.getTime()+864e5), tn=tasksFor(nx), en=eventsFor(nx);
+      m='**Feierabend-Check** 🌙\nHak ab, was erledigt ist, und trag Gewicht und Essen ein.';
+      m+='\n\nMorgen ('+WD[_isoWeekday(nx)-1]+'): **'+tn.length+' Aufgabe'+(tn.length===1?'':'n')+'**'+(en.length?' · '+en.length+' Termin'+(en.length===1?'':'e'):'');
+      return {title:'🌙 Dein Tag im Rückblick', message:m, priority:2, tags:['crescent_moon'], icon:icon('abend')};
+    }
+    if(kind==='termin'){
+      var e2=eventsFor(d); if(!e2.length) return null;
+      m='**Morgen ('+name+')**\n'+bullets(e2,6);
+      return {title:'📅 Morgen: '+(n.detail?e2[0]:e2.length+' Termin'+(e2.length===1?'':'e')), message:m, priority:4, tags:['calendar'], icon:icon('termin')};
+    }
+    if(kind==='item'){
+      return {title:(it.emoji||'🔔')+' '+(it.title||'Erinnerung'), message:'Tippen, um **Life OS** zu öffnen.', priority:3, tags:['bell'], icon:icon(it.kind||'custom')};
+    }
+    return null;
+  }
+  function hash(s){ var h=0; for(var i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return h; }
+  function payload(n,msg,delayTs){
+    var p={topic:n.topic,title:msg.title,message:msg.message,markdown:true,priority:msg.priority||3,tags:msg.tags||[],icon:msg.icon,click:APP,
+      actions:[{action:'view',label:'Life OS öffnen',url:APP}]};
+    if(delayTs) p.delay=String(delayTs);
+    return p;
+  }
+  async function post(n,p){
+    var r=await fetch(n.server.replace(/\/+$/,'')+'/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});
+    if(!r.ok) throw new Error('ntfy '+r.status);
+    return r.json();
+  }
+  async function cancel(n,id){
+    try{ await fetch(n.server.replace(/\/+$/,'')+'/'+encodeURIComponent(n.topic)+'/'+encodeURIComponent(id),{method:'DELETE'}); }catch(e){}
+  }
+  async function cancelAll(n){
+    var ks=Object.keys(n.sched||{});
+    for(var i=0;i<ks.length;i++){ var v=n.sched[ks[i]]; if(v&&v.id&&v.ts*1000>Date.now()) await cancel(n,v.id); }
+    n.sched={};
+  }
+  function setMsg(t){ lastMsg=t; var el=$('nt-status'); if(el) el.textContent=t; }
+  async function plan(){
+    if(busy) return; if(typeof S==='undefined'||!S||!S.tagesplan) return;
+    busy=true;
+    try{
+      var n=ntState(), changed=false;
+      var sig=JSON.stringify([n.enabled,n.topic,n.server,n.detail,n.morgen,n.abend,n.termine,n.items]);
+      if(n.sig!==sig){ await cancelAll(n); n.sig=sig; changed=true; }
+      if(!n.enabled){ if(changed) save(); setMsg('Aus – es werden keine Nachrichten geplant.'); return; }
+      var now=Date.now(), max=now+70*3600*1000, made=0, kept=0;
+      Object.keys(n.sched).forEach(function(k){ if(n.sched[k].ts*1000<now-864e5){ delete n.sched[k]; changed=true; } });
+      var jobs=[];
+      for(var off=0;off<=3;off++){
+        var d=new Date(); d.setDate(d.getDate()+off);
+        var wd=_isoWeekday(d), di=iso(d);
+        if(n.morgen&&n.morgen.on) jobs.push({key:di+'|morgen',kind:'morgen',d:d,time:n.morgen.time});
+        if(n.abend&&n.abend.on) jobs.push({key:di+'|abend',kind:'abend',d:d,time:n.abend.time});
+        if(n.termine&&n.termine.on) jobs.push({key:di+'|termin',kind:'termin',d:new Date(d.getTime()+864e5),time:n.termine.time,at:d});
+        (n.items||[]).forEach(function(it){ if(it.on && dueOn(it,wd)) jobs.push({key:di+'|item|'+it.id,kind:'item',d:d,time:it.time,it:it}); });
+      }
+      for(var i=0;i<jobs.length;i++){
+        var j=jobs[i], when=at(j.at||j.d,j.time).getTime();
+        if(when<now+90*1000 || when>max) continue;
+        var msg=build(j.kind,j.d,j.it,n); var ex=n.sched[j.key];
+        if(!msg){ if(ex){ await cancel(n,ex.id); delete n.sched[j.key]; changed=true; } continue; }
+        var h=hash(msg.title+'|'+msg.message);
+        if(ex && ex.h===h && ex.ts===Math.floor(when/1000)){ kept++; continue; }
+        if(ex){ await cancel(n,ex.id); }
+        var res=await post(n,payload(n,msg,Math.floor(when/1000)));
+        n.sched[j.key]={id:res.id,ts:Math.floor(when/1000),h:h}; made++; changed=true;
+        await new Promise(function(r){ setTimeout(r,250); });
+      }
+      if(changed) save();
+      var total=Object.keys(n.sched).length;
+      setMsg('✓ Aktiv. '+total+' Nachrichten für die nächsten 3 Tage geplant'+(made?' ('+made+' neu)':'')+'. Öffne Life OS mindestens alle 3 Tage, damit nachgeplant wird.');
+    }catch(e){
+      setMsg('⚠️ Planen nicht möglich: '+(e&&e.message||e)+'. Internet prüfen und später erneut versuchen.');
+    }finally{ busy=false; }
+  }
+  function planSoon(ms){ clearTimeout(timer); timer=setTimeout(plan,ms||1500); }
+  window.ntPlanNow=function(){ var n=ntState(); n.sig=''; plan(); };
+  window.ntTest=async function(){
+    var n=ntState();
+    try{
+      await post(n,payload(n,{title:'🔔 Life OS: Test',message:'**Es funktioniert!** ✅\nSo sehen deine Nachrichten aus: Titel, Symbol, Text und ein Knopf zum Öffnen.',priority:3,tags:['white_check_mark'],icon:icon('test')},0));
+      setMsg('Test gesendet. Kommt nichts an? In der ntfy-App das Thema unten abonnieren.');
+    }catch(e){ setMsg('⚠️ Test fehlgeschlagen: '+(e&&e.message||e)); }
+  };
+  // ---------- Oberfläche ----------
+  function dayChips(it,i){
+    var h='<div class="nt-days" role="group" aria-label="Wochentage">';
+    for(var k=1;k<=7;k++){
+      var on=!it.days||!it.days.length||it.days.indexOf(k)>=0;
+      h+='<button type="button" class="'+(on?'on':'')+'" data-act="day" data-i="'+i+'" data-d="'+k+'" aria-pressed="'+on+'">'+WDS[k-1]+'</button>';
+    }
+    return h+'</div>';
+  }
+  function render(){
+    var n=ntState(), b=$('nt-body'); if(!b) return;
+    var h='';
+    h+='<label class="st-check"><input type="checkbox" data-f="enabled"'+(n.enabled?' checked':'')+'><span>Push-Benachrichtigungen aktiv</span></label>';
+    h+='<div class="nt-status" id="nt-status" role="status" aria-live="polite">'+esc(lastMsg||(n.enabled?'Wird beim Öffnen geplant …':'Aus – schalte oben ein, wenn die ntfy-App eingerichtet ist.'))+'</div>';
+    h+='<h3 class="st-h">1 · Handy einrichten</h3><div class="nt-card"><div class="st-note">Installiere die kostenlose App <b>ntfy</b> (Play Store oder F-Droid), tippe „+“ und gib dieses Thema ein. Das Thema ist wie ein Passwort – gib es nicht weiter.</div><div class="nt-code" id="nt-topic">'+esc(n.topic)+'</div><div class="nt-row"><button type="button" class="nt-small" data-act="copy">📋 Kopieren</button><a class="nt-small" style="text-decoration:none;display:inline-flex;align-items:center" href="ntfy://ntfy.sh/'+encodeURIComponent(n.topic)+'">In ntfy öffnen</a><button type="button" class="nt-small" data-act="newtopic">↻ Neues Thema</button></div></div>';
+    h+='<h3 class="st-h">2 · Tägliche Nachrichten</h3>';
+    h+='<div class="nt-card"><div class="nt-row"><label class="st-check nt-grow"><input type="checkbox" data-f="morgen.on"'+(n.morgen.on?' checked':'')+'><span>🌅 Morgen-Briefing</span></label><input class="nt-inp" type="time" data-f="morgen.time" value="'+esc(n.morgen.time)+'" aria-label="Uhrzeit Morgen-Briefing"></div><div class="st-note">Heutige Aufgaben (nach Wochentag) und Termine.</div></div>';
+    h+='<div class="nt-card"><div class="nt-row"><label class="st-check nt-grow"><input type="checkbox" data-f="abend.on"'+(n.abend.on?' checked':'')+'><span>🌙 Abend-Rückblick</span></label><input class="nt-inp" type="time" data-f="abend.time" value="'+esc(n.abend.time)+'" aria-label="Uhrzeit Abend-Rückblick"></div><div class="st-note">Erinnert ans Abhaken, Gewicht und Essen; Ausblick auf morgen.</div></div>';
+    h+='<div class="nt-card"><div class="nt-row"><label class="st-check nt-grow"><input type="checkbox" data-f="termine.on"'+(n.termine.on?' checked':'')+'><span>📅 Termine am Vorabend</span></label><input class="nt-inp" type="time" data-f="termine.time" value="'+esc(n.termine.time)+'" aria-label="Uhrzeit Termin-Erinnerung"></div><div class="st-note">Nur wenn am Folgetag ein Kalender-Termin steht.</div></div>';
+    h+='<h3 class="st-h">3 · Eigene Erinnerungen</h3>';
+    (n.items||[]).forEach(function(it,i){
+      h+='<div class="nt-card"><div class="nt-row"><input type="checkbox" data-i="'+i+'" data-f="item.on"'+(it.on?' checked':'')+' aria-label="Erinnerung aktiv" style="width:22px;height:22px"><input class="nt-inp nt-grow" type="text" data-i="'+i+'" data-f="item.title" value="'+esc(it.title)+'" aria-label="Text der Erinnerung" maxlength="60"><input class="nt-inp" type="time" data-i="'+i+'" data-f="item.time" value="'+esc(it.time)+'" aria-label="Uhrzeit"></div>'+dayChips(it,i)+'<div class="nt-row"><input class="nt-inp" style="width:64px;text-align:center" type="text" data-i="'+i+'" data-f="item.emoji" value="'+esc(it.emoji||'')+'" aria-label="Symbol (Emoji)" maxlength="4"><button type="button" class="nt-small" data-act="del" data-i="'+i+'">🗑 Entfernen</button></div></div>';
+    });
+    h+='<button type="button" class="st-btn" data-act="add">+ Erinnerung hinzufügen</button>';
+    h+='<label class="st-check"><input type="checkbox" data-f="detail"'+(n.detail?' checked':'')+'><span>Aufgaben-/Termin-Titel in Nachrichten zeigen</span></label>';
+    h+='<div class="st-note">Datenschutz: Nachrichten laufen über den Dienst ntfy.sh. Ohne Titel stehen nur Anzahlen drin.</div>';
+    h+='<div class="nt-row"><button type="button" class="nt-small pri" data-act="test">📨 Test senden</button><button type="button" class="nt-small" data-act="replan">🔄 Jetzt neu planen</button></div>';
+    b.innerHTML=h;
+  }
+  function setPath(n,f,v){
+    var p=f.split('.'); if(p.length===1){ n[p[0]]=v; } else { n[p[0]][p[1]]=v; }
+  }
+  function changed(){ save(); planSoon(1500); }
+  function wire(){
+    var sheet=document.createElement('div');
+    sheet.innerHTML='<div id="nt-backdrop" hidden></div><section id="nt" role="dialog" aria-modal="true" aria-labelledby="nt-title" hidden><div class="st-head"><h2 id="nt-title">🔔 Benachrichtigungen</h2><button type="button" class="st-close" id="nt-close" aria-label="Schließen">✕</button></div><div class="st-body" id="nt-body"></div></section>';
+    while(sheet.firstChild) document.body.appendChild(sheet.firstChild);
+    var btn=$('ntbtn'); if(btn) btn.addEventListener('click',window.openNotify);
+    $('nt-close').addEventListener('click',window.closeNotify);
+    $('nt-backdrop').addEventListener('click',window.closeNotify);
+    var body=$('nt-body');
+    body.addEventListener('change',function(e){
+      var t=e.target, f=t.getAttribute('data-f'); if(!f) return;
+      var n=ntState(), v=(t.type==='checkbox')?t.checked:t.value;
+      if(f.indexOf('item.')===0){ var it=n.items[+t.getAttribute('data-i')]; if(it) it[f.slice(5)]=v; }
+      else setPath(n,f,v);
+      changed(); if(f==='enabled'){ setMsg(v?'Wird geplant …':'Wird abgeschaltet …'); }
+    });
+    body.addEventListener('click',function(e){
+      var t=e.target.closest('[data-act]'); if(!t) return;
+      var a=t.getAttribute('data-act'), n=ntState(), i=+t.getAttribute('data-i');
+      if(a==='day'){
+        var it=n.items[i], d=+t.getAttribute('data-d'); if(!it.days||!it.days.length) it.days=[1,2,3,4,5,6,7];
+        var k=it.days.indexOf(d); if(k>=0) it.days.splice(k,1); else it.days.push(d);
+        if(!it.days.length||it.days.length===7) it.days=[];
+        render(); changed();
+      } else if(a==='add'){ n.items.push({id:'c'+Date.now(),kind:'custom',emoji:'🔔',title:'Neue Erinnerung',time:'12:00',days:[],on:true}); render(); changed(); }
+      else if(a==='del'){ n.items.splice(i,1); render(); changed(); }
+      else if(a==='copy'){ try{ navigator.clipboard.writeText(n.topic); setMsg('Thema kopiert.'); }catch(er){ setMsg('Kopieren nicht möglich – Thema markieren und manuell kopieren.'); } }
+      else if(a==='newtopic'){ if(confirm('Neues Thema erzeugen? Du musst es danach in der ntfy-App neu abonnieren.')){ cancelAll(n).then(function(){ n.topic=genTopic(); n.sig=''; save(); render(); planSoon(500); }); } }
+      else if(a==='test'){ window.ntTest(); }
+      else if(a==='replan'){ window.ntPlanNow(); setMsg('Wird neu geplant …'); }
+    });
+    document.addEventListener('keydown',function(e){
+      var s=$('nt'); if(!s||s.hidden) return;
+      if(e.key==='Escape'){ e.preventDefault(); window.closeNotify(); return; }
+      if(e.key==='Tab'){
+        var f=[].slice.call(s.querySelectorAll('button,input,a[href]')).filter(function(x){ return x.offsetParent!==null&&!x.disabled; });
+        if(!f.length) return; var first=f[0], last=f[f.length-1];
+        if(e.shiftKey&&document.activeElement===first){ e.preventDefault(); last.focus(); }
+        else if(!e.shiftKey&&document.activeElement===last){ e.preventDefault(); first.focus(); }
+        else if(!s.contains(document.activeElement)){ e.preventDefault(); first.focus(); }
+      }
+    });
+    window.addEventListener('focus',function(){ planSoon(2500); });
+    setInterval(function(){ planSoon(500); },30*60*1000);
+    setTimeout(function(){ plan(); },6000);
+  }
+  var opener=null;
+  window.openNotify=function(){
+    var s=$('nt'); if(!s) return;
+    try{ ntState(); }catch(e){ return; }
+    render();
+    var z=parseFloat(document.body.style.zoom)||100; s.style.zoom=String(100/z);
+    opener=document.activeElement; s.hidden=false; $('nt-backdrop').hidden=false;
+    setTimeout(function(){ $('nt-close').focus(); },0);
+  };
+  window.closeNotify=function(){
+    var s=$('nt'); if(!s) return; s.hidden=true; $('nt-backdrop').hidden=true;
+    if(opener&&opener.focus){ try{ opener.focus(); }catch(e){} }
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',wire); else wire();
+})();
 
 </script>
       </html>
