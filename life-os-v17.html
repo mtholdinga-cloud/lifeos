@@ -3843,10 +3843,11 @@ window.shImport=async function(ev){
     return null;
   }
   function hash(s){ var h=0; for(var i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return h; }
-  function payload(n,msg,delayTs){
+  function payload(n,msg,delayTs,seq){
     var p={topic:n.topic,title:msg.title,message:msg.message,markdown:true,priority:msg.priority||3,tags:msg.tags||[],icon:msg.icon,click:APP,
       actions:[{action:'view',label:'Life OS öffnen',url:APP}]};
     if(delayTs) p.delay=String(delayTs);
+    if(seq) p.sequence_id=String(seq).replace(/[^A-Za-z0-9_-]/g,'-').slice(0,60);
     return p;
   }
   async function post(n,p){
@@ -3854,55 +3855,43 @@ window.shImport=async function(ev){
     if(!r.ok) throw new Error('ntfy '+r.status);
     return r.json();
   }
-  async function cancel(n,id){
-    try{ await fetch(n.server.replace(/\/+$/,'')+'/'+encodeURIComponent(n.topic)+'/'+encodeURIComponent(id),{method:'DELETE'}); }catch(e){}
-  }
-  async function cancelAll(n){
-    var ks=Object.keys(n.sched||{});
-    for(var i=0;i<ks.length;i++){ var v=n.sched[ks[i]]; if(v&&v.id&&v.ts*1000>Date.now()) await cancel(n,v.id); }
-    n.sched={};
-  }
   function setMsg(t){ lastMsg=t; var el=$('nt-status'); if(el) el.textContent=t; }
   async function plan(){
     if(busy) return; if(typeof S==='undefined'||!S||!S.tagesplan) return;
     busy=true;
     try{
       var n=ntState(), changed=false;
-      var sig=JSON.stringify([n.enabled,n.topic,n.server,n.detail,n.morgen,n.abend,n.termine,n.items]);
-      if(n.sig!==sig){ await cancelAll(n); n.sig=sig; changed=true; }
-      if(!n.enabled){ if(changed) save(); setMsg('Aus – es werden keine Nachrichten geplant.'); return; }
-      var now=Date.now(), max=now+70*3600*1000, made=0, kept=0;
+      if(!n.enabled){ setMsg('Aus – es werden keine neuen Nachrichten geplant (schon geplante der nächsten Stunden kommen noch).'); return; }
+      var now=Date.now(), max=now+28*3600*1000, made=0;
       Object.keys(n.sched).forEach(function(k){ if(n.sched[k].ts*1000<now-864e5){ delete n.sched[k]; changed=true; } });
       var jobs=[];
-      for(var off=0;off<=3;off++){
+      for(var off=0;off<=2;off++){
         var d=new Date(); d.setDate(d.getDate()+off);
         var wd=_isoWeekday(d), di=iso(d);
-        if(n.morgen&&n.morgen.on) jobs.push({key:di+'|morgen',kind:'morgen',d:d,time:n.morgen.time});
-        if(n.abend&&n.abend.on) jobs.push({key:di+'|abend',kind:'abend',d:d,time:n.abend.time});
-        if(n.termine&&n.termine.on) jobs.push({key:di+'|termin',kind:'termin',d:new Date(d.getTime()+864e5),time:n.termine.time,at:d});
-        (n.items||[]).forEach(function(it){ if(it.on && dueOn(it,wd)) jobs.push({key:di+'|item|'+it.id,kind:'item',d:d,time:it.time,it:it}); });
+        if(n.morgen&&n.morgen.on) jobs.push({key:di+'|morgen|'+n.morgen.time,kind:'morgen',d:d,time:n.morgen.time});
+        if(n.abend&&n.abend.on) jobs.push({key:di+'|abend|'+n.abend.time,kind:'abend',d:d,time:n.abend.time});
+        if(n.termine&&n.termine.on) jobs.push({key:di+'|termin|'+n.termine.time,kind:'termin',d:new Date(d.getTime()+864e5),time:n.termine.time,at:d});
+        (n.items||[]).forEach(function(it){ if(it.on && dueOn(it,wd)) jobs.push({key:di+'|item|'+it.id+'|'+it.time,kind:'item',d:d,time:it.time,it:it}); });
       }
       for(var i=0;i<jobs.length;i++){
         var j=jobs[i], when=at(j.at||j.d,j.time).getTime();
         if(when<now+90*1000 || when>max) continue;
-        var msg=build(j.kind,j.d,j.it,n); var ex=n.sched[j.key];
-        if(!msg){ if(ex){ await cancel(n,ex.id); delete n.sched[j.key]; changed=true; } continue; }
-        var h=hash(msg.title+'|'+msg.message);
-        if(ex && ex.h===h && ex.ts===Math.floor(when/1000)){ kept++; continue; }
-        if(ex){ await cancel(n,ex.id); }
-        var res=await post(n,payload(n,msg,Math.floor(when/1000)));
-        n.sched[j.key]={id:res.id,ts:Math.floor(when/1000),h:h}; made++; changed=true;
+        if(n.sched[j.key]) continue;
+        var msg=build(j.kind,j.d,j.it,n);
+        if(!msg) continue;
+        var res=await post(n,payload(n,msg,Math.floor(when/1000),j.key));
+        n.sched[j.key]={id:res.id,ts:Math.floor(when/1000)}; made++; changed=true;
         await new Promise(function(r){ setTimeout(r,250); });
       }
       if(changed) save();
-      var total=Object.keys(n.sched).length;
-      setMsg('✓ Aktiv. '+total+' Nachrichten für die nächsten 3 Tage geplant'+(made?' ('+made+' neu)':'')+'. Öffne Life OS mindestens alle 3 Tage, damit nachgeplant wird.');
+      var pend=Object.keys(n.sched).filter(function(k){ return n.sched[k].ts*1000>now; }).length;
+      setMsg('✓ Aktiv. '+pend+' Nachricht'+(pend===1?'':'en')+' für die nächsten ~28 Stunden geplant'+(made?' ('+made+' neu)':'')+'. Öffne Life OS täglich, damit nachgeplant wird.');
     }catch(e){
       setMsg('⚠️ Planen nicht möglich: '+(e&&e.message||e)+'. Internet prüfen und später erneut versuchen.');
     }finally{ busy=false; }
   }
   function planSoon(ms){ clearTimeout(timer); timer=setTimeout(plan,ms||1500); }
-  window.ntPlanNow=function(){ var n=ntState(); n.sig=''; plan(); };
+  window.ntPlanNow=function(){ ntState(); plan(); };
   window.ntTest=async function(){
     var n=ntState();
     try{
@@ -3935,7 +3924,7 @@ window.shImport=async function(ev){
     });
     h+='<button type="button" class="st-btn" data-act="add">+ Erinnerung hinzufügen</button>';
     h+='<label class="st-check"><input type="checkbox" data-f="detail"'+(n.detail?' checked':'')+'><span>Aufgaben-/Termin-Titel in Nachrichten zeigen</span></label>';
-    h+='<div class="st-note">Datenschutz: Nachrichten laufen über den Dienst ntfy.sh. Ohne Titel stehen nur Anzahlen drin.</div>';
+    h+='<div class="st-note">Wichtig: Nachrichten werden bis ca. 28 Stunden im Voraus bei ntfy.sh eingeplant und lassen sich dort nicht mehr zurückholen. Änderungen an Zeiten oder Texten gelten daher ab der nächsten Planung; schon geplante Nachrichten kommen noch einmal wie vorher. Datenschutz: Die Texte laufen über ntfy.sh. Ohne Titel stehen nur Anzahlen drin.</div>';
     h+='<div class="nt-row"><button type="button" class="nt-small pri" data-act="test">📨 Test senden</button><button type="button" class="nt-small" data-act="replan">🔄 Jetzt neu planen</button></div>';
     b.innerHTML=h;
   }
@@ -3969,7 +3958,7 @@ window.shImport=async function(ev){
       } else if(a==='add'){ n.items.push({id:'c'+Date.now(),kind:'custom',emoji:'🔔',title:'Neue Erinnerung',time:'12:00',days:[],on:true}); render(); changed(); }
       else if(a==='del'){ n.items.splice(i,1); render(); changed(); }
       else if(a==='copy'){ try{ navigator.clipboard.writeText(n.topic); setMsg('Thema kopiert.'); }catch(er){ setMsg('Kopieren nicht möglich – Thema markieren und manuell kopieren.'); } }
-      else if(a==='newtopic'){ if(confirm('Neues Thema erzeugen? Du musst es danach in der ntfy-App neu abonnieren.')){ cancelAll(n).then(function(){ n.topic=genTopic(); n.sig=''; save(); render(); planSoon(500); }); } }
+      else if(a==='newtopic'){ if(confirm('Neues Thema erzeugen? Du musst es danach in der ntfy-App neu abonnieren.')){ n.topic=genTopic(); save(); render(); planSoon(500); } }
       else if(a==='test'){ window.ntTest(); }
       else if(a==='replan'){ window.ntPlanNow(); setMsg('Wird neu geplant …'); }
     });
