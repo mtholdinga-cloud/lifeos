@@ -1404,7 +1404,7 @@ function renderFitness() {
     '</div>' +
     (lastW ? '<div style=\"margin-bottom:6px;\"><span style=\"font-size:1.2em;font-weight:800;color:var(--acc);\">'+lastW.val+' kg</span> <span style=\"font-size:.75em;color:var(--t2);\">('+lastW.date+')</span></div>' : '') +
     (weights.length > 1 ? '<div class=\"weight-chart\">'+wChart+'</div>' : '') +
-    '<div style=\"display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;\"><button onclick=\"document.getElementById(\'sh-file\').click()\" style=\"padding:10px 14px;min-height:44px;border-radius:10px;background:var(--bg2);color:var(--t0);border:1px solid var(--bg3);cursor:pointer;font-size:.85em;font-weight:700;\">📲 Samsung Health importieren</button><button onclick=\"shHelp()\" style=\"padding:10px 14px;min-height:44px;border-radius:10px;background:transparent;color:var(--t1);border:1px solid var(--bg3);cursor:pointer;font-size:.85em;\">So geht\'s</button></div>' +
+    '<div style=\"display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;\"><button id=\"hcfit\" onclick=\"window.hcSync&&window.hcSync(false)\" style=\"padding:10px 14px;min-height:44px;border-radius:10px;background:var(--acc);color:#000;border:none;cursor:pointer;font-size:.85em;font-weight:800;\">⌚ Aus Samsung Health holen</button><button onclick=\"document.getElementById(\'sh-file\').click()\" style=\"padding:10px 14px;min-height:44px;border-radius:10px;background:var(--bg2);color:var(--t0);border:1px solid var(--bg3);cursor:pointer;font-size:.85em;font-weight:700;\">📲 Samsung Health importieren</button><button onclick=\"shHelp()\" style=\"padding:10px 14px;min-height:44px;border-radius:10px;background:transparent;color:var(--t1);border:1px solid var(--bg3);cursor:pointer;font-size:.85em;\">So geht\'s</button></div>' +
     '</div>' +
     '<div class=\"card\"><div class=\"card-title\">🚬 Letzte Zigarette</div>' +
     '<div style=\"font-size:1.3em;font-weight:800;color:var(--acc);margin-bottom:8px;\">'+ziggiMsg+'</div>' +
@@ -3948,24 +3948,72 @@ window.shImport=async function(ev){
       setMsg('Test gesendet. Kommt nichts an? In der ntfy-App das Thema unten abonnieren.');
     }catch(e){ setMsg('⚠️ Test fehlgeschlagen: '+(e&&e.message||e)); }
   };
+  function hcPad(n){ return (n<10?'0':'')+n; }
+  function hcToday(t,iso){
+    if(!S.fitness) S.fitness={};
+    var f=S.fitness, hc=f.kcalHc, changed=false, kc=Math.min(5500,t.kcal);
+    var fresh=!f.kcal || (hc && hc.d===iso && hc.v===f.kcal);
+    if(fresh){
+      if(f.kcal!==kc){ f.kcal=kc; S.kcal=kc; changed=true; }
+      f.kcalHc={d:iso,v:kc};
+    }
+    if(!f.ern) f.ern={morgens:'',mittags:'',abends:''};
+    ['morgens','mittags','abends'].forEach(function(k){
+      var cur=f.ern[k]||'';
+      if(!cur || cur.indexOf('⌚')===0){
+        var txt=t.meals[k].length?'⌚ '+t.meals[k].join(', '):'';
+        if(txt!==cur){ f.ern[k]=txt; changed=true; }
+      }
+    });
+    S.ern=f.ern;
+    return changed;
+  }
   window.hcSync=async function(silent){
     var H=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Health;
-    if(!H){ if(!silent) alert('Health Connect gibt es nur in der Life-OS-Android-App.'); return; }
+    if(!H){ if(!silent) alert('Samsung Health lässt sich nur in der Life-OS-Android-App abgleichen.\n\nAm PC: Samsung Health exportieren und über „📲 Samsung Health importieren“ einlesen.'); return; }
     try{
-      await H.requestAuthorization({read:['weight','bodyFat'],write:[]});
-      var res=await H.readSamples({dataType:'weight',startDate:new Date(Date.now()-30*864e5).toISOString(),endDate:new Date().toISOString(),limit:200,ascending:true});
-      var list=((res&&res.samples)||[]).map(function(x){ var v=Math.round(parseFloat(x.value)*10)/10; var d=new Date(x.startDate); return {val:v,date:d.toLocaleDateString('de-DE'),ts:d.toISOString()}; }).filter(function(x){ return x.val>20&&x.val<300; });
+      await H.requestAuthorization({read:['weight','bodyFat','dietaryEnergyConsumed','dietaryProtein'],write:[]});
+      var from=new Date(Date.now()-30*864e5).toISOString(), to=new Date().toISOString();
+      var rd=function(t){ return H.readSamples({dataType:t,startDate:from,endDate:to,limit:500,ascending:true}).then(function(r){ return (r&&r.samples)||[]; }); };
+      var ws=await rd('weight');
+      var list=ws.map(function(x){ var v=Math.round(parseFloat(x.value)*10)/10; var d=new Date(x.startDate); return {val:v,date:d.toLocaleDateString('de-DE'),ts:d.toISOString()}; }).filter(function(x){ return x.val>20&&x.val<300; });
       if(!S.fitness) S.fitness={};
-      var m=shMergeWeights(S.fitness.weights,list);
-      if(m.added){ S.fitness.weights=m.arr; save(); try{ if(typeof renderFitness==='function') renderFitness(); }catch(e){} }
+      var m=shMergeWeights(S.fitness.weights,list), changed=false;
+      if(m.added){ S.fitness.weights=m.arr; changed=true; }
+      var foodN=0, todayKcal=null, foodErr='';
+      try{
+        var es=await rd('dietaryEnergyConsumed'), ps=[];
+        try{ ps=await rd('dietaryProtein'); }catch(e){}
+        var pm={}; ps.forEach(function(x){ pm[x.startDate]=(pm[x.startDate]||0)+parseFloat(x.value); });
+        var days={};
+        es.forEach(function(x){
+          var kc=Math.round(parseFloat(x.value)); if(!(kc>0)) return;
+          var d=new Date(x.startDate), iso=_dateISO(d), hr=d.getHours();
+          var slot=hr<11?'morgens':(hr<16?'mittags':'abends');
+          var dd=days[iso]||(days[iso]={kcal:0,meals:{morgens:[],mittags:[],abends:[]}});
+          dd.kcal+=kc; var p=pm[x.startDate];
+          dd.meals[slot].push(kc+' kcal'+(p>0?' · '+Math.round(p)+' g Eiweiß':'')+' ('+hcPad(hr)+':'+hcPad(d.getMinutes())+')');
+          foodN++;
+        });
+        var todayISO=_dateISO(), t=days[todayISO]; delete days[todayISO];
+        var fi=shApplyFood(S,days,todayISO);
+        if(fi.past) changed=true;
+        if(t){ todayKcal=t.kcal; if(hcToday(t,todayISO)) changed=true; }
+      }catch(e){ foodErr=String(e&&e.message||e); }
+      if(changed){ save(); try{ if(typeof renderFitness==='function') renderFitness(); }catch(e){} try{ if(typeof renderArchiv==='function') renderArchiv(); }catch(e){} }
       try{ localStorage.setItem('lifeos-hc-ts',String(Date.now())); localStorage.setItem('lifeos-hc-ok','1'); }catch(e){}
-      if(typeof showToast==='function') showToast('⌚ Samsung Health: '+m.added+' neue Gewichtswerte ('+list.length+' gefunden)');
-    }catch(e){ if(!silent) alert('Health Connect: '+(e&&e.message||e)+'\n\nPrüfe in Samsung Health: Einstellungen > Health Connect, und erlaube dort Life OS das Lesen von Gewicht.'); }
+      if(typeof showToast==='function'){
+        var parts=['Gewicht +'+m.added];
+        if(foodErr) parts.push('Essen: nicht erlaubt/lesbar'); else parts.push(todayKcal!=null?'heute '+todayKcal+' kcal':'noch kein Essen heute');
+        if(!silent || changed) showToast('⌚ Samsung Health: '+parts.join(' · '));
+      }
+      if(!silent && foodErr) alert('Essen konnte nicht gelesen werden: '+foodErr+'\n\nIn Samsung Health: Einstellungen > Health Connect > Daten und Zugriff > Life OS: „Ernährung“ lesen erlauben. Außerdem muss Samsung Health Ernährung an Health Connect weitergeben.');
+    }catch(e){ if(!silent) alert('Health Connect: '+(e&&e.message||e)+'\n\nPrüfe in Samsung Health: Einstellungen > Health Connect, und erlaube dort Life OS das Lesen von Gewicht und Ernährung.'); }
   };
   function hcAuto(){
     try{ if(!(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Health)) return;
       if(localStorage.getItem('lifeos-hc-ok')!=='1') return;
-      var last=+(localStorage.getItem('lifeos-hc-ts')||0); if(Date.now()-last<6*3600*1000) return;
+      var last=+(localStorage.getItem('lifeos-hc-ts')||0); if(Date.now()-last<10*60*1000) return;
       window.hcSync(true);
     }catch(e){}
   }
@@ -4007,9 +4055,11 @@ window.shImport=async function(ev){
     sheet.innerHTML='<div id="nt-backdrop" hidden></div><section id="nt" role="dialog" aria-modal="true" aria-labelledby="nt-title" hidden><div class="st-head"><h2 id="nt-title">🔔 Benachrichtigungen</h2><button type="button" class="st-close" id="nt-close" aria-label="Schließen">✕</button></div><div class="st-body" id="nt-body"></div></section>';
     while(sheet.firstChild) document.body.appendChild(sheet.firstChild);
     var btn=$('ntbtn'); if(btn) btn.addEventListener('click',window.openNotify);
-    var shb=$('shbtn'); if(shb&&shb.parentNode){ var hb=document.createElement('button'); hb.type='button'; hb.className='st-btn'; hb.id='hcbtn'; hb.textContent='⌚ Gewicht aus Samsung Health abgleichen (App)'; hb.addEventListener('click',function(){ window.hcSync(false); }); shb.parentNode.insertBefore(hb,shb); }
+    var shb=$('shbtn'); if(shb&&shb.parentNode){ var hb=document.createElement('button'); hb.type='button'; hb.className='st-btn'; hb.id='hcbtn'; hb.textContent='⌚ Gewicht & Essen aus Samsung Health holen (App)'; hb.addEventListener('click',function(){ window.hcSync(false); }); shb.parentNode.insertBefore(hb,shb); }
     setTimeout(hcAuto,9000);
     window.addEventListener('focus',function(){ setTimeout(hcAuto,3000); });
+    document.addEventListener('visibilitychange',function(){ if(!document.hidden) setTimeout(hcAuto,2000); });
+    setInterval(hcAuto,10*60*1000);
     $('nt-close').addEventListener('click',window.closeNotify);
     $('nt-backdrop').addEventListener('click',window.closeNotify);
     var body=$('nt-body');
