@@ -941,7 +941,7 @@ const db = new Dexie('LifeOSv17', (window.DexieCloud && window.DexieCloud.dexieC
 db.version(1).stores({state:'key', archive:'++id, date', notes:'++id, date', calNotes:'key'});
 if (db.cloud) {
   try {
-    db.cloud.configure({ databaseUrl: "https://zr6457ppl.dexie.cloud", requireAuth: true });
+    db.cloud.configure({ databaseUrl: "https://zr6457ppl.dexie.cloud", requireAuth: true, unsyncedTables: ['archive','notes'] });
   } catch(e) { console.warn('Dexie Cloud configure fehlgeschlagen', e); }
 }
 let _useIDB = true;
