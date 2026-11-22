@@ -305,7 +305,20 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
   .mt-ai-badge{display:inline-block;background:linear-gradient(135deg,var(--acc2),var(--acc));color:#000;font-size:9px;font-weight:800;padding:1px 6px;border-radius:8px;margin-left:4px;vertical-align:middle;letter-spacing:.5px;}
 
 
-/* === ARCHIV MODAL === */
+/* === WOCHENTAGE / HEUTE NICHT DRAN === */
+  .tp-notdue { margin-top:8px; border-top:1px dashed var(--bg3); padding-top:4px; }
+  .tp-notdue > summary { cursor:pointer; font-size:12px; color:var(--t2); padding:6px 2px; list-style:none; user-select:none; }
+  .tp-notdue > summary::-webkit-details-marker { display:none; }
+  .tp-notdue > summary::before { content:'\25B8  '; }
+  .tp-notdue[open] > summary::before { content:'\25BE  '; }
+  .tp-notdue .task-row { opacity:.6; }
+  .tp-days-tag { display:inline-block; margin-left:6px; padding:0 6px; border-radius:8px; background:var(--bg3); color:var(--t2); font-size:10px; font-weight:700; vertical-align:middle; }
+  .tp-daypick { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:4px 0 8px 34px; padding:8px; border-radius:10px; background:var(--bg3); }
+  .tp-daypick-lbl { font-size:11px; color:var(--t2); margin-right:2px; }
+  .tp-day { min-width:34px; padding:5px 8px; border-radius:8px; border:1px solid var(--bg3); background:var(--bg2); color:var(--t2); font-size:12px; font-weight:700; cursor:pointer; }
+  .tp-day.on { background:var(--acc); color:#000; border-color:var(--acc); }
+  .tp-day.quick { background:transparent; border-style:dashed; }
+  /* === ARCHIV MODAL === */
 #archive-modal { z-index:2000 !important; }
 .arch-detail { animation: fadeIn .2s ease; }
 /* === MOBILE IMPROVEMENTS === */
@@ -1165,9 +1178,15 @@ function renderHeute(){
   const cont=document.getElementById('morgen-list');
   const morgenTasks=_getMorgenTasks();
   cont.innerHTML='';
+  const dueTasks=morgenTasks.filter(taskDueToday);
+  const offDetails=document.createElement('details');offDetails.className='tp-notdue';
+  const offSum=document.createElement('summary');offSum.textContent='Heute nicht dran ('+(morgenTasks.length-dueTasks.length)+')';
+  offDetails.appendChild(offSum);
+  let dueNo=0;
   morgenTasks.forEach((t,i)=>{
+    const due=taskDueToday(t);
     const row=document.createElement('div');row.className='task-row';
-    const num=document.createElement('div');num.className='task-num';num.textContent=i+1;
+    const num=document.createElement('div');num.className='task-num';num.textContent=due?(++dueNo):'·';
     const cb=document.createElement('div');
     cb.className='task-cb'+(t.done?' done':t.notRelevant?' late':'');
     cb.textContent=t.done?'✓':t.notRelevant?'✗':'';
@@ -1185,11 +1204,12 @@ function renderHeute(){
     txt.className='task-text'+(t.done?' done':t.notRelevant?' late':'');
     txt.textContent=t.title||t.text||'';
     row.append(num,cb,txt);
-    cont.appendChild(row);
+    (due?cont:offDetails).appendChild(row);
   });
-  // Progress
-  const done=morgenTasks.filter(t=>t.done).length;
-  const total=morgenTasks.length;
+  if(dueTasks.length<morgenTasks.length)cont.appendChild(offDetails);
+  // Progress (zaehlt nur Aufgaben, die heute dran sind)
+  const done=dueTasks.filter(t=>t.done).length;
+  const total=dueTasks.length;
   const pct=total>0?Math.round(done/total*100):0;
   document.getElementById('prog-text').textContent=`${done} von ${total} erledigt`;
   document.getElementById('prog-pct').textContent=`${pct}%`;
@@ -1198,7 +1218,7 @@ function renderHeute(){
   const sportDone=S.reps.lies.length+S.reps.unter.length+S.reps.klim.length;
   document.getElementById('mini-sport').textContent=sportDone?`${sportDone*10}Rep`:'—';
   // Mini fokus
-  const fTasks=_getFokusTasks();
+  const fTasks=_getFokusTasks().filter(taskDueToday);
   const fdone=fTasks.filter(t=>t.done).length;
   document.getElementById('mini-fokus').textContent=`${fdone}/${fTasks.length}`;
 }
@@ -1908,6 +1928,51 @@ function toggleGroupCollapse(gi) {
   save(); renderTagesplan();
 }
 
+// ===== WOCHENTAGE PRO AUFGABE (Heute + Tagesplan) =====
+// t.days = Liste ISO-Wochentage (1=Mo ... 7=So). Fehlt das Feld oder ist es leer: jeden Tag.
+var DAY_LBL = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+function _isoWeekday(d) { d = d || new Date(); var w = d.getDay(); return w === 0 ? 7 : w; }
+function taskDueToday(t) {
+  if (!t || !Array.isArray(t.days) || t.days.length === 0) return true;
+  return t.days.indexOf(_isoWeekday()) >= 0;
+}
+function taskDaysLabel(t) {
+  if (!t || !Array.isArray(t.days) || t.days.length === 0 || t.days.length === 7) return '';
+  var d = t.days.slice().sort(function(a,b){return a-b;});
+  var contiguous = d[d.length-1] - d[0] === d.length - 1;
+  if (d.length > 2 && contiguous) return DAY_LBL[d[0]-1] + '–' + DAY_LBL[d[d.length-1]-1];
+  return d.map(function(x){ return DAY_LBL[x-1]; }).join(' ');
+}
+function toggleDayPicker(gid, ti) {
+  var key = gid + ':' + ti;
+  window._dayPick = (window._dayPick === key) ? null : key;
+  renderTagesplan();
+}
+function setTaskDays(gid, ti, mode, d) {
+  var g = _getGroupByGid(gid); if (!g) return;
+  var t = g.tasks[ti]; if (!t) return;
+  var cur = (Array.isArray(t.days) && t.days.length) ? t.days.slice() : [1,2,3,4,5,6,7];
+  if (mode === 'all') cur = [1,2,3,4,5,6,7];
+  else if (mode === 'weekdays') cur = [1,2,3,4,5];
+  else if (mode === 'toggle') {
+    var k = cur.indexOf(d);
+    if (k >= 0) { if (cur.length === 1) return; cur.splice(k, 1); } else cur.push(d);
+  }
+  cur.sort(function(a,b){return a-b;});
+  if (cur.length === 7) delete t.days; else t.days = cur;
+  save(); renderTagesplan(); try { renderHeute(); } catch(e) {}
+}
+function dayPickerHTML(gid, ti, t) {
+  var all = !(Array.isArray(t.days) && t.days.length);
+  var chips = DAY_LBL.map(function(l, i) {
+    var on = all || t.days.indexOf(i + 1) >= 0;
+    return '<button class="tp-day' + (on ? ' on' : '') + '" onclick="setTaskDays(\'' + gid + '\',' + ti + ',\'toggle\',' + (i + 1) + ')">' + l + '</button>';
+  }).join('');
+  return '<div class="tp-daypick"><span class="tp-daypick-lbl">Wochentage:</span>' + chips
+    + '<button class="tp-day quick" onclick="setTaskDays(\'' + gid + '\',' + ti + ',\'weekdays\')">Mo–Fr</button>'
+    + '<button class="tp-day quick" onclick="setTaskDays(\'' + gid + '\',' + ti + ',\'all\')">Mo–So</button></div>';
+}
+
 function renderTagesplan() {
   const panel = document.getElementById('panel-tagesplan');
   if (!panel) return;
@@ -2010,25 +2075,36 @@ function renderGroupTasksHTML(group) {
     '</div>';
   var taskRows = '';
   if (!collapsed) {
+    var dueRows = '', offRows = '', offCount = 0, dueNo = 0, offPicker = false;
     for (var ti = 0; ti < tasks.length; ti++) {
       var t = tasks[ti];
+      var due = taskDueToday(t);
       var cbCls = t.done ? "task-cb done" : (t.notRelevant ? "task-cb not-rel" : "task-cb pending");
-      var cbIco = t.done ? "\u2713" : (t.notRelevant ? "\u00b7" : "\u2717");
+      var cbIco = t.done ? "✓" : (t.notRelevant ? "·" : "✗");
       var txtCls = (t.done||t.notRelevant) ? "task-text done" : "task-text";
       var nrCls = t.notRelevant ? " not-relevant" : "";
-      taskRows += '<div class="task-row'+nrCls+'" draggable="true"' +
+      var dTag = taskDaysLabel(t);
+      var row = '<div class="task-row'+nrCls+'" draggable="true"' +
         ' ondragstart="taskDragStart(event,'+gi+','+ti+')"' +
         ' ondragover="taskDragOver(event)"' +
         ' ondrop="taskDrop(event,'+gi+','+ti+')"' +
         ' ondragend="taskDragEnd(event)">' +
-        '<div class="task-num">' + (ti+1) + '</div>' +
+        '<div class="task-num">' + (due ? (++dueNo) : '·') + '</div>' +
         '<div class="' + cbCls + '" onclick="toggleTask(\''+ gid +'\',' + ti + ')">'+ cbIco +'</div>' +
-        '<div class="' + txtCls + '">' + escHtml(t.title) + '</div>' +
+        '<div class="' + txtCls + '">' + escHtml(t.title) + (dTag ? ' <span class="tp-days-tag">' + dTag + '</span>' : '') + '</div>' +
         '<div class="task-actions">' +
-        '<button class="task-btn" onclick="toggleTask(\''+ gid +'\',' + ti + ')">\u2705</button>' +
-        '<button class="task-btn" onclick="toggleNotRelevant(\''+ gid +'\',' + ti + ')">\u274c</button>' +
-        '<button class="task-btn" onclick="deleteTask(\''+ gid +'\',' + ti + ')">\ud83d\uddd1\ufe0f</button>' +
+        '<button class="task-btn" title="Wochentage" onclick="toggleDayPicker(\''+ gid +'\',' + ti + ')">📅</button>' +
+        '<button class="task-btn" onclick="toggleTask(\''+ gid +'\',' + ti + ')">✅</button>' +
+        '<button class="task-btn" onclick="toggleNotRelevant(\''+ gid +'\',' + ti + ')">❌</button>' +
+        '<button class="task-btn" onclick="deleteTask(\''+ gid +'\',' + ti + ')">🗑️</button>' +
         '</div></div>';
+      var picking = (window._dayPick === gid + ':' + ti);
+      if (picking) row += dayPickerHTML(gid, ti, t);
+      if (due) dueRows += row; else { offRows += row; offCount++; if (picking) offPicker = true; }
+    }
+    taskRows += dueRows;
+    if (offCount) {
+      taskRows += '<details class="tp-notdue"' + (offPicker ? ' open' : '') + '><summary>Heute nicht dran (' + offCount + ')</summary>' + offRows + '</details>';
     }
     taskRows += '<div class="task-add-row">' +
       '<input class="task-inp" type="text" placeholder="+ Aufgabe hinzuf\xfcgen..." onkeydown="if(event.key===\'Enter\')addTaskByGid(\''+ gid +'\',this)">' +
@@ -2493,7 +2569,7 @@ function _dateLongFromISO(iso){ try{ return new Date(iso+'T00:00:00').toLocaleDa
 function buildDaySnapshot(dateLabel, tsOverride) {
   const groups = (S.tagesplan.groups || []).map(g => ({
     id: g.id, title: g.title,
-    tasks: (g.tasks || []).map(t => ({title: t.title, done: t.done, notRelevant: t.notRelevant, subtasks: (t.subtasks||[]).map(st=>({text:st.text||st,done:st.done||false}))}))
+    tasks: (g.tasks || []).map(t => ({title: t.title, done: t.done, notRelevant: t.notRelevant, days: Array.isArray(t.days) ? t.days.slice() : undefined, subtasks: (t.subtasks||[]).map(st=>({text:st.text||st,done:st.done||false}))}))
   }));
   return {
     date: dateLabel, ts: tsOverride || Date.now(), groups,
