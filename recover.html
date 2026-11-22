@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Life OS Datenrettung</title>
+<style>
+  :root{color-scheme:dark light}
+  body{font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:0;padding:16px;background:#12141a;color:#eef0f5;line-height:1.45}
+  h1{font-size:22px;margin:0 0 6px}
+  .card{background:#1c2029;border:1px solid #2c3242;border-radius:14px;padding:14px;margin:12px 0}
+  .ok{color:#6fe3a0}.warn{color:#ffcb6b}.bad{color:#ff7b7b}
+  button{font-size:17px;padding:14px 16px;border-radius:12px;border:0;background:#4f8cff;color:#fff;width:100%;margin:6px 0;font-weight:600}
+  button.sec{background:#364056}
+  button:disabled{opacity:.45}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  td,th{padding:4px 6px;border-bottom:1px solid #2c3242;text-align:left;vertical-align:top}
+  pre{white-space:pre-wrap;word-break:break-word;font-size:12px;background:#0d0f14;padding:8px;border-radius:8px;max-height:220px;overflow:auto}
+  small{opacity:.75}
+</style>
+</head>
+<body>
+<h1>Life OS Datenrettung</h1>
+<small>Diese Seite <b>liest nur</b>. Sie ändert und löscht nichts an deiner App oder deinen Daten.</small>
+
+<div class="card" id="c1"><b>Schritt 1: Alten Stand auf diesem Gerät suchen</b>
+  <div id="scan">Suche läuft ...</div>
+</div>
+
+<div class="card" id="c2" style="display:none"><b>Schritt 2: Sichern</b>
+  <p><small>Zuerst &bdquo;In die Cloud sichern&ldquo;. Das legt eine <b>zusätzliche</b> Sicherungszeile an (<code>recovery-handy-…</code>). Dein aktueller Stand in der App wird dabei nicht verändert. Danach kann ich den alten Stand einsehen und sauber zusammenführen.</small></p>
+  <button id="bCloud">☁️ In die Cloud sichern</button>
+  <button id="bFile" class="sec">💾 Zusätzlich als Datei speichern</button>
+  <div id="out"></div>
+</div>
+
+<div class="card"><b>Protokoll</b><pre id="log"></pre></div>
+
+<script>
+var LOG=document.getElementById('log');
+function log(m){ LOG.textContent += new Date().toLocaleTimeString('de-DE')+'  '+m+'\n'; }
+function esc(s){ return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+var FOUND=null;
+
+function openRaw(name){
+  return new Promise(function(res,rej){
+    var r=indexedDB.open(name);               // ohne Versionsnummer: kein Upgrade, nichts wird verändert
+    r.onsuccess=function(){ res(r.result); };
+    r.onerror=function(){ rej(r.error); };
+    r.onblocked=function(){ rej(new Error('blocked')); };
+  });
+}
+function getAll(db,store){
+  return new Promise(function(res){
+    try{
+      var q=db.transaction(store,'readonly').objectStore(store).getAll();
+      q.onsuccess=function(){ res(q.result); };
+      q.onerror=function(){ res([]); };
+    }catch(e){ res([]); }
+  });
+}
+function summarize(S){
+  var o={tasks:0,done:0,archive:0,weights:0,updatedAt:null,konten:0};
+  try{ (S.tagesplan.groups||[]).forEach(function(g){ (g.tasks||[]).forEach(function(t){ o.tasks++; if(t.done) o.done++; }); }); }catch(e){}
+  try{ o.archive=(S.archive||[]).length; }catch(e){}
+  try{ o.weights=(S.fitness.weights||[]).length; }catch(e){}
+  try{ o.updatedAt=S.meta&&S.meta.updatedAt; }catch(e){}
+  try{ o.konten=(S.finanzen&&S.finanzen.konten||S.finanzen&&S.finanzen.accounts||[]).length; }catch(e){}
+  return o;
+}
+
+async function scan(){
+  var res={idb:{}, ls:{}, names:[]};
+  try{
+    var list=(indexedDB.databases)?await indexedDB.databases():[];
+    res.names=list.map(function(d){ return d.name+' (v'+d.version+')'; });
+    log('Gefundene Datenbanken: '+(res.names.join(', ')||'keine'));
+    var has=list.some(function(d){ return d.name==='LifeOSv17'; });
+    if(has){
+      var db=await openRaw('LifeOSv17');
+      var names=[].slice.call(db.objectStoreNames);
+      for(var i=0;i<names.length;i++){ res.idb[names[i]]=await getAll(db,names[i]); }
+      db.close();
+      log('Alte Datenbank LifeOSv17 gelesen: '+names.map(function(n){ return n+'='+res.idb[n].length; }).join(', '));
+    } else { log('Keine alte Datenbank LifeOSv17 auf diesem Gerät.'); }
+  }catch(e){ log('Fehler beim Lesen der Datenbank: '+e); }
+  try{
+    for(var k=0;k<localStorage.length;k++){
+      var key=localStorage.key(k);
+      if(/^lifeos_v17_state$|^losv17_/.test(key)) res.ls[key]=localStorage.getItem(key);
+    }
+    log('LocalStorage-Spiegel: '+Object.keys(res.ls).map(function(k){ return k+' ('+res.ls[k].length+' Zeichen)'; }).join(', '));
+  }catch(e){ log('LocalStorage nicht lesbar: '+e); }
+  return res;
+}
+
+function render(res){
+  var rows=[];
+  var st=(res.idb.state||[]).filter(function(r){ return r.key==='main'; })[0];
+  if(st&&st.data){ var s=summarize(st.data); rows.push(['Alte Datenbank, Haupt-Stand',s]); }
+  var lsRaw=res.ls['lifeos_v17_state'];
+  if(lsRaw){ try{ var ls=JSON.parse(lsRaw); rows.push(['LocalStorage-Spiegel',summarize(ls)]); }catch(e){} }
+  var arch=(res.idb.archive||[]).length;
+  var h='<table><tr><th>Quelle</th><th>Stand vom</th><th>Aufgaben</th><th>Archiv-Tage</th><th>Gewichts-Werte</th></tr>';
+  rows.forEach(function(r){ h+='<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1].updatedAt||'?')+'</td><td>'+r[1].tasks+'</td><td>'+r[1].archive+'</td><td>'+r[1].weights+'</td></tr>'; });
+  h+='</table>';
+  if(arch) h+='<p>Archiv-Tabelle (alt): <b>'+arch+'</b> Einträge</p>';
+  if(!rows.length){ h='<p class="bad"><b>Auf diesem Gerät/Browser wurde kein alter Stand gefunden.</b></p><p>Öffne diese Seite bitte im selben Browser, in dem du Life OS früher benutzt hast (Chrome oder die installierte Web-App), nicht in der neuen Life-OS-App.</p>'; }
+  else { h='<p class="ok"><b>Alter Stand gefunden.</b></p>'+h; }
+  h+='<p><small>Datenbanken: '+esc(res.names.join(', ')||'-')+'</small></p>';
+  document.getElementById('scan').innerHTML=h;
+  if(rows.length||arch) document.getElementById('c2').style.display='block';
+}
+
+function payload(res){
+  var st=(res.idb.state||[]).filter(function(r){ return r.key==='main'; })[0];
+  var ls=null; try{ ls=res.ls['lifeos_v17_state']?JSON.parse(res.ls['lifeos_v17_state']):null; }catch(e){}
+  return {
+    kind:'life-os-handy-recovery', created:new Date().toISOString(), ua:navigator.userAgent,
+    origin:location.origin, stateMain:st?st.data:null, stateMainTs:st?st.ts:null,
+    localStorageMirror:ls, archiveTable:res.idb.archive||[], notesTable:res.idb.notes||[],
+    calNotes:res.idb.calNotes||[]
+  };
+}
+
+function loadScript(src){
+  return new Promise(function(res,rej){ var s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=function(){ rej(new Error('Laden fehlgeschlagen: '+src)); }; document.head.appendChild(s); });
+}
+
+document.getElementById('bFile').onclick=function(){
+  if(!FOUND) return;
+  var blob=new Blob([JSON.stringify(payload(FOUND))],{type:'application/json'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='life-os-handy-recovery-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a); a.click(); a.remove(); log('Datei zum Download angeboten.');
+};
+
+document.getElementById('bCloud').onclick=async function(){
+  var btn=this; btn.disabled=true; var out=document.getElementById('out');
+  try{
+    log('Lade Dexie ...');
+    await loadScript('https://unpkg.com/dexie@4.4.7/dist/dexie.min.js');
+    await loadScript('https://unpkg.com/rxjs@7.8.2/dist/bundles/rxjs.umd.min.js');
+    await loadScript('https://unpkg.com/dexie-cloud-addon@4.4.16/dist/umd/dexie-cloud-addon.min.js');
+    // gleiche Konfiguration wie die App, damit dieselbe lokale Datenbank und derselbe Login genutzt werden
+    var db=new Dexie('LifeOSv17',{addons:[DexieCloud.dexieCloud]});
+    db.version(1).stores({state:'key',archive:'++id, date',notes:'++id, date',calNotes:'key'});
+    db.cloud.configure({databaseUrl:'https://zr6457ppl.dexie.cloud',requireAuth:true,unsyncedTables:['archive','notes']});
+    await db.open();
+    log('Warte auf Anmeldung (falls nötig erscheint ein Login-Fenster: E-Mail + Code) ...');
+    await new Promise(function(res,rej){
+      var t=setTimeout(function(){ rej(new Error('Keine Anmeldung innerhalb von 3 Minuten')); },180000);
+      db.cloud.currentUser.subscribe(function(u){ if(u&&u.isLoggedIn){ clearTimeout(t); res(); } });
+    });
+    var u=db.cloud.currentUser.value; log('Angemeldet.');
+    var key='recovery-handy-'+new Date().toISOString().slice(0,16).replace(/[-:T]/g,'');
+    var p=payload(FOUND);
+    var existing=await db.state.get(key);
+    if(existing){ throw new Error('Zeile '+key+' existiert schon'); }
+    await db.state.put({key:key,data:p,ts:Date.now(),kind:'recovery'});
+    log('Zeile '+key+' geschrieben, synchronisiere ...');
+    await db.cloud.sync({purpose:'push',wait:true});
+    var back=await db.state.get(key);
+    out.innerHTML='<p class="ok"><b>Gesichert.</b> Sicherungszeile: <code>'+esc(key)+'</code> ('+JSON.stringify(p).length+' Zeichen). Bitte sag mir Bescheid, dann führe ich den alten Stand mit dem aktuellen zusammen.</p>';
+    log('Fertig. Lokal vorhanden: '+(!!back));
+  }catch(e){
+    out.innerHTML='<p class="bad"><b>Cloud-Sicherung nicht abgeschlossen:</b> '+esc(e.message||e)+'</p><p>Nutze bitte stattdessen &bdquo;Als Datei speichern&ldquo;.</p>';
+    log('FEHLER: '+(e&&e.stack||e));
+    btn.disabled=false;
+  }
+};
+
+scan().then(function(r){ FOUND=r; render(r); });
+</script>
+</body>
+</html>
