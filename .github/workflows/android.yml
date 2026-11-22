@@ -1,0 +1,84 @@
+name: Android App
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/android.yml'
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Signatur-Schluessel merken (damit Updates installierbar bleiben)
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: lifeos-debug-keystore-v1
+      - name: Capacitor-Projekt erzeugen
+        run: |
+          mkdir app
+          cd app
+          npm init -y
+          npm i @capacitor/core@8 @capacitor/cli@8 @capacitor/android@8 @capacitor/local-notifications@8 @capgo/capacitor-health@8
+          mkdir www
+          cat > www/index.html <<'EOF'
+          <!doctype html><html lang="de"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=https://mtholdinga-cloud.github.io/lifeos/life-os-v17.html"><title>Life OS</title></head><body style="background:#0f0f0f;color:#fff;font-family:sans-serif"><p>Life OS wird geladen …</p></body></html>
+          EOF
+          cat > www/privacypolicy.html <<'EOF'
+          <!doctype html><html lang="de"><head><meta charset="utf-8"><title>Datenschutz Life OS</title></head><body style="font-family:sans-serif;padding:16px"><h1>Datenschutz</h1><p>Life OS liest auf deinen Wunsch Gewicht und Körperfett aus Health Connect (Samsung Health) und speichert sie nur in deiner eigenen Life-OS-Datenbank. Es werden keine Gesundheitsdaten an Dritte weitergegeben.</p></body></html>
+          EOF
+          cat > capacitor.config.json <<'EOF'
+          {"appId":"de.mtholding.lifeos","appName":"Life OS","webDir":"www","server":{"url":"https://mtholdinga-cloud.github.io/lifeos/life-os-v17.html","androidScheme":"https"},"plugins":{"LocalNotifications":{"smallIcon":"ic_stat_lifeos","iconColor":"#4ade80"}}}
+          EOF
+          npx cap add android
+          npx cap sync android
+      - name: Manifest und Icons anpassen
+        run: |
+          cd app
+          python3 - <<'EOF'
+          p='android/app/src/main/AndroidManifest.xml'
+          s=open(p,encoding='utf-8').read()
+          perms=['android.permission.POST_NOTIFICATIONS','android.permission.SCHEDULE_EXACT_ALARM','android.permission.RECEIVE_BOOT_COMPLETED','android.permission.VIBRATE','android.permission.health.READ_WEIGHT','android.permission.health.READ_BODY_FAT','android.permission.health.READ_NUTRITION','android.permission.health.READ_HEALTH_DATA_HISTORY']
+          add=''.join('    <uses-permission android:name="%s" />\n'%x for x in perms if x not in s)
+          add+='    <queries><package android:name="com.google.android.apps.healthdata" /></queries>\n'
+          s=s.replace('</manifest>',add+'</manifest>')
+          open(p,'w',encoding='utf-8').write(s)
+          EOF
+          RES=android/app/src/main/res
+          for spec in mdpi:48:108:24 hdpi:72:162:36 xhdpi:96:216:48 xxhdpi:144:324:72 xxxhdpi:192:432:96; do
+            IFS=: read d s f st <<< "$spec"
+            mkdir -p $RES/mipmap-$d $RES/drawable-$d
+            convert ../icon-512.png -resize ${s}x${s}! -alpha set $RES/mipmap-$d/ic_launcher.png
+            convert $RES/mipmap-$d/ic_launcher.png \( -size ${s}x${s} xc:none -fill white -draw "circle $((s/2)),$((s/2)) $((s/2)),0" \) -compose DstIn -composite $RES/mipmap-$d/ic_launcher_round.png
+            fg=$((f*62/100))
+            convert -size ${f}x${f} xc:none \( ../icon-512.png -resize ${fg}x${fg}! \) -gravity center -composite $RES/mipmap-$d/ic_launcher_foreground.png
+            convert -size 96x96 xc:none -fill white -draw "polygon 28,14 46,14 46,64 74,64 74,82 28,82" -resize ${st}x${st} $RES/drawable-$d/ic_stat_lifeos.png
+          done
+          mkdir -p $RES/values
+          printf '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">#23272B</color>\n</resources>\n' > $RES/values/ic_launcher_background.xml
+      - name: APK bauen
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
+          cd app/android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/LifeOS.apk"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LifeOS-apk
+          path: LifeOS.apk
+      - name: Download-Link veroeffentlichen
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete app-latest --cleanup-tag -y || true
+          gh release create app-latest LifeOS.apk --title "Life OS App (Android)" --notes "Automatisch gebaute Android-App. APK herunterladen und installieren." --latest=false
