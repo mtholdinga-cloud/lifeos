@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Life OS v17</title>
 <meta name="theme-color" content="#0f0f0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -597,35 +597,109 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
 <script src="https://unpkg.com/dexie-cloud-addon@4.4.16/dist/umd/dexie-cloud-addon.min.js"></script>
 </head>
 
+<style id="a11y-css">
+/* ===== Bedienung & Barrierefreiheit (v17.a11y) ===== */
+.skip-link{position:fixed;left:8px;top:-80px;z-index:3000;background:var(--acc);color:#000;padding:12px 16px;border-radius:10px;font-weight:800;text-decoration:none;font-size:14px;}
+.skip-link:focus{top:8px;}
+#main:focus{outline:none;}
+button:focus-visible,[role=button]:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,.nav-item:focus-visible,.mini-tile:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--acc2)!important;outline-offset:2px!important;}
+#topbar{gap:8px;}
+#topbar .logo{white-space:nowrap;}
+.topbar-right{flex-shrink:0;gap:6px;}
+#topbar button{min-height:44px;min-width:44px;}
+.mini-tile-label{font-size:11px;}
+@media (pointer:coarse){
+  :where(button){position:relative;}
+  :where(button)::after{content:'';position:absolute;inset:-3px;}
+}
+@media (max-width:560px){
+  .date-chip{display:none;}
+  .save-btn .lbl{display:none;}
+  #topbar{padding:6px 10px;}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}}
+body.calm *,body.calm *::before,body.calm *::after{animation:none!important;transition:none!important;}
+body.hc{--t2:#d6d6d6;--t3:#bdbdbd;--bg3:#5a5a5a;--border:#8a8a8a;}
+body.hc.pc-mode{--t2:#222;--t3:#444;--bg3:#8c8c8c;--border:#666;}
+body.hc button,body.hc input,body.hc select,body.hc textarea{border-color:var(--t2);}
+#dim-overlay{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:800;}
+/* Einstellungen */
+#settings[hidden],#settings-backdrop[hidden]{display:none;}
+#settings-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1090;}
+#settings{position:fixed;z-index:1100;background:var(--bg1);color:var(--t1);border:1px solid var(--bg3);display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.45);top:60px;right:12px;width:380px;max-width:calc(100vw - 24px);max-height:calc(100vh - 80px);border-radius:16px;}
+.st-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 8px;}
+.st-head h2{font-size:17px;font-weight:800;color:var(--t0);}
+.st-close{background:var(--bg2);border:1px solid var(--bg3);border-radius:10px;color:var(--t0);font-size:16px;cursor:pointer;min-width:44px;min-height:44px;}
+.st-body{padding:4px 16px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;}
+.st-h{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--t2);margin-top:8px;}
+.st-row{display:flex;flex-direction:column;gap:4px;}
+.st-lab{display:flex;justify-content:space-between;font-size:14px;color:var(--t0);font-weight:700;}
+.st-lab output{font-family:'DM Mono',monospace;color:var(--t1);}
+.st-range{width:100%;height:34px;accent-color:var(--acc);cursor:pointer;}
+.st-btn{display:block;width:100%;text-align:left;background:var(--bg2);border:1px solid var(--bg3);border-radius:12px;padding:12px 14px;min-height:48px;color:var(--t0);font-size:14px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;}
+.st-btn:hover,.st-btn:active{background:var(--bg3);}
+.st-quiet{font-weight:600;color:var(--t1);}
+.st-check{display:flex;align-items:center;gap:12px;min-height:44px;font-size:14px;color:var(--t0);font-weight:700;cursor:pointer;}
+.st-check input{width:22px;height:22px;accent-color:var(--acc);}
+.st-help{background:var(--bg2);border:1px solid var(--bg3);border-radius:12px;padding:10px 14px;font-size:13px;line-height:1.5;color:var(--t1);}
+.st-help summary{cursor:pointer;font-weight:700;color:var(--t0);min-height:32px;display:flex;align-items:center;}
+.st-help ol{margin:8px 0 6px 18px;display:flex;flex-direction:column;gap:6px;}
+.st-note{font-size:12px;color:var(--t2);line-height:1.45;}
+@media (max-width:700px){
+  #settings{top:auto;bottom:0;left:0;right:0;width:auto;max-width:none;max-height:88vh;border-radius:18px 18px 0 0;}
+}
+</style>
+<a class="skip-link" href="#main">Zum Inhalt springen</a>
+<div id="dim-overlay" aria-hidden="true"></div>
 <!-- TOPBAR -->
-<div id="topbar">
-  <div class="logo">Life<span>OS</span> <span style="font-size:10px;color:var(--t2);font-weight:400">v17</span></div>
+<div id="topbar" role="banner">
+  <div class="logo" role="heading" aria-level="1">Life<span>OS</span> <span style="font-size:10px;color:var(--t2);font-weight:400">v17</span></div>
   <div style="display:flex;align-items:center;gap:8px;">
     <div class="date-chip" id="datechip"></div>
     <div class="live-dot"></div><span class="sync-dot" id="sync-dot"></span><span class="sync-label" id="sync-label"></span>
   </div>
   <div class="topbar-right">
-    <div class="zoom-ctrl">
-      <span style="font-size:10px;color:var(--t2);">🔍</span>
-      <input type="range" class="zoom-slider" id="zoom-slider" min="70" max="130" value="100" title="Zoom">
-      <span style="font-size:10px;color:var(--t2);font-family:DM Mono,monospace;" id="zoom-label">100%</span>
-    </div>
-    <button class="save-btn" id="savebtn" onclick="saveData()">💾 Speichern</button>
-    <button class="export-btn" id="exportbtn" onclick="exportData()">📤</button>
-    <button class="export-btn" id="importbtn" onclick="document.getElementById('import-file').click()">📥</button>
-    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
-    <button class="export-btn" id="mtsyncbtn" onclick="openMTSyncSettings()" title="MT-Sync Einstellungen">🤖</button>
+    <button class="save-btn" id="savebtn" onclick="saveData()" aria-label="Speichern">💾<span class="lbl"> Speichern</span></button>
     <button class="export-btn" id="cloudbtn" onclick="cloudConnect()" title="Cloud-Sync: mit E-Mail anmelden, damit PC und Handy synchron bleiben">☁️ Verbinden</button>
-    <button class="mode-btn" id="modebtn">🖥️ PC</button>
+    <button class="export-btn" id="settingsbtn" aria-label="Einstellungen" aria-haspopup="dialog" aria-expanded="false" title="Einstellungen">⚙️</button>
   </div>
 </div>
+
+<div id="settings-backdrop" hidden></div>
+<section id="settings" role="dialog" aria-modal="true" aria-labelledby="settings-title" hidden>
+  <div class="st-head"><h2 id="settings-title">Einstellungen</h2><button type="button" class="st-close" id="settings-close" aria-label="Einstellungen schließen">✕</button></div>
+  <div class="st-body">
+    <h3 class="st-h">Anzeige</h3>
+    <div class="st-row"><div class="st-lab"><label for="zoom-slider">Größe (Zoom)</label><output id="zoom-label" for="zoom-slider">100%</output></div><input type="range" class="st-range" id="zoom-slider" min="70" max="160" step="5" value="100"></div>
+    <div class="st-row"><div class="st-lab"><label for="dim-slider">Helligkeit</label><output id="dim-label" for="dim-slider">100%</output></div><input type="range" class="st-range" id="dim-slider" min="40" max="100" step="5" value="100"></div>
+    <button type="button" class="st-btn" id="modebtn">🖥️ PC</button>
+    <label class="st-check"><input type="checkbox" id="pref-hc"><span>Hoher Kontrast</span></label>
+    <label class="st-check"><input type="checkbox" id="pref-calm"><span>Weniger Animationen</span></label>
+    <button type="button" class="st-btn st-quiet" id="pref-reset">↺ Anzeige zurücksetzen</button>
+    <h3 class="st-h">Daten &amp; Sync</h3>
+    <button type="button" class="st-btn" id="exportbtn" onclick="exportData()">📤 Daten exportieren (Sicherung)</button>
+    <button type="button" class="st-btn" id="importbtn" onclick="document.getElementById('import-file').click()">📥 Daten importieren</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)" aria-label="Sicherungsdatei wählen">
+    <button type="button" class="st-btn" id="shbtn">📲 Samsung Health importieren</button>
+    <input type="file" id="sh-file" accept=".csv,.zip" multiple style="display:none" aria-label="Samsung-Health-Export wählen (ZIP oder CSV)">
+    <button type="button" class="st-btn" id="mtsyncbtn" onclick="closeSettings();openMTSyncSettings()">🤖 MT-Sync Einstellungen</button>
+    <details id="sh-help" class="st-help"><summary>So kommen Gewicht &amp; Essen aus Samsung Health</summary>
+      <ol>
+        <li>Am Handy in Samsung Health das Menü bzw. die Einstellungen öffnen und <b>„Persönliche Daten herunterladen“</b> wählen (je nach App-Version leicht anders benannt). Mit dem Samsung-Konto bestätigen.</li>
+        <li>Wenn der Export fertig ist, liegt eine ZIP-Datei im Ordner „Download“ bzw. „Samsung Health“ auf dem Handy.</li>
+        <li>Hier auf <b>„Samsung Health importieren“</b> tippen und die ZIP (oder einzelne CSV-Dateien) wählen. Du siehst erst eine Vorschau, gespeichert wird erst nach Bestätigung.</li>
+      </ol>
+      <p class="st-note">Eine dauerhafte Live-Verbindung ist technisch nicht möglich: Samsung Health und Health Connect lassen sich nur von Android-Apps lesen, nicht von einer Webseite. Der Import ist deshalb ein Export-Import, den du bei Bedarf wiederholst. Doppelte Werte werden übersprungen.</p>
+    </details>
+  </div>
+</section>
 
 <!-- APP -->
 <div id="app">
   <!-- SIDEBAR -->
   <div id="sidebar">
     <div class="sidebar-toggle" id="sidebar-toggle">›</div>
-    <nav id="nav">
+    <nav id="nav" aria-label="Hauptnavigation">
       <div class="nav-item active" data-panel="heute"><span class="nav-icon">🏠</span><span class="nav-label">Heute</span></div>
       <div class="nav-item" data-panel="tagesplan"><span class="nav-icon">📋</span><span class="nav-label">Tagesplan</span></div>
       <div class="nav-item" data-panel="fitness"><span class="nav-icon">💪</span><span class="nav-label">Fitness</span></div>
@@ -641,7 +715,7 @@ textarea.note-inp{resize:none;border:1px solid var(--bg3);border-radius:8px;padd
   </div>
 
   <!-- MAIN CONTENT -->
-  <div id="main">
+  <div id="main" role="main" tabindex="-1">
 
     <!-- ===== HEUTE ===== -->
     <div class="panel active" id="panel-heute">
@@ -1129,7 +1203,7 @@ setInterval(updateDate,60000);updateDate();updateGreet();
 let pcMode=localStorage.getItem('lifeospcmode')!=='0';
 function applyMode(){
   document.body.classList.toggle('pc-mode',pcMode);
-  document.getElementById('modebtn').textContent=pcMode?'🌙 Dark':'🖥️ PC';
+  document.getElementById('modebtn').textContent=pcMode?'🌙 Zum dunklen Design wechseln':'☀️ Zum hellen PC-Design wechseln';
 
   localStorage.setItem('lifeospcmode',pcMode?'1':'0');
 }
@@ -1305,6 +1379,7 @@ function renderFitness() {
     '</div>' +
     (lastW ? '<div style=\"margin-bottom:6px;\"><span style=\"font-size:1.2em;font-weight:800;color:var(--acc);\">'+lastW.val+' kg</span> <span style=\"font-size:.75em;color:var(--t2);\">('+lastW.date+')</span></div>' : '') +
     (weights.length > 1 ? '<div class=\"weight-chart\">'+wChart+'</div>' : '') +
+    '<div style=\"display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;\"><button onclick=\"document.getElementById(\'sh-file\').click()\" style=\"padding:10px 14px;min-height:44px;border-radius:10px;background:var(--bg2);color:var(--t0);border:1px solid var(--bg3);cursor:pointer;font-size:.85em;font-weight:700;\">📲 Samsung Health importieren</button><button onclick=\"shHelp()\" style=\"padding:10px 14px;min-height:44px;border-radius:10px;background:transparent;color:var(--t1);border:1px solid var(--bg3);cursor:pointer;font-size:.85em;\">So geht\'s</button></div>' +
     '</div>' +
     '<div class=\"card\"><div class=\"card-title\">🚬 Letzte Zigarette</div>' +
     '<div style=\"font-size:1.3em;font-weight:800;color:var(--acc);margin-bottom:8px;\">'+ziggiMsg+'</div>' +
@@ -2740,7 +2815,7 @@ function handleDayRollover() {
 }
 function showToast(msg) {
   let t = document.getElementById('_toast');
-  if (!t) { t = document.createElement('div'); t.id='_toast'; t.className='toast-msg'; document.body.appendChild(t); }
+  if (!t) { t = document.createElement('div'); t.id='_toast'; t.className='toast-msg'; t.setAttribute('role','status'); t.setAttribute('aria-live','polite'); document.body.appendChild(t); }
   t.textContent = msg; t.style.opacity = '1';
   clearTimeout(t._timer);
   t._timer = setTimeout(() => { t.style.opacity = '0'; }, 3000);
@@ -3348,5 +3423,307 @@ function renderEditableTaskList(tasks, key, container, renderFn, numbered) {
 </script>
 <script>
 (function(){var _z=null;function _u(){var x=new XMLHttpRequest();x.open('GET',location.pathname+'?n='+Date.now(),true);x.onload=function(){if(_z===null){_z=x.responseText.length;return;}if(x.responseText.length!==_z){_z=x.responseText.length;location.reload();}};x.send();}setTimeout(function(){_u();setInterval(_u,120000);},8000);})();
+</script>
+<script>
+// ===== Samsung Health: Import (reine Funktionen) =====
+function shParseCSV(text){
+  var rows=[],row=[],f='',q=false,i,c;
+  text=String(text).replace(/^\uFEFF/,'');
+  for(i=0;i<text.length;i++){
+    c=text.charAt(i);
+    if(q){
+      if(c==='"'){ if(text.charAt(i+1)==='"'){f+='"';i++;} else q=false; }
+      else f+=c;
+    } else if(c==='"'){ q=true; }
+    else if(c===','){ row.push(f); f=''; }
+    else if(c==='\n'){ row.push(f); rows.push(row); row=[]; f=''; }
+    else if(c!=='\r'){ f+=c; }
+  }
+  if(f.length||row.length){ row.push(f); rows.push(row); }
+  return rows;
+}
+function shTable(text){
+  var rows=shParseCSV(text), hi=-1, i, r, c;
+  for(i=0;i<Math.min(rows.length,4);i++){ if(rows[i].length>=4){ hi=i; break; } }
+  if(hi<0) return null;
+  var keys=rows[hi].map(function(h){ var p=String(h).trim().split('.'); return p[p.length-1].toLowerCase(); });
+  var out=[];
+  for(r=hi+1;r<rows.length;r++){
+    if(rows[r].length<2) continue;
+    var o={};
+    for(c=0;c<keys.length;c++){ if(keys[c] && o[keys[c]]===undefined) o[keys[c]]=rows[r][c]; }
+    out.push(o);
+  }
+  return {keys:keys, rows:out};
+}
+function shTime(o){
+  var s=o.start_time||o.create_time||o.update_time;
+  if(!s) return null;
+  var m=String(s).trim().match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?/);
+  if(!m) return null;
+  var ms=Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+(m[6]||0));
+  var off=(o.time_offset===undefined)?'':String(o.time_offset).trim();
+  var d, offMs=null, mm;
+  if(off){
+    mm=off.match(/UTC\s*([+-])(\d{1,2}):?(\d{2})?/i);
+    if(mm) offMs=(mm[1]==='-'?-1:1)*((+mm[2])*60+(+(mm[3]||0)))*60000;
+    else if(/^-?\d+$/.test(off)) offMs=+off;
+  }
+  var p2=function(n){return (n<10?'0':'')+n;};
+  var iso, hour;
+  if(offMs!==null){
+    d=new Date(ms+offMs);
+    iso=d.getUTCFullYear()+'-'+p2(d.getUTCMonth()+1)+'-'+p2(d.getUTCDate()); hour=d.getUTCHours();
+  } else {
+    d=new Date(ms);
+    iso=d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate()); hour=d.getHours();
+  }
+  return {ms:ms, iso:iso, hour:hour};
+}
+function shAnalyze(files){
+  var weights=[], days={}, nW=0, nF=0;
+  files.forEach(function(f){
+    var t;
+    try{ t=shTable(f.text); }catch(e){ t=null; }
+    if(!t) return;
+    var hasT=t.keys.indexOf('start_time')>=0||t.keys.indexOf('create_time')>=0||t.keys.indexOf('update_time')>=0;
+    if(!hasT) return;
+    if(t.keys.indexOf('weight')>=0 && /weight/i.test(f.name) && !/goal/i.test(f.name)){
+      t.rows.forEach(function(o){
+        var v=parseFloat(String(o.weight).replace(',','.')), tm=shTime(o);
+        if(!tm || !(v>20 && v<300)) return;
+        v=Math.round(v*10)/10;
+        var p=tm.iso.split('-');
+        weights.push({val:v, date:new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString('de-DE'), ts:new Date(tm.ms).toISOString(), iso:tm.iso});
+        nW++;
+      });
+    } else if(t.keys.indexOf('calorie')>=0 && (t.keys.indexOf('meal_type')>=0 || /food_intake|nutrition/i.test(f.name))){
+      t.rows.forEach(function(o){
+        var cal=parseFloat(String(o.calorie).replace(',','.')), tm=shTime(o);
+        if(!tm || !(cal>=0)) return;
+        var mt=String(o.meal_type||'').trim(), slot;
+        if(mt==='100001') slot='morgens'; else if(mt==='100002') slot='mittags'; else if(mt==='100003') slot='abends';
+        else slot=tm.hour<11?'morgens':(tm.hour<16?'mittags':'abends');
+        var d=days[tm.iso]||(days[tm.iso]={kcal:0,meals:{morgens:[],mittags:[],abends:[]}});
+        d.kcal+=cal;
+        var nm=String(o.name||o.title||o.food_name||'Eintrag').trim()||'Eintrag';
+        d.meals[slot].push(nm+' ('+Math.round(cal)+' kcal)');
+        nF++;
+      });
+    }
+  });
+  Object.keys(days).forEach(function(k){ days[k].kcal=Math.round(days[k].kcal); });
+  return {weights:weights, days:days, nW:nW, nF:nF};
+}
+function shWTs(w){
+  if(w && w.ts){ var t=Date.parse(w.ts); if(!isNaN(t)) return t; }
+  var m=w && w.date && String(w.date).match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+  return m? new Date(+m[3],+m[2]-1,+m[1],12).getTime() : 0;
+}
+function shMergeWeights(existing, list){
+  var arr=Array.isArray(existing)?existing.slice():[];
+  var seen={}, added=0;
+  arr.forEach(function(w){ seen[w.date+'|'+w.val]=1; });
+  list.forEach(function(w){
+    var k=w.date+'|'+w.val;
+    if(seen[k]) return;
+    seen[k]=1; arr.push({val:w.val, date:w.date, ts:w.ts}); added++;
+  });
+  arr.sort(function(a,b){ return shWTs(a)-shWTs(b); });
+  return {arr:arr, added:added};
+}
+
+// ===== Einstellungen (⚙️) + Anzeige-Optionen =====
+(function(){
+  var PK='lifeos-prefs', prefs={}, opener=null;
+  try{ prefs=JSON.parse(localStorage.getItem(PK)||'{}')||{}; }catch(e){ prefs={}; }
+  function $(id){ return document.getElementById(id); }
+  function sp(){ try{ localStorage.setItem(PK,JSON.stringify(prefs)); }catch(e){} }
+  function applyPrefs(){
+    var d=(typeof prefs.dim==='number')?prefs.dim:100, ov=$('dim-overlay');
+    if(ov) ov.style.opacity=String(Math.max(0,Math.min(0.6,(100-d)/100)));
+    var ds=$('dim-slider'); if(ds) ds.value=d;
+    var dl=$('dim-label'); if(dl) dl.textContent=d+'%';
+    document.body.classList.toggle('hc',!!prefs.hc);
+    document.body.classList.toggle('calm',!!prefs.calm);
+    var a=$('pref-hc'); if(a) a.checked=!!prefs.hc;
+    var b=$('pref-calm'); if(b) b.checked=!!prefs.calm;
+  }
+  window.openSettings=function(){
+    var s=$('settings'), b=$('settings-backdrop'); if(!s) return;
+    opener=document.activeElement; s.hidden=false; if(b) b.hidden=false;
+    var g=$('settingsbtn'); if(g) g.setAttribute('aria-expanded','true');
+    setTimeout(function(){ var c=$('settings-close'); if(c) c.focus(); },0);
+  };
+  window.closeSettings=function(){
+    var s=$('settings'), b=$('settings-backdrop'); if(!s) return;
+    s.hidden=true; if(b) b.hidden=true;
+    var g=$('settingsbtn'); if(g) g.setAttribute('aria-expanded','false');
+    if(opener && opener.focus){ try{ opener.focus(); }catch(e){} }
+  };
+  window.shHelp=function(){
+    window.openSettings();
+    var h=$('sh-help'); if(h){ h.open=true; setTimeout(function(){ try{ h.scrollIntoView({block:'center'}); }catch(e){} },50); }
+  };
+  document.addEventListener('keydown',function(e){
+    var s=$('settings'); if(!s || s.hidden) return;
+    if(e.key==='Escape'){ e.preventDefault(); window.closeSettings(); return; }
+    if(e.key==='Tab'){
+      var f=[].slice.call(s.querySelectorAll('button,input:not([type=file]),summary,a[href]')).filter(function(x){ return x.offsetParent!==null && !x.disabled; });
+      if(!f.length) return;
+      var first=f[0], last=f[f.length-1];
+      if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+      else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+      else if(!s.contains(document.activeElement)){ e.preventDefault(); first.focus(); }
+    }
+  });
+  function wire(){
+    var bd=$('settings-backdrop'); if(bd) bd.addEventListener('click',window.closeSettings);
+    var c=$('settings-close'); if(c) c.addEventListener('click',window.closeSettings);
+    var g=$('settingsbtn'); if(g) g.addEventListener('click',window.openSettings);
+    var ds=$('dim-slider'); if(ds) ds.addEventListener('input',function(){ prefs.dim=+this.value; sp(); applyPrefs(); });
+    var hc=$('pref-hc'); if(hc) hc.addEventListener('change',function(){ prefs.hc=this.checked; sp(); applyPrefs(); });
+    var ca=$('pref-calm'); if(ca) ca.addEventListener('change',function(){ prefs.calm=this.checked; sp(); applyPrefs(); });
+    var rs=$('pref-reset'); if(rs) rs.addEventListener('click',function(){
+      prefs={}; sp(); applyPrefs();
+      var z=$('zoom-slider'); if(z){ z.value=100; z.dispatchEvent(new Event('input')); }
+    });
+    var sb=$('shbtn'); if(sb) sb.addEventListener('click',function(){ var f=$('sh-file'); if(f) f.click(); });
+    var sf=$('sh-file'); if(sf) sf.addEventListener('change',window.shImport);
+    applyPrefs();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',wire); else wire();
+})();
+
+// ===== Barrierefreiheit: Tastatur, Rollen, Namen =====
+(function(){
+  var NATIVE={BUTTON:1,A:1,INPUT:1,SELECT:1,TEXTAREA:1,SUMMARY:1,LABEL:1,OPTION:1};
+  function hasText(el){ return /[A-Za-zÄÖÜäöüß0-9]/.test(el.textContent||''); }
+  function sweep(){
+    try{
+      var i, els=document.querySelectorAll('[onclick],.nav-item,.mini-tile');
+      for(i=0;i<els.length;i++){
+        var el=els[i];
+        if(NATIVE[el.tagName]) continue;
+        if(el.getAttribute('role') || el.hasAttribute('tabindex')) continue;
+        if(el.querySelector('input,select,textarea,button,a[href]')) continue;
+        el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+      }
+      var navs=document.querySelectorAll('.nav-item');
+      for(i=0;i<navs.length;i++){
+        if(navs[i].classList.contains('active')) navs[i].setAttribute('aria-current','page'); else navs[i].removeAttribute('aria-current');
+        if(!navs[i].getAttribute('aria-label')){ var lb=navs[i].querySelector('.nav-label'); if(lb) navs[i].setAttribute('aria-label',lb.textContent.trim()); }
+      }
+      var nm=document.querySelectorAll('button,[role=button]');
+      for(i=0;i<nm.length;i++){
+        var b=nm[i];
+        if(b.getAttribute('aria-label')||b.getAttribute('aria-labelledby')) continue;
+        if(!hasText(b) && b.title) b.setAttribute('aria-label',b.title);
+      }
+      var inp=document.querySelectorAll('input:not([type=hidden]):not([type=file]),select,textarea');
+      for(i=0;i<inp.length;i++){
+        var x=inp[i];
+        if(x.getAttribute('aria-label')||x.getAttribute('aria-labelledby')||(x.labels&&x.labels.length)||x.closest('label')) continue;
+        var t=x.placeholder||x.title; if(t) x.setAttribute('aria-label',t);
+      }
+    }catch(e){}
+  }
+  window.a11ySweep=sweep;
+  document.addEventListener('keydown',function(e){
+    var t=e.target;
+    if((e.key==='Enter'||e.key===' ') && t && t.getAttribute && t.getAttribute('role')==='button' && !NATIVE[t.tagName]){
+      e.preventDefault(); t.click();
+    }
+  });
+  var timer=null;
+  function later(){ clearTimeout(timer); timer=setTimeout(sweep,250); }
+  function start(){
+    sweep();
+    try{ new MutationObserver(later).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']}); }catch(e){}
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();
+})();
+
+// ===== Samsung Health: Import in die App =====
+function shLoadZip(){
+  return new Promise(function(res,rej){
+    if(window.JSZip) return res(window.JSZip);
+    var s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    s.onload=function(){ res(window.JSZip); };
+    s.onerror=function(){ rej(new Error('ZIP-Baustein konnte nicht geladen werden (Internet?). Entpacke die ZIP am Handy und wähle die CSV-Dateien einzeln.')); };
+    document.head.appendChild(s);
+  });
+}
+function shApplyFood(state, days, todayISO){
+  var info={today:0, past:0, skipped:0};
+  var cutoff=new Date(); cutoff.setDate(cutoff.getDate()-30);
+  var cutISO=_dateISO(cutoff);
+  Object.keys(days).sort().forEach(function(iso){
+    var d=days[iso];
+    if(iso===todayISO){
+      if(!state.fitness) state.fitness={};
+      if(!state.fitness.kcal){ state.fitness.kcal=d.kcal; state.kcal=d.kcal; }
+      if(!state.fitness.ern) state.fitness.ern={morgens:'',mittags:'',abends:''};
+      ['morgens','mittags','abends'].forEach(function(k){
+        if(!state.fitness.ern[k] && d.meals[k].length) state.fitness.ern[k]=d.meals[k].join(', ');
+      });
+      state.ern=state.fitness.ern;
+      info.today++;
+      return;
+    }
+    if(iso>todayISO || iso<cutISO){ info.skipped++; return; }
+    if(!Array.isArray(state.archive)) state.archive=[];
+    var label=_dateLongFromISO(iso);
+    var ex=null;
+    for(var i=0;i<state.archive.length;i++){ if(state.archive[i].date===label){ ex=state.archive[i]; break; } }
+    if(!ex){ info.skipped++; return; }
+    var ern={morgens:d.meals.morgens.join(', '),mittags:d.meals.mittags.join(', '),abends:d.meals.abends.join(', ')};
+    if(!ex.fitness) ex.fitness={};
+    if(!ex.kcal && !ex.fitness.kcal){ ex.kcal=d.kcal; ex.fitness.kcal=d.kcal; }
+    var cur=ex.fitness.ern||ex.ern||{};
+    var merged={morgens:cur.morgens||ern.morgens,mittags:cur.mittags||ern.mittags,abends:cur.abends||ern.abends};
+    ex.fitness.ern=merged; ex.ern=merged;
+    info.past++;
+  });
+  return info;
+}
+window.shImport=async function(ev){
+  var files=[].slice.call((ev&&ev.target&&ev.target.files)||[]);
+  try{ ev.target.value=''; }catch(e){}
+  if(!files.length) return;
+  var texts=[];
+  try{
+    for(var i=0;i<files.length;i++){
+      var f=files[i];
+      if(/\.zip$/i.test(f.name)){
+        var Z=await shLoadZip(); var zip=await Z.loadAsync(f);
+        var names=Object.keys(zip.files).filter(function(n){ return /\.csv$/i.test(n) && !zip.files[n].dir && /weight|food|nutrition|intake/i.test(n) && !/goal|food_info|favorite/i.test(n); });
+        for(var j=0;j<names.length;j++){ texts.push({name:names[j].split('/').pop(), text:await zip.files[names[j]].async('string')}); }
+      } else {
+        texts.push({name:f.name, text:await f.text()});
+      }
+    }
+  }catch(e){ alert('❌ Datei konnte nicht gelesen werden: '+(e&&e.message||e)); return; }
+  var r=shAnalyze(texts);
+  if(!r.nW && !r.nF){
+    alert('Keine Gewichts- oder Ernährungsdaten gefunden.\n\nTipp: In der Samsung-Health-ZIP sind die Dateien „com.samsung.health.weight…csv“ (Gewicht) und „com.samsung.health.food_intake…csv“ (Essen). Wähle die ZIP oder diese CSV-Dateien.');
+    return;
+  }
+  if(!S.fitness) S.fitness={};
+  var merged=shMergeWeights(S.fitness.weights, r.weights);
+  var todayISO=_dateISO(), dayKeys=Object.keys(r.days);
+  var msg='Samsung Health – gefunden:\n• '+r.nW+' Gewichtswerte ('+merged.added+' davon neu)\n• '+r.nF+' Essens-Einträge an '+dayKeys.length+' Tagen'+(r.days[todayISO]?' (heute: '+r.days[todayISO].kcal+' kcal)':'')+'\n\nEssen wird für heute und für bereits archivierte Tage der letzten 30 Tage ergänzt; bereits Eingetragenes bleibt unverändert.\n\nJetzt importieren?';
+  if(!confirm(msg)) return;
+  try{
+    S.fitness.weights=merged.arr;
+    var fi=shApplyFood(S, r.days, todayISO);
+    save();
+    try{ if(typeof renderFitness==='function') renderFitness(); }catch(e){}
+    try{ if(typeof renderArchiv==='function') renderArchiv(); }catch(e){}
+    if(typeof showToast==='function') showToast('✅ Samsung Health: '+merged.added+' Gewichte, '+(fi.today+fi.past)+' Ernährungstage');
+  }catch(e){ alert('❌ Import fehlgeschlagen: '+(e&&e.message||e)); }
+};
+
 </script>
       </html>
